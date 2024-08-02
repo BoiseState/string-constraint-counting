@@ -141,7 +141,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
             isSingleton = true;
         }
 
-        long initialCount = this.invSolver.getModelCount(base);
+//        long initialCount = this.invSolver.getModelCount(base);
         inMCTime = BasicTimer.getRunTime();
 
         // store symbolic string values
@@ -154,7 +154,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
             trueSat = true;
         }
 
-        long trueModelCount = this.invSolver.getModelCount(base);
+//        long trueModelCount = this.invSolver.getModelCount(base);
         tMCTime = BasicTimer.getRunTime();
 
         // revert symbolic string values
@@ -170,7 +170,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
             falseSat = true;
         }
 
-        long falseModelCount = this.invSolver.getModelCount(base);
+//        long falseModelCount = this.invSolver.getModelCount(base);
         fMCTime = BasicTimer.getRunTime();
 
         // revert symbolic string values
@@ -218,7 +218,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
         }
 
         // set yes or no for disjoint branches
-        long overlap = this.invSolver.getModelCount(base);
+//        long overlap = this.invSolver.getModelCount(base);
 
         // revert symbolic string values
         solver.revertLastPredicate();
@@ -256,13 +256,13 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
         // id of initial model
         columns.add(String.valueOf(base));
         // initial model count
-        columns.add(String.valueOf(initialCount));
+//        columns.add(String.valueOf(initialCount));
         // true model count
-        columns.add(String.valueOf(trueModelCount));
+//        columns.add(String.valueOf(trueModelCount));
         // false model count
-        columns.add(String.valueOf(falseModelCount));
+//        columns.add(String.valueOf(falseModelCount));
         // overlap count
-        columns.add(String.valueOf(overlap));
+//        columns.add(String.valueOf(overlap));
         // previous operations
         columns.add(ops);
 
