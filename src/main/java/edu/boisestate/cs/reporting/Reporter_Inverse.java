@@ -145,23 +145,23 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
         inMCTime = BasicTimer.getRunTime();
 
         // store symbolic string values
-        solver.setLast(base, arg);
+//        solver.setLast(base, arg);
 
         // test if true branch is SAT
 //        parser.assertBooleanConstraint(true, constraint);
         tTime = BasicTimer.getRunTime();
-        if (solver.isSatisfiable(base)) {
-            trueSat = true;
-        }
+//        if (solver.isSatisfiable(base)) {
+//            trueSat = true;
+//        }
 
 //        long trueModelCount = this.invSolver.getModelCount(base);
         tMCTime = BasicTimer.getRunTime();
 
         // revert symbolic string values
-        solver.revertLastPredicate();
+//        solver.revertLastPredicate();
 
         // store symbolic string values
-        solver.setLast(base, arg);
+//        solver.setLast(base, arg);
 
         // test if false branch is SAT
 //        parser.assertBooleanConstraint(false, constraint);
@@ -174,7 +174,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
         fMCTime = BasicTimer.getRunTime();
 
         // revert symbolic string values
-        solver.revertLastPredicate();
+//        solver.revertLastPredicate();
 
         // if actual execution did not produce either true or false
         if (!actualVal.equals("true") && !actualVal.equals("false")) {
@@ -209,7 +209,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
 
         // store symbolic string values
-        solver.setLast(base, arg);
+//        solver.setLast(base, arg);
 
 //        parser.assertBooleanConstraint(!result, constraint);
 
@@ -223,7 +223,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 //        long overlap = this.invSolver.getModelCount(base);
 
         // revert symbolic string values
-        solver.revertLastPredicate();
+//        solver.revertLastPredicate();
 
         // get accumulated time
         long accTime = 0;

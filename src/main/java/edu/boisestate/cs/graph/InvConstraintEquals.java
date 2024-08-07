@@ -126,6 +126,10 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 			printDebug("original is null");
 //			System.out.println("original is null");
 			inputs = solver.getSymbolicModel(nextConstraint.getID()).clone();
+			if (inputs == null) {
+				System.err.println("No forward model for source " + nextConstraint.getID());
+				System.exit(1);
+			}
 		}
 
 		T argResult = solver.getSymbolicModel(argConstraint.getID()).clone();
@@ -236,9 +240,8 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 			}
 
 		} else {
-			printDebug("ERROR: Equals has no forward results, UNSAT");
-//			System.out.println("ERROR: Euqals has no forward results, UNSAT");
-			ret = new Tuple<Boolean,Boolean>(false, true);
+			System.err.println("ERROR Equals hs no forward results, UNSAT");
+			System.exit(1);
 		}
 
 		//eas: depends on the type of the query and arguments it might needs to backtrack

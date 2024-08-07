@@ -170,7 +170,7 @@ abstract public class A_Reporter <T extends A_Model<T>> {
                 boolean isBoolFunc = parser.addEnd(constraint);//parses the constraints
 
                 if (isBoolFunc) {
-                    // this is called but no backward propogation is done, just certain necessary forward stuff
+//                    parser.assertBooleanConstraint(constraint.getActualVal().equals("true"), constraint); //else equals false
                     this.calculateStats(constraint); //invokes prints and stats computations, also sat checks
                 }
 
