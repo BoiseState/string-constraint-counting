@@ -143,7 +143,7 @@ public class MCReporter
         timerMap.put(arg, lastTime + prevTime);
 
         // store symbolic string values
-        solver.setLast(base, arg);
+//        solver.setLast(base, arg);
 
       // System.out.printf("Asserting Negation of Predicate to determine disjoint branches for Constraint %d\n", base);
 
@@ -162,7 +162,7 @@ public class MCReporter
         long overlap = this.modelCountSolver.getModelCount(base);
 
         // revert symbolic string values
-        solver.revertLastPredicate();
+//        solver.revertLastPredicate();
 
         // get percentages
 //        float truePercent = 100 * (float) trueModelCount / (float) initialCount;

@@ -114,48 +114,48 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
     protected void calculateStats(PrintConstraint constraint) {
     	   	   	
         // get constraint info as variables
-        Map<String, Integer> sourceMap = constraint.getSourceMap();
-        StringBuilder stats = new StringBuilder();
+//        Map<String, Integer> sourceMap = constraint.getSourceMap();
+//        StringBuilder stats = new StringBuilder();
         String actualVal = constraint.getActualVal();
-        int base = sourceMap.get("t");
-        long tTime, fTime, inMCTime, tMCTime, fMCTime = 0;
+//        int base = sourceMap.get("t");
+//        long tTime, fTime, inMCTime, tMCTime, fMCTime = 0;
 
         // get id of second symbolic string if it exists
-        int arg = -1;
-        if (sourceMap.get("s1") != null) {
-            arg = sourceMap.get("s1");
-        }
+//        int arg = -1;
+//        if (sourceMap.get("s1") != null) {
+//            arg = sourceMap.get("s1");
+//        }
 
         // initialize boolean flags
-        boolean isSingleton = false;
-        boolean trueSat = false;
-        boolean falseSat = false;
+//        boolean isSingleton = false;
+//        boolean trueSat = false;
+//        boolean falseSat = false;
 
         // determine if symbolic strings are singletons
-        boolean argIsSingleton = false;
-        if(arg != -1) {
-        	argIsSingleton = solver.isSingleton(sourceMap.get("s1"));
-        }
-        if (solver.isSingleton(base, actualVal) &&
-            (sourceMap.get("s1") == null || argIsSingleton)) {
-            isSingleton = true;
-        }
+//        boolean argIsSingleton = false;
+//        if(arg != -1) {
+//        	argIsSingleton = solver.isSingleton(sourceMap.get("s1"));
+//        }
+//        if (solver.isSingleton(base, actualVal) &&
+//            (sourceMap.get("s1") == null || argIsSingleton)) {
+//            isSingleton = true;
+//        }
 
 //        long initialCount = this.invSolver.getModelCount(base);
-        inMCTime = BasicTimer.getRunTime();
+//        inMCTime = BasicTimer.getRunTime();
 
         // store symbolic string values
 //        solver.setLast(base, arg);
 
         // test if true branch is SAT
 //        parser.assertBooleanConstraint(true, constraint);
-        tTime = BasicTimer.getRunTime();
+//        tTime = BasicTimer.getRunTime();
 //        if (solver.isSatisfiable(base)) {
 //            trueSat = true;
 //        }
 
 //        long trueModelCount = this.invSolver.getModelCount(base);
-        tMCTime = BasicTimer.getRunTime();
+//        tMCTime = BasicTimer.getRunTime();
 
         // revert symbolic string values
 //        solver.revertLastPredicate();
@@ -165,13 +165,13 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
         // test if false branch is SAT
 //        parser.assertBooleanConstraint(false, constraint);
-        fTime = BasicTimer.getRunTime();
-        if (solver.isSatisfiable(base)) {
-            falseSat = true;
-        }
+//        fTime = BasicTimer.getRunTime();
+//        if (solver.isSatisfiable(base)) {
+//            falseSat = true;
+//        }
 
 //        long falseModelCount = this.invSolver.getModelCount(base);
-        fMCTime = BasicTimer.getRunTime();
+//        fMCTime = BasicTimer.getRunTime();
 
         // revert symbolic string values
 //        solver.revertLastPredicate();
@@ -183,29 +183,29 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
         }
 
         // determine result of actual execution
-        boolean result = true;
-        if (actualVal.equals("false")) {
-            result = false;
-        }
+//        boolean result = true;
+//        if (actualVal.equals("false")) {
+//            result = false;
+//        }
 
         // branches disjoint?
-        parser.assertBooleanConstraint(result, constraint);
+//        parser.assertBooleanConstraint(result, constraint);
 
 
         // update accumulated timer for base
-        long prevTime = 0;
-        if (timerMap.containsKey(base)) {
-            prevTime = timerMap.get(base);
-        }
-        long lastTime = BasicTimer.getRunTime();
-        timerMap.put(base, lastTime + prevTime);
+//        long prevTime = 0;
+//        if (timerMap.containsKey(base)) {
+//            prevTime = timerMap.get(base);
+//        }
+//        long lastTime = BasicTimer.getRunTime();
+//        timerMap.put(base, lastTime + prevTime);
 
         // update accumulated timer for arg
-        prevTime = 0;
-        if (timerMap.containsKey(arg)) {
-            prevTime = timerMap.get(arg);
-        }
-        timerMap.put(arg, lastTime + prevTime);
+//        prevTime = 0;
+//        if (timerMap.containsKey(arg)) {
+//            prevTime = timerMap.get(arg);
+//        }
+//        timerMap.put(arg, lastTime + prevTime);
 
 
         // store symbolic string values
@@ -214,10 +214,10 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 //        parser.assertBooleanConstraint(!result, constraint);
 
         // set yes or no for disjoint branches
-        String disjoint = "yes";
-        if (solver.isSatisfiable(base)) {
-            disjoint = "no";
-        }
+//        String disjoint = "yes";
+//        if (solver.isSatisfiable(base)) {
+//            disjoint = "no";
+//        }
 
         // set yes or no for disjoint branches
 //        long overlap = this.invSolver.getModelCount(base);
@@ -226,53 +226,53 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 //        solver.revertLastPredicate();
 
         // get accumulated time
-        long accTime = 0;
-        if (timerMap.containsKey(base)) {
-            accTime = timerMap.get(base);
-        }
+//        long accTime = 0;
+//        if (timerMap.containsKey(base)) {
+//            accTime = timerMap.get(base);
+//        }
 
         // get constraint function name
-        String constName = constraint.getSplitValue().split("!!")[0];
-       
+//        String constName = constraint.getSplitValue().split("!!")[0];
+
         // add boolean operation to operation list
-        addBooleanOperation(base, arg, constName, constraint.getId(), argIsSingleton);
+//        addBooleanOperation(base, arg, constName, constraint.getId(), argIsSingleton);
 
         // get operations
-        String[] opsArray = this.operationsMap.get(base);
-        String ops = joinStrings(Arrays.asList(opsArray), "\t -> \t");
-
-        // gather column data in list
-        List<String> columns = new ArrayList<>();
-        // id
-        columns.add(String.valueOf(constraint.getId()));
-        // actual value
-        columns.add(String.format("%s", constraint.getActualVal()));
-        // is singleton?
-        columns.add(String.valueOf(isSingleton));
-        // true sat?
-        columns.add(String.valueOf(trueSat));
-        // false sat?
-        columns.add(String.valueOf(falseSat));
-        // disjoint?
-        columns.add(String.format(disjoint));
-        // id of initial model
-        columns.add(String.valueOf(base));
-        // initial model count
-//        columns.add(String.valueOf(initialCount));
-        // true model count
-//        columns.add(String.valueOf(trueModelCount));
-        // false model count
-//        columns.add(String.valueOf(falseModelCount));
-        // overlap count
-//        columns.add(String.valueOf(overlap));
-        // previous operations
-        columns.add(ops);
-
-        // generate row string
-        String row = joinStrings(columns, "\t");
-
-        // output row
-        printDebug(cid + row);
+//        String[] opsArray = this.operationsMap.get(base);
+//        String ops = joinStrings(Arrays.asList(opsArray), "\t -> \t");
+//
+//        // gather column data in list
+//        List<String> columns = new ArrayList<>();
+//        // id
+//        columns.add(String.valueOf(constraint.getId()));
+//        // actual value
+//        columns.add(String.format("%s", constraint.getActualVal()));
+//        // is singleton?
+//        columns.add(String.valueOf(isSingleton));
+//        // true sat?
+//        columns.add(String.valueOf(trueSat));
+//        // false sat?
+//        columns.add(String.valueOf(falseSat));
+//        // disjoint?
+//        columns.add(String.format(disjoint));
+//        // id of initial model
+//        columns.add(String.valueOf(base));
+//        // initial model count
+////        columns.add(String.valueOf(initialCount));
+//        // true model count
+////        columns.add(String.valueOf(trueModelCount));
+//        // false model count
+////        columns.add(String.valueOf(falseModelCount));
+//        // overlap count
+////        columns.add(String.valueOf(overlap));
+//        // previous operations
+//        columns.add(ops);
+//
+//        // generate row string
+//        String row = joinStrings(columns, "\t");
+//
+//        // output row
+//        printDebug(cid + row);
 
         // --------------------------------------------------------------------------------------------
         // The process for solving the inputs needed to reach the current predicate location starts here.
@@ -296,10 +296,10 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 		// this stops any backprop from happening until forward prop has finished
 		// also currently only works on a necessary subset though the soundness should be confirmed
 		// ------------------------ Traversal Optimization?
-		if (!toProcess.contains(constraint)){
-//			printDebug("SKIPPING PROCESSING PREDICATE " + predID);
-			return;
-		}
+//		if (!toProcess.contains(constraint)){
+////			printDebug("SKIPPING PROCESSING PREDICATE " + predID);
+//			return;
+//		}
 		// ------------------------
 		processIt.remove();
 
@@ -389,6 +389,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
 		if (debug) { //printing of solutions done each iteration just print unsat/sat
 			if (toProcess.isEmpty()) {//processing is done
+				System.out.println("DONE PROCESSING\n");
 				if (inputSolution.size() != ((InvDefaultDirectedGraph) graph).getNumSymInputs()) {
 					System.out.println("error in solutions set");
 					System.out.println("expected: " + ((InvDefaultDirectedGraph) graph).getNumSymInputs());
@@ -397,6 +398,12 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 						System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
 					}
 					System.out.println("unsat");
+				}
+				else {
+					System.out.println("sat,");
+					for (Integer id : inputSolution.keySet()) {
+						System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
+					}
 				}
 			}
 		} else {
@@ -408,6 +415,11 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 					for (Integer id : inputSolution.keySet()) {
 						System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
 					}
+//					for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
+//						if (c.getOp() == Operation.INIT_SYM){
+//							System.out.println(c.getID() + ": \"" + c.output(0).getShortestExampleString() + "\"");
+//						}
+//					}
 				}
 			}
 		}

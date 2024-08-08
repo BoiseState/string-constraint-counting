@@ -10,6 +10,7 @@ import java.util.TreeSet;
 import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
 
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import org.jgrapht.DirectedGraph;
 
 import edu.boisestate.cs.Parser_2;
@@ -68,7 +69,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 		//predicateIDs have the last predicate is the current constraint predicate
 		//and it contains all predicates solved so far
 		qID.addAll(predicateIDs);
-		qID.retainAll(eGraph.getDependedPredicates(predicateIDs.get(predicateIDs.size()-1)));
+		qID.addAll((eGraph.getDependedPredicates(predicateIDs.get(predicateIDs.size()-1))));
 		//sort it so the predicate with the largest ids processed first
 		//Collections.sort(qID, Collections.reverseOrder());
 		printDebug("Q " + qID);
@@ -205,6 +206,10 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 				T solution = i.output(0);//symbolic nodes hold their solution in the output values
 
 				// populate map for output to file/SPF
+				if (inputSolution.get(i.getID()) != null) {
+					T prev = inputSolution.get(i.getID());
+					solution = prev.intersect(solution);
+				}
 				inputSolution.put(i.getID(), solution);
 
 				printDebug(i.getID() + ": " + solution.getShortestExampleString());

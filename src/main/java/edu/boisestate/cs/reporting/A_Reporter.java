@@ -170,8 +170,8 @@ abstract public class A_Reporter <T extends A_Model<T>> {
                 boolean isBoolFunc = parser.addEnd(constraint);//parses the constraints
 
                 if (isBoolFunc) {
-//                    parser.assertBooleanConstraint(constraint.getActualVal().equals("true"), constraint); //else equals false
-                    this.calculateStats(constraint); //invokes prints and stats computations, also sat checks
+                    parser.assertBooleanConstraint(constraint.getActualVal().equals("true"), constraint); //else equals false
+//                    this.calculateStats(constraint); //invokes prints and stats computations, also sat checks
                 }
 
                 finishEdges(unfinishedInEdges, unfinishedOutEdges, constraint);
