@@ -1,5 +1,5 @@
-00 - SAT equality of two symbolic unrestricted variables
-01 - SAT inequality of two symbolic unrestricted variable
+00 - SAT inequality of two symbolic unrestricted variables
+01 - SAT equality of two symbolic unrestricted variable
 02 - SAT equality of two symbolic restricted (with contains) variables
 03 - SAT inequality of two symbolic restricted (with contains) variables 
 04 - SAT equality of two symbolic unrestricted variables concatenated with a constant
