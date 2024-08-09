@@ -484,7 +484,8 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
     		case PREDICATE:
 
-    			newConstraint = new InvConstraintPredicate<T>(ID,invSolver);
+				boolean result = value.equals("true")? true : false;
+    			newConstraint = new InvConstraintPredicate<T>(ID,invSolver, result);
     			allInverseConstraints.put(ID, newConstraint);
     			
     			if (localDebug) {

@@ -29,7 +29,7 @@ abstract public class A_Reporter <T extends A_Model<T>> {
     protected final Map<Integer, String[]> operationsMap;
     protected final Map<Integer, Long> timerMap;
 
-    protected Set<PrintConstraint> toProcess = new HashSet<>();
+    protected ArrayList<PrintConstraint> toProcess;
     protected Iterator<PrintConstraint> processIt;
     /**
      * 
@@ -236,6 +236,7 @@ abstract public class A_Reporter <T extends A_Model<T>> {
 //        toProcess = ((InvDefaultDirectedGraph)graph).getPredicates();
 
         processIt = toProcess.iterator();
+        // this is basically just cause we check if toProcess is empty to determine if we are done solving
         while (processIt.hasNext()) {
             calculateStats(processIt.next());
         }

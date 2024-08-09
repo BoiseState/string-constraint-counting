@@ -1141,11 +1141,11 @@ public class Parser_2<T extends A_Model<T>> {
 		int id = constraint.getId();
 
 		// if debug mode set
-		if (debug) {
+//		if (debug) {
 
 			// output root information
-			System.out.println("parser-Root: " + value);
-		}
+			printDebug("parser-Root: " + value);
+//		}
 
 		// if actual value not null
 		if (actualValue != null) {

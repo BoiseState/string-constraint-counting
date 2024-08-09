@@ -13,7 +13,7 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
 
     private Map<PrintConstraint, Set<PrintConstraint>> predDepend;
     private Map<Integer, Set<Integer>> predDependID;
-    private Set<PrintConstraint> necessaryPredicates = new HashSet<PrintConstraint>();
+    private ArrayList<PrintConstraint> necessaryPredicates = new ArrayList<>();
     private int numInputs;
 
     public InvDefaultDirectedGraph(Class<? extends SymbolicEdge> edgeClass) {
@@ -126,7 +126,7 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
         return numInputs;
     }
 
-    public Set<PrintConstraint> getNecessaryPredicates() {
+    public ArrayList<PrintConstraint> getNecessaryPredicates() {
         return necessaryPredicates;
     }
 

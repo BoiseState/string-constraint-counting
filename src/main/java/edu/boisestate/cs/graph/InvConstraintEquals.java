@@ -111,7 +111,7 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 
 	@Override
 	public Tuple<Boolean, Boolean> evaluate() {
-		printDebug("EVALUATE PREDICATE " + ID + " ...");
+		printDebug("EVALUATE EQUALS PREDICATE " + ID + " ...");
 //		System.out.format("\nBFS EVALUATE PREDICATE %d ...\n",ID);
 		Tuple<Boolean, Boolean>  ret = new Tuple<Boolean,Boolean>(true, true);
 		//9-15-23 handling two symbolic values
@@ -151,6 +151,14 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 				//could be target or a source
 				int indxSymb = 1;
 				int indxConcr = 2;
+				// nps - 8/9/24 - some real benches have predicates on concretes....
+				if (this.argConstraint.getOp() == Operation.INIT_CON && this.nextConstraint.getOp() == Operation.INIT_CON) {
+					// just give outputs whatever the inputs are.... trivial
+					outputSet.put(1, solver.getSymbolicModel(nextID));
+					outputSet.put(2, solver.getSymbolicModel(argID));
+					return new Tuple<Boolean, Boolean>(true, true);
+				}
+
 				if(this.nextConstraint.getOp() == Operation.INIT_CON){
 					indxSymb = 2;
 					indxConcr = 1;

@@ -96,7 +96,7 @@ public class InvConstraintConcreteValue<T extends A_Model_Inverse<T>>  extends A
 				inputs = inputs.intersect(iter.next().output(this));
 		}
 
-		if (inputs == null) {
+		if (inputs == null || inputs.isEmpty()) {
 			System.err.println("NO VALUE FOR CONCRETE EXISTS " + ID );
 			System.exit(1);
 		}
@@ -105,6 +105,9 @@ public class InvConstraintConcreteValue<T extends A_Model_Inverse<T>>  extends A
 
 		if (!inputs.containsString(test)) {
 			System.err.println("ERROR IN EVALUATE CONCRETE VALUE " + ID + "...");
+			System.out.println("inputs model: " + inputs);
+			System.out.println("input strings: " + inputs.getFiniteStrings());
+			System.out.println("concrete value: " + test);
 			System.exit(1);
 		}
 		return new Tuple<Boolean, Boolean>(true, true);
