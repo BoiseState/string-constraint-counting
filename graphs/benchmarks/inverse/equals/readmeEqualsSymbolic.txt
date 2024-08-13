@@ -1,7 +1,7 @@
 00 - SAT inequality of two symbolic unrestricted variables
 01 - SAT equality of two symbolic unrestricted variable
-02 - SAT equality of two symbolic restricted (with contains) variables
-03 - SAT inequality of two symbolic restricted (with contains) variables 
+02 - SAT inequality of two symbolic restricted (with contains) variables
+03 - SAT equality of two symbolic restricted (with contains) variables 
 04 - SAT equality of two symbolic unrestricted variables concatenated with a constant
 05 - SAT inequality of two symbolic unrestricted variables concatenated with a constant
 06 - SAT equality of two symbolic unrestricted variables concatenated with a symbolic variable

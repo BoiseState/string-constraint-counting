@@ -3,11 +3,13 @@
  */
 package edu.boisestate.cs.graph;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
-//import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
 
@@ -35,8 +37,16 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 	//to keep the initial value
 	private T inputs = null;
 
-	//the result of euqals to evalute to: true or false;
+	//the result of equals to evaluate to: true or false;
 	private boolean result;
+
+	//optimization for two level partition inverse
+	private boolean optim = true;
+	int partition = 0;
+	//set up a couple of data structures
+	//one model maps to a list of outputs
+	//when 
+	private Map<T, List<Tuple<T,T>>> mapInOut = null;
 
 
 	public InvConstraintEquals (int ID, Solver_Inverse<T> solver, boolean  result) {
@@ -126,20 +136,23 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 			inputs = solver.getSymbolicModel(nextConstraint.getID()).clone();
 		}
 
-		T argResult = solver.getSymbolicModel(argConstraint.getID()).clone();
+		//T argResult = solver.getSymbolicModel(argConstraint.getID()).clone();
 		//System.out.println("arg " + argResult.getFiniteStrings());
 		//T predicateResult = solver.getSymbolicModel(nextConstraint.getID());
 		//	System.out.println("solver " + solver);
 		//System.out.println("nextConstr " + nextConstraint.getID());
 		//System.out.println("predicate " + inputs.getFiniteStrings());
 
-		if (!inputs.isEmpty()) {
+		//eas the second set of disjunction is for the optimization
+		if ( !inputs.isEmpty() || (mapInOut == null || !mapInOut.isEmpty())) {
+
+
 
 			//different cases: 
-			//if one of them is concrete the solver
-			//already did the narrowing and symbolic part should match
+			//if one of them is a concrete, the solver
+			//already did the narrowing and the symbolic part should match the result (true/false)
 			//so it's ok to pass an entire set up
-			//better query for a singelton solutions set
+			//better query for a singleton solutions set
 			if(this.argConstraint.getOp() == Operation.INIT_CON || this.nextConstraint.getOp() == Operation.INIT_CON) {
 				//predicate result would go with non-concrete constraint, which
 				//could be target or a source
@@ -161,7 +174,8 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 				//should be operator dependent
 				System.out.println("Two Symbolic " + this.getOp()); 
 				if(result) {
-					//expected result is true	
+					//expected result is true
+					//cannot do any optimization since it is relational
 					T input = inputs.getShortestExampleModel();
 					System.out.println("Solution " + input.getFiniteStrings());
 					//remove it from the inputs
@@ -182,49 +196,179 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 
 					//argument model
 					T input2 = solver.getSymbolicModel(argConstraint.getID()).clone();
-					//if both have no common strings: intersection is empty
-					boolean common = !solver.intersect(inputs, argID).isEmpty();
-					System.out.println("Target and args have common strings? " + common);
-
-					//if no common string then propagate them both up
-					if(!common) { //turn back to !common after done debugging
-						outputSet.put(1, inputs);
-						outputSet.put(2, input2);
-						//return the default true, true
-						//no backtracking here back
-					} else {
+				
+					if(optim && partition != 2) {
 						
-						//TOD: an optimization where inputs, over which we iterate
-						//single values has the smallest number of strings in
-						//its solution set.
+						//in optimized version we create 3 partitions/cases
+						//we have t (inputs) and s (input2) values that for
+						//not equals remain the same, no narrowing happened
+						//partiton0 considers the case when we propagate back the entire t for the target and s \ t cap s for the argument, i.e., without common elements between t and s
+						//parition1 is symmetric: t \ t cap s and the entire s
+						//parition2 does the brute force algorithm: el \in t and s\{el}, i.e., what the default implementation is doing
+						//the partitions and their set of inverses (for partition2, partitions 0 and 1 only have single inverses) are not created until the previous one propagated backwards has failed.
 
-						T input1 = inputs.getShortestExampleModel();
-						//remove it from the set
-						inputs.minus(input1);
-						//create a copy of the full model
+						if(partition == 0 /*mapInOut == null*/) {
+							//create partition of different subsets
+							T input1; 
+							//output for a given subset of inputs
+							List<Tuple<T,T>> currOutput = new ArrayList<Tuple<T,T>>();
 
-						//leave the set of strings to which input1 is not equal to.
-						input2.minus(input1);
-						//no need to do intersection the incoming values are actually ones
-						//from the nodes themselves, and not over-approximating computations.
-						
-						//try a different concrete string and find all string for arg
-						//that are not equal to that string, and propagate up.
-						while (input2.isEmpty()) {
-							input1 = inputs.getShortestExampleModel();
-							inputs.minus(input1);
-							input2 = solver.getSymbolicModel(argConstraint.getID()).clone();
-							input2.minus(input1);
+							mapInOut = new HashMap<T, List<Tuple<T,T>>>();
+							//the first partition considers an entire target
+							//so no need to remove input1 from inputs
+							//case 1 the common string are in the first but not in the second
+							input1 = inputs.clone();
+							T input2Copy = input2.clone();
+							input2Copy.minus(input1);
+							if(!input2Copy.isEmpty()) {
+								currOutput.add(new Tuple(input1, input2Copy ));
+//								System.out.println("input1 " + input1.getFiniteStrings());
+//								System.out.println("inpu12Copy " + input2Copy.getFiniteStrings());
+								mapInOut.put(input1, currOutput);
+							}
+							System.out.println("map1 : " /* + mapInOut*/);
+							if(mapInOut.isEmpty()) {
+								partition++;
+							}
+							//case 2 the common strings are in the second but not in the frist
 						}
 						
-//						System.out.println("target: " + input1.getFiniteStrings() + " arg: " + 
-//								input2.getFiniteStrings());
-						//send them up
-						outputSet.put(1, input1);
-						outputSet.put(2, input2);
-						if(!inputs.isEmpty()) {
-							//adding to backtracking
-							ret = new Tuple<Boolean,Boolean>(true, false);
+						if (partition == 1) {
+							List<Tuple<T,T>> currOutput = new ArrayList<Tuple<T,T>>();
+							T input1 = inputs.clone();
+							T input1Copy = input1.clone();
+							input1Copy.minus(input2);
+							if(!input1Copy.isEmpty()) {
+								currOutput = new ArrayList<Tuple<T,T>>();
+								currOutput.add(new Tuple(input1Copy, input2 ));
+//								System.out.println("input1Copy " + input1Copy.getFiniteStrings());
+//								System.out.println("inpu2 " + input2.getFiniteStrings());
+								mapInOut.put(input1Copy, currOutput);
+							}
+							System.out.println("map2 : " /* + mapInOut*/);
+
+							//case 3 intersection
+							//when a string is present in both sets
+							//this what should be left after removing
+							//
+							if(mapInOut.isEmpty()) {
+							inputs.minus(input1Copy);
+							partition++;
+							}
+							
+						} 
+						
+						// if (partition == 3) {
+//							input1 = inputs.clone();
+//
+//							//creating bunch of tuples
+//							//need to do it on the fly later
+//							currOutput = new ArrayList<Tuple<T,T>>();
+//
+//							//remove each pair and propagate up
+//							//input is empty
+//							while(!inputs.isEmpty()) {
+//								input1Copy = inputs.getShortestExampleModel();
+//								System.out.println(input1Copy.getAcceptedStringExample());
+//								inputs.minus(input1Copy);
+//								input2Copy = input2.clone();
+//								input2Copy.minus(input1Copy);
+//								if(!input2Copy.isEmpty()) {
+//									currOutput.add(new Tuple(input1Copy, input2Copy));
+////									System.out.println("input1Copy " + input1Copy.getFiniteStrings());
+////									System.out.println("inpu2Copy " + input2Copy.getFiniteStrings());
+//								}
+//							}
+//							if(!currOutput.isEmpty()) {
+//								mapInOut.put(input1, currOutput);
+//							}
+							
+						//	System.out.println("Should not gete there");
+					//		System.out.println("map3 : " /*+ mapInOut*/);
+
+//						} 
+
+						if(partition !=2 ) {
+
+						//if map was not null and has become one,
+						//then process the first value
+
+						Entry<T, List<Tuple<T,T>>> entry = mapInOut.entrySet().iterator().next();
+
+						Tuple<T,T> values = entry.getValue().get(0);
+
+						outputSet.put(1, values.get1());
+						outputSet.put(2, values.get2());
+//						System.out.println("ou1 " + values.get1().getFiniteStrings());
+//						System.out.println("ou2 " + values.get2().getFiniteStrings());
+
+						entry.getValue().remove(0);
+						if(entry.getValue().isEmpty()) {
+							//remove the processed element
+							mapInOut.remove(entry.getKey());
+						}
+
+						//if(!mapInOut.isEmpty()) {
+							//backtrack to me
+							ret = new Tuple<Boolean, Boolean>(true, false);//continue and add to backtrack since there are more inputs
+						//}
+						//else there is no values left, can go back to me but then UNSAT will thrown
+							partition++;
+
+
+					 } 
+					}
+					if (!optim || partition == 2) {
+					
+						//if both have no common strings: intersection is empty
+						boolean common = !solver.intersect(inputs, argID).isEmpty();
+						System.out.println("Target and args have common strings? " + common);
+
+						//if no common string then propagate them both up
+						if(!common) { //turn back to !common after done debugging
+							outputSet.put(1, inputs);
+							outputSet.put(2, input2);
+							//return the default true, true
+							//no backtracking here back
+						} else {
+
+
+
+							//TOD: an optimization where inputs, over which we iterate
+							//single values has the smallest number of strings in
+							//its solution set.
+
+							T input1 = inputs.getShortestExampleModel();
+							//remove it from the set
+							inputs.minus(input1);
+							//create a copy of the full model
+
+							//leave the set of strings to which input1 is not equal to.
+							input2.minus(input1);
+							//no need to do intersection the incoming values are actually ones
+							//from the nodes themselves, and not over-approximating computations.
+
+							//try a different concrete string and find all string for arg
+							//that are not equal to that string, and propagate up.
+							//the loop considers a case when input1 is larger than input 2
+							// and removing input1 from input2 would make input2 empty,
+							//e.g., input 1 = {aa,ab} and input2 = {aa}
+							while (input2.isEmpty()) {
+								input1 = inputs.getShortestExampleModel();
+								inputs.minus(input1);
+								input2 = solver.getSymbolicModel(argConstraint.getID()).clone();
+								input2.minus(input1);
+							}
+
+													System.out.println("target: " + input1.getFiniteStrings() + "\targ: " + 
+															input2.getShortestExampleString());
+							//send them up
+							outputSet.put(1, input1);
+							outputSet.put(2, input2);
+							if(!inputs.isEmpty()) {
+								//adding to backtracking
+								ret = new Tuple<Boolean,Boolean>(true, false);
+							}
 						}
 					}
 				}
@@ -236,6 +380,7 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 		}
 
 		//eas: depends on the type of the query and arguments it might needs to backtrack
+		System.out.println("ret in eq " + ret);
 		return ret;
 	}
 
