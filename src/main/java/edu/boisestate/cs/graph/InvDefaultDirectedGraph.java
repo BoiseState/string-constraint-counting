@@ -6,6 +6,7 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -14,7 +15,7 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
     private Map<PrintConstraint, Set<PrintConstraint>> predDepend;
     private Map<Integer, Set<Integer>> predDependID;
     private ArrayList<PrintConstraint> necessaryPredicates = new ArrayList<>();
-    private int numInputs;
+    private HashSet<PrintConstraint> sources = new HashSet<>();
 
     public InvDefaultDirectedGraph(Class<? extends SymbolicEdge> edgeClass) {
         super(edgeClass);
@@ -37,8 +38,9 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
         }
 
         //get all the symbolic sources
-        Set<PrintConstraint> sources = new HashSet<PrintConstraint>();
+
         for (PrintConstraint s : vertexSet()) {
+            // TODO: this will sometimes not identify the symbolic inputs
             if (this.inDegreeOf(s) == 0 && s.getSplitValue().startsWith("r")) {
                 sources.add(s);
                 //System.out.println(s.getSplitValue());
@@ -46,7 +48,7 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
         }
 
         //System.out.println(sources);
-        numInputs = sources.size();
+
         //intermediate map that remember symbolic sources for each predicate
         Map<PrintConstraint, Set<PrintConstraint>> symbValPred = new HashMap<PrintConstraint, Set<PrintConstraint>>();
         //DFS for each sink
@@ -97,6 +99,7 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
         return ret;
     }
 
+    // note that this includes itself
     public Set<Integer> getAncestors(PrintConstraint start) {
         Set<Integer> ret = new HashSet<Integer>();
         EdgeReversedGraph<PrintConstraint, SymbolicEdge> reversedGraph = new EdgeReversedGraph<PrintConstraint, SymbolicEdge>(this);
@@ -108,6 +111,16 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
 
         return ret;
     }
+
+//    public Set<Integer> getChildren(PrintConstraint start) {
+//        Set<Integer> ret = new HashSet<Integer>();
+//        BreadthFirstIterator<PrintConstraint, SymbolicEdge> breadthFirstIterator =
+//                new BreadthFirstIterator<PrintConstraint, SymbolicEdge>(this, start);
+//        while (breadthFirstIterator.hasNext()) {
+//            ret.add(breadthFirstIterator.next().getId());
+//        }
+//        return ret;
+//    }
 
     public PrintConstraint getConstraint(Integer id) {
         for (PrintConstraint c : vertexSet()) {
@@ -123,7 +136,7 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
     }
 
     public Integer getNumSymInputs() {
-        return numInputs;
+        return sources.size();
     }
 
     public ArrayList<PrintConstraint> getNecessaryPredicates() {
@@ -159,5 +172,27 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
 
             }
         }
+
+        // nps - 8.13.24
+        // sometimes in real graphs there are no symbolics for certain predicates so just remove those
+        // probably a better way of doing this...
+        ArrayList<PrintConstraint> ret = new ArrayList<>();
+        for (PrintConstraint c : necessaryPredicates) {
+            if (hasSymbolicAncestor(c)) {
+                ret.add(c);
+            }
+        }
+
+        necessaryPredicates = ret;
     }
+
+    public boolean hasSymbolicAncestor(PrintConstraint c) {
+        for (int ancestor : getAncestors(c)) {
+            if (sources.contains(getConstraint(ancestor))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

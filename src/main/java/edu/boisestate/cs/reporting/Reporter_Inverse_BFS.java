@@ -68,7 +68,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 		TreeSet <Integer> qID = new TreeSet<Integer>();
 		//predicateIDs have the last predicate is the current constraint predicate
 		//and it contains all predicates solved so far
-		qID.addAll(predicateIDs);
+//		qID.addAll(predicateIDs);
 		qID.addAll((eGraph.getDependedPredicates(predicateIDs.get(predicateIDs.size()-1))));
 		//sort it so the predicate with the largest ids processed first
 		//Collections.sort(qID, Collections.reverseOrder());

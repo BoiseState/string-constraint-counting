@@ -128,18 +128,19 @@ public class InvConstraintPredicate<T extends A_Model_Inverse<T>> extends A_Inv_
 
         if (!predicateResult.isEmpty()) {
 
-            if (argID == -1) { //isEmpty predicate
-                T emptyString = this.solver.modelManager.createString("");
-                if (result) {
-                    T isEmpty = predicateResult.intersect(emptyString);
-                    outputSet.put(1, isEmpty); //
-                } else {
-                    T notEmpty = this.solver.modelManager.createAnyString(predicateResult.getBoundLength());
-                    notEmpty.minus(emptyString);
-                    notEmpty = notEmpty.intersect(predicateResult);
-                    outputSet.put(1, notEmpty);
-                }
-            } else { // two arguments so contains predicate
+            // nps - results handled in forward prop for isEmptu
+//            if (argID == -1) { //isEmpty predicate
+//                T emptyString = this.solver.modelManager.createString("");
+//                if (result) {
+//                    T isEmpty = predicateResult.intersect(emptyString);
+//                    outputSet.put(1, isEmpty); //
+//                } else {
+//                    T notEmpty = this.solver.modelManager.createAnyString(predicateResult.getBoundLength());
+//                    notEmpty.minus(emptyString);
+//                    notEmpty = notEmpty.intersect(predicateResult);
+//                    outputSet.put(1, notEmpty);
+//                }
+//            } else { // two arguments so contains predicate
                 //predicate result would go with non-concrete constratin, which
                 //could be target or a source
                 int indxSymb = 1;
@@ -155,7 +156,7 @@ public class InvConstraintPredicate<T extends A_Model_Inverse<T>> extends A_Inv_
                 // place symbolic string from solver string table into output set, position 1
                 outputSet.put(indxSymb, predicateResult);
                 outputSet.put(indxConcr, solver.getSymbolicModel(argID));//the argument for now is concrete, so whatever is coming from it
-            }
+//            }
         } else {
 //            printDebug("ERROR: Predicate has no forward results, UNSAT");
             System.err.println("ERROR: Predicate has no forward results, UNSAT");
