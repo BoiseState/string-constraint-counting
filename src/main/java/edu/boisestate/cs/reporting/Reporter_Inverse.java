@@ -42,77 +42,77 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Reporter that attempts to determine input solution for each predicate encountered.
- * 
- * @author Marlin Roberts
+ *
  * @param <T> - Automata model that implements inverse operations.
+ * @author Marlin Roberts
  */
 @SuppressWarnings("unused")
 public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T> {
 
     protected final Solver_Inverse<T> invSolver;
-	protected Map<Integer,PrintConstraint> allConstraints = new HashMap<>();
-	protected Map<Integer,I_Inv_Constraint<T>> allInverseConstraints = new HashMap<>();
-	//protected Map<Integer,SolutionSet<T>> inputSolutions = new HashMap<>();
-	protected Map<Integer,T> inputSolution = new HashMap<>();
-	protected Map<Integer,Integer> inputIndexes = new HashMap<>();
-	protected List<Integer> predicateIDs = new ArrayList<>();
-	private boolean saveResults = false;
-	private String graphName;
-	private String saveFile = "src\\test\\automata\\";
-	
-	// temporary implementation of solution output to file
-	public String solutionFile = "./temp/solutions.txt";
-	
-	// prefix for output when running inside SPF
-	protected static String cid = "[IGEN] ";
+    protected Map<Integer, PrintConstraint> allConstraints = new HashMap<>();
+    protected Map<Integer, I_Inv_Constraint<T>> allInverseConstraints = new HashMap<>();
+    //protected Map<Integer,SolutionSet<T>> inputSolutions = new HashMap<>();
+    protected Map<Integer, T> inputSolution = new HashMap<>();
+    protected Map<Integer, Integer> inputIndexes = new HashMap<>();
+    protected List<Integer> predicateIDs = new ArrayList<>();
+    private boolean saveResults = false;
+    private String graphName;
+    private String saveFile = "src\\test\\automata\\";
+
+    // temporary implementation of solution output to file
+    public String solutionFile = "./temp/solutions.txt";
+
+    // prefix for output when running inside SPF
+    protected static String cid = "[IGEN] ";
 
     /**
      * Constructor for inverse reporter. Keeps a reference to the given solver as an inverse solver.
      * Stores constraints in a new map for reference later.
-     * 
+     *
      * @param graph
      * @param parser
      * @param invSolver
      * @param debug
      */
-    public Reporter_Inverse (DirectedGraph <PrintConstraint, SymbolicEdge> 	graph,
-                      		   Parser_2<T> 										parser,
-                      		   Solver_Inverse<T> 							invSolver,
-                      		   boolean 											debug) {
-    	
-        super (graph, parser, invSolver, debug);  	// solver instance variable in A_Reporter available 
-        this.invSolver = invSolver; 				// same solver as inverse solver
-        
+    public Reporter_Inverse(DirectedGraph<PrintConstraint, SymbolicEdge> graph,
+                            Parser_2<T> parser,
+                            Solver_Inverse<T> invSolver,
+                            boolean debug) {
+
+        super(graph, parser, invSolver, debug);    // solver instance variable in A_Reporter available
+        this.invSolver = invSolver;                // same solver as inverse solver
+
         // this saves the set of constraints as references so that we can use access them later 
         // while building the inverse constraints. There are some graphs that have inputs stored twice, 
         // once with outgoing edges and once with no incoming/outgoing edges. The conditional avoids
         // adding references to the latter.
-    	for (PrintConstraint p : graph.vertexSet()) {
-    		if (!((graph.inDegreeOf(p) == 0) & (graph.outDegreeOf(p) == 0))) {
-    			allConstraints.put(p.getId(), p);
-    		}
-    		
-    	}
-     }
-    
+        for (PrintConstraint p : graph.vertexSet()) {
+            if (!((graph.inDegreeOf(p) == 0) & (graph.outDegreeOf(p) == 0))) {
+                allConstraints.put(p.getId(), p);
+            }
+
+        }
+    }
+
     /**
      * sets save option for file output, used for getting solution back to SPF
-     * 
+     *
      * @param save - boolean true = save to file
      * @param name - filename
      */
-    public void setSaveOption (boolean save, String name) {
-    	this.saveResults = save;
-    	this.graphName = name;
-    	this.saveFile = this.saveFile + graphName;
+    public void setSaveOption(boolean save, String name) {
+        this.saveResults = save;
+        this.graphName = name;
+        this.saveFile = this.saveFile + graphName;
     }
 
     /*
      * called when forward analysis reaches predicate, computes stats and inputs
      */
- 	@Override
+    @Override
     protected void calculateStats(PrintConstraint constraint) {
-    	   	   	
+
         // get constraint info as variables
 //        Map<String, Integer> sourceMap = constraint.getSourceMap();
 //        StringBuilder stats = new StringBuilder();
@@ -289,28 +289,28 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
         // save this predicate ID so we can grab the new inverse constraint
         // from the allInverseConstraints container later
-		int predID = constraint.getId();
+        int predID = constraint.getId();
 
-		predicateIDs.add(predID);
+        predicateIDs.add(predID);
 
-		// this stops any backprop from happening until forward prop has finished
-		// also currently only works on a necessary subset though the soundness should be confirmed
-		// ------------------------ Traversal Optimization?
+        // this stops any backprop from happening until forward prop has finished
+        // also currently only works on a necessary subset though the soundness should be confirmed
+        // ------------------------ Traversal Optimization?
 //		if (!toProcess.contains(constraint)){
 ////			printDebug("SKIPPING PROCESSING PREDICATE " + predID);
 //			return;
 //		}
-		// ------------------------
-		processIt.remove();
+        // ------------------------
+        processIt.remove();
 
         // build the transposed graph of inverse constraints
         buildICG_r3();
 
-		if (debug) {
-			for (I_Inv_Constraint<T> con : allInverseConstraints.values()) {
-				con.setDebug(true);
-			}
-		}
+        if (debug) {
+            for (I_Inv_Constraint<T> con : allInverseConstraints.values()) {
+                con.setDebug(true);
+            }
+        }
 
         solveInputs();
 
@@ -325,7 +325,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 //        }
 
         // get a reference to the predicate inverse constraint
-       // I_Inv_Constraint<T> predicate = allInverseConstraints.get(predicateID);
+        // I_Inv_Constraint<T> predicate = allInverseConstraints.get(predicateID);
 
         // ********************************
         // The call that starts it all ....
@@ -333,7 +333,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
         // ********************************       
 
         // check for SAT here ...
-        
+
         // TODO: consolidate solutions from inside sink nodes into a solution set
         // then either output solutions or write them to a file
         // THIS CODE DOES NOT CURRENTLY DO ANYTHING ....
@@ -387,400 +387,402 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
         // ------------------------------------------------------------------------------------
 
 
-		if (debug) { //printing of solutions done each iteration just print unsat/sat
-			if (toProcess.isEmpty()) {//processing is done
-				System.out.println("DONE PROCESSING\n");
-				if (inputSolution.size() != ((InvDefaultDirectedGraph) graph).getNumSymInputs()) {
-					System.out.println("error in solutions set");
-					System.out.println("expected: " + ((InvDefaultDirectedGraph) graph).getNumSymInputs());
-					System.out.println("actual: " + inputSolution.size());
-					for (Integer id : inputSolution.keySet()) {
-						System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
-					}
-					System.out.println("unsat");
-				}
-				else {
-					System.out.println("sat,");
-					for (Integer id : inputSolution.keySet()) {
-						System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
-					}
-				}
-			}
-		} else {
-			if (toProcess.isEmpty()) { //done
-				if (inputSolution.size() != ((InvDefaultDirectedGraph)graph).getNumSymInputs())
-					System.out.println("unsat");
-				else {
-					System.out.println("sat,");
-					for (Integer id : inputSolution.keySet()) {
-						System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
-					}
+        if (debug) { //printing of solutions done each iteration just print unsat/sat
+            if (toProcess.isEmpty()) {//processing is done
+                System.out.println("DONE PROCESSING\n");
+                if (inputSolution.size() != ((InvDefaultDirectedGraph) graph).getNumSymInputs()) {
+                    System.out.println("error in solutions set");
+                    System.out.println("expected: " + ((InvDefaultDirectedGraph) graph).getNumSymInputs());
+                    System.out.println("actual: " + inputSolution.size());
+                    for (Integer id : inputSolution.keySet()) {
+                        System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
+                    }
+                    System.out.println("unsat");
+                } else {
+                    System.out.println("sat,");
+                    for (Integer id : inputSolution.keySet()) {
+                        System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
+                    }
+                }
+            }
+        } else {
+            if (toProcess.isEmpty()) { //done
+                if (inputSolution.size() != ((InvDefaultDirectedGraph) graph).getNumSymInputs())
+                    System.out.println("unsat");
+                else {
+                    System.out.println("sat,");
+                    for (Integer id : inputSolution.keySet()) {
+                        System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
+                    }
 //					for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
 //						if (c.getOp() == Operation.INIT_SYM){
 //							System.out.println(c.getID() + ": \"" + c.output(0).getShortestExampleString() + "\"");
 //						}
 //					}
-				}
-			}
-		}
-
+                }
+            }
+        }
 
 
     }
-    
+
     /*
      * builds the transposed graph of inverse constraints.
      * first, creates an inverse constraint for every print constraint.
      * second, sets the internal next and arg references to the correct inverse constraint.
      */
-    protected void buildICG_r3 () {
+    protected void buildICG_r3() {
 
-    	boolean localDebug = false;
-    	
-    	List<Integer> args;
-    	
-    	// create inverse constraint for every print constraint
-    	// op was set during the forward graph construction
-    	for (PrintConstraint pc : allConstraints.values()) {
+        boolean localDebug = false;
 
-    		int ID = pc.getId();
-    		Operation op = pc.getOp();
-    		String value = pc.getActualVal();
-    		printDebug("ID " + ID + " op " + op);
-    		I_Inv_Constraint<T> newConstraint;
+        List<Integer> args;
 
-    		switch (op) {
+        // create inverse constraint for every print constraint
+        // op was set during the forward graph construction
+        for (PrintConstraint pc : allConstraints.values()) {
 
-    		case INIT: 
+            int ID = pc.getId();
+            Operation op = pc.getOp();
+            String value = pc.getActualVal();
+            printDebug("ID " + ID + " op " + op);
+            I_Inv_Constraint<T> newConstraint;
 
-    			if (localDebug) {
-    				System.out.println("processed " + op.toString() + "  " + pc.getId());
-    			} 
-    			
-   			
-    			break;
+            switch (op) {
 
-    		case INIT_CON: 
+                case INIT:
 
-    			newConstraint = new InvConstraintConcreteValue<T>(ID,invSolver);
-    			allInverseConstraints.put(ID, newConstraint);
-    			
-    			if (localDebug) {
-    				System.out.println("processed " + op.toString() + "  " + pc.getId());
-    			}
-
-    			break;
-
-    		case INIT_SYM:
-
-    			newConstraint = new InvConstraintInput<T>(ID,invSolver);
-    			allInverseConstraints.put(ID, newConstraint);
-    			
-    			if (localDebug) {
-    				System.out.println("processed " + op.toString() + "  " + pc.getId());
-    			}
-
-    			break;
-
-    		case PREDICATE:
-
-				boolean result = value.equals("true")? true : false;
-    			newConstraint = new InvConstraintPredicate<T>(ID,invSolver, result);
-    			allInverseConstraints.put(ID, newConstraint);
-    			
-    			if (localDebug) {
-    				System.out.println("processed " + op.toString() + "  " + pc.getId());
-    			}
-
-    			break;
-    			
-    		case EQUALS:
-    			boolean output = value.equals("true")? true : false;
-    			newConstraint = new InvConstraintEquals<T>(ID,invSolver, output);
-    			allInverseConstraints.put(ID, newConstraint);
-    			
-    			if (localDebug) {
-    				System.out.println("processed " + op.toString() + "  " + pc.getId());
-    			}
-
-    			break;
-    			
-    		case PROPAGATION:
-
-    			newConstraint = new InvConstraintPropagation<T>(ID,invSolver);
-    			allInverseConstraints.put(ID, newConstraint);
-    			
-    			if (localDebug) {
-    				System.out.println("processed " + op.toString() + "  " + pc.getId());
-    			}
-
-    			break;
-
-    		case CONCAT_SYM:
-
-    			newConstraint = new InvConstraintConcatSym<T>(ID,invSolver);
-    			allInverseConstraints.put(ID, newConstraint);
-    			
-    			if (localDebug) {
-    				System.out.println("processed " + op.toString() + "  " + pc.getId());
-    			}
-
-    			break;
-
-    		case CONCAT_CON:
-
-    			// FIX 
-    			// **** Using symbolic code for now, needs concrete ported to r3
-    			newConstraint = new InvConstraintConcatSym<T>(ID,invSolver);
-    			allInverseConstraints.put(ID, newConstraint);
-    			
-    			if (localDebug) {
-    				System.out.println("processed " + op.toString() + "  " + pc.getId());
-    			}
-
-    			break;	
-
-    		case TOUPPERCASE:
-    			
-       			newConstraint = new InvConstraintToUpperCase<T>(ID,invSolver);
-    			allInverseConstraints.put(ID, newConstraint);
-    			
-    			if (localDebug) {
-    				System.out.println("processed " + op.toString() + "  " + pc.getId());
-    			}
-
-    			break;    	
-
-    		case TOLOWERCASE:
-
-    			newConstraint = new InvConstraintToLowerCase<T>(ID,invSolver);
-    			allInverseConstraints.put(ID, newConstraint); 
-    			
-    			if (localDebug) {
-    				System.out.println("processed " + op.toString() + "  " + pc.getId());
-    			}
-
-    			break; 
-
-    		case SUBSTR_STRT_END:
-    			
-    			args = pc.getArgList();
-    			newConstraint = new InvConstraintSubStringStartEnd<T>(ID,invSolver,args);
-    			allInverseConstraints.put(ID, newConstraint);
-    			
-    			if (localDebug) {
-    				System.out.println("processed " + op.toString() + "  " + pc.getId());
-    			}
-    			
-    			break; 
-    			
-    		case SET_LENGTH:
-    			
-    			args = pc.getArgList();
-    			newConstraint = new InvConstraintSetLength<T>(ID,invSolver,args);
-    			allInverseConstraints.put(ID, newConstraint);
-    			
-    			if (localDebug) {
-    				System.out.println("processed " + op.toString() + "  " + pc.getId());
-    			}
-    			
-    			break; 
-
-    		case SUBSTRING_START:
-    			
-    			args = pc.getArgList();
-    			newConstraint = new InvConstraintSubStringStart<T>(ID,invSolver,args);
-    			allInverseConstraints.put(ID, newConstraint);
-    			
-    			if (localDebug) {
-    				System.out.println("processed " + op.toString() + "  " + pc.getId());
-    			}
-    			
-    			break; 
-    			
-    			
-    		case DELETE_START_END:
-    			
-    			args = pc.getArgList();
-    			newConstraint = new InvConstraintDeleteStartEnd<T>(ID,invSolver,args);
-    			allInverseConstraints.put(ID, newConstraint);
-    			
-    			if (localDebug) {
-    				System.out.println("processed " + op.toString() + "  " + pc.getId());
-    			}
-
-    			break; 
-
-    		case DELETE_CHAR_AT:
-
-    			args = pc.getArgList();
-    			newConstraint = new InvConstraintDeleteCharAt<T>(ID,invSolver,args);
-    			allInverseConstraints.put(ID, newConstraint);
-    			
-    			if (localDebug) {
-    				System.out.println("processed " + op.toString() + "  " + pc.getId());
-    			}
-    			
-    			break; 
-
-    		case REPLACE_CHAR_CHAR:
-
-    			args = pc.getArgList();
-    			newConstraint = new InvConstraintReplaceCharChar<T>(ID,invSolver,args);
-    			allInverseConstraints.put(ID, newConstraint);
-    			
-    			if (localDebug) {
-    				System.out.println("processed " + op.toString() + "  " + pc.getId() + " " + args);
-    			}
-    			
-    			break; 
-
-    		default:
-    			
-    			if (localDebug) {
-    				System.out.println("WARNING: Unhandled constraint type... " + op.toString() + "  " + pc.getId() + "  " + pc.getValue());
-    			}
-    			
-    			
-    		} // end switch
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
 
 
-    	} // end for each printconstraint
+                    break;
+
+                case INIT_CON:
+
+                    newConstraint = new InvConstraintConcreteValue<T>(ID, invSolver);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
+
+                    break;
+
+                case INIT_SYM:
+
+                    newConstraint = new InvConstraintInput<T>(ID, invSolver);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
+
+                    break;
+
+                case PREDICATE:
+
+                    boolean result = value.equals("true") ? true : false;
+                    newConstraint = new InvConstraintPredicate<T>(ID, invSolver, result);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
+
+                    break;
+
+                case EQUALS:
+                    boolean output = value.equals("true") ? true : false;
+                    newConstraint = new InvConstraintEquals<T>(ID, invSolver, output);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
+
+                    break;
+
+                case PROPAGATION:
+
+                    newConstraint = new InvConstraintPropagation<T>(ID, invSolver);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
+
+                    break;
+
+                case CONCAT_SYM:
+
+                    newConstraint = new InvConstraintConcatSym<T>(ID, invSolver);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
+
+                    break;
+
+                case CONCAT_CON:
+
+                    // FIX
+                    // **** Using symbolic code for now, needs concrete ported to r3
+                    newConstraint = new InvConstraintConcatSym<T>(ID, invSolver);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
+
+                    break;
+
+                case TOUPPERCASE:
+
+                    newConstraint = new InvConstraintToUpperCase<T>(ID, invSolver);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
+
+                    break;
+
+                case TOLOWERCASE:
+
+                    newConstraint = new InvConstraintToLowerCase<T>(ID, invSolver);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
+
+                    break;
+
+                case SUBSTR_STRT_END:
+
+                    args = pc.getArgList();
+                    newConstraint = new InvConstraintSubStringStartEnd<T>(ID, invSolver, args);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
+
+                    break;
+
+                case SET_LENGTH:
+
+                    args = pc.getArgList();
+                    newConstraint = new InvConstraintSetLength<T>(ID, invSolver, args);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
+
+                    break;
+
+                case SUBSTRING_START:
+
+                    args = pc.getArgList();
+                    newConstraint = new InvConstraintSubStringStart<T>(ID, invSolver, args);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
+
+                    break;
 
 
-    	// all inverse constraints have been created, now we set the next and arg constraint references
-    	for (PrintConstraint pc : allConstraints.values()) {
+                case DELETE_START_END:
 
-    		if (pc.getOp() != Operation.UNDEFINED) {
-    			    		// each print constraint has a corresponding inverse constraint, get a reference to it
-    		I_Inv_Constraint<T> invConstraint = allInverseConstraints.get(pc.getId());
-    	   	
-    		// the next inverse constraint to evaluate is the base of printconstraint
-    		I_Inv_Constraint<T> nextConstraint = allInverseConstraints.get(pc.getBase());
-    		if (nextConstraint != null) {
-    			invConstraint.setNext(nextConstraint);
-    		}
-    		
-    		
-    		// get the arglist and check if not empty
-    		List<Integer> argList = pc.getArgList();
+                    args = pc.getArgList();
+                    newConstraint = new InvConstraintDeleteStartEnd<T>(ID, invSolver, args);
+                    allInverseConstraints.put(ID, newConstraint);
 
-    		
-    		// MJR some operations only have concrete arguments and the value in args are the actual values and NOT constraint IDs. 
-    		if (!argList.isEmpty() && pc.getOp() != Operation.SUBSTR_STRT_END && 
-    				pc.getOp() != Operation.SUBSTRING_START && 
-    				pc.getOp() != Operation.SET_LENGTH && 
-    				pc.getOp() != Operation.REPLACE_CHAR_CHAR &&
-    				pc.getOp() != Operation.DELETE_START_END) {
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
+
+                    break;
+
+                case DELETE_CHAR_AT:
+
+                    args = pc.getArgList();
+                    newConstraint = new InvConstraintDeleteCharAt<T>(ID, invSolver, args);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
+
+                    break;
+
+                case REPLACE_CHAR_CHAR:
+
+                    args = pc.getArgList();
+                    newConstraint = new InvConstraintReplaceCharChar<T>(ID, invSolver, args);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId() + " " + args);
+                    }
+
+                    break;
+
+                default:
+
+                    if (localDebug) {
+                        System.out.println("WARNING: Unhandled constraint type... " + op.toString() + "  " + pc.getId() + "  " + pc.getValue());
+                    }
 
 
-    				// argument present, set invConstraint argument reference.
-    	 			int arg = argList.get(0);
-    	 			if (arg != -1) {
-    	 				
-    	    			if (localDebug) {
-    	    				System.out.println("pcID: " + pc.getId() + " getting arg: " + arg);
-    	    			}
-    	 				
-    	 				
-    	 				invConstraint.setArg(allInverseConstraints.get(arg));
-    	 			} // end if
+            } // end switch
 
-    	   		} // end if
-    		
-    		} // end if
-    		
-    	}  // end for each printconstraint
-    	
-    	//populate previous constraints -- need for BFS
-    	//get all parents for the particular node
-    	for(I_Inv_Constraint<T> p : allInverseConstraints.values()) {
-    		
-    		HashSet<I_Inv_Constraint<T>> invParents = new HashSet<I_Inv_Constraint<T>>();
-    		for(SymbolicEdge e : graph.outgoingEdgesOf(allConstraints.get(p.getID()))) {
-    			PrintConstraint source  = (PrintConstraint)e.getATarget();
-    			//add to p's incoming set
-    			I_Inv_Constraint<T> invSource = allInverseConstraints.get(source.getId());
-    			//it could be null since it has not been processed yet
-    			if(invSource != null) {
-    				invParents.add(allInverseConstraints.get(source.getId()));
-    			}
-    			
-    		}
-    		printDebug("Parents  "  + p + " are " + invParents);
-    		I_Inv_Constraint<T> invP = allInverseConstraints.get(p.getID());
-    		invP.setPrev(invParents);
-    	}
-    	
+
+        } // end for each printconstraint
+
+
+        // all inverse constraints have been created, now we set the next and arg constraint references
+        for (PrintConstraint pc : allConstraints.values()) {
+
+            if (pc.getOp() != Operation.UNDEFINED) {
+                // each print constraint has a corresponding inverse constraint, get a reference to it
+                I_Inv_Constraint<T> invConstraint = allInverseConstraints.get(pc.getId());
+
+                // the next inverse constraint to evaluate is the base of printconstraint
+                I_Inv_Constraint<T> nextConstraint = allInverseConstraints.get(pc.getBase());
+                if (nextConstraint != null) {
+                    invConstraint.setNext(nextConstraint);
+                }
+
+
+                // get the arglist and check if not empty
+                List<Integer> argList = pc.getArgList();
+
+
+                // MJR some operations only have concrete arguments and the value in args are the actual values and NOT constraint IDs.
+                if (!argList.isEmpty() && pc.getOp() != Operation.SUBSTR_STRT_END &&
+                        pc.getOp() != Operation.SUBSTRING_START &&
+                        pc.getOp() != Operation.SET_LENGTH &&
+                        pc.getOp() != Operation.REPLACE_CHAR_CHAR &&
+                        pc.getOp() != Operation.DELETE_START_END) {
+
+
+                    // argument present, set invConstraint argument reference.
+                    int arg = argList.get(0);
+                    if (arg != -1) {
+
+                        if (localDebug) {
+                            System.out.println("pcID: " + pc.getId() + " getting arg: " + arg);
+                        }
+
+
+                        invConstraint.setArg(allInverseConstraints.get(arg));
+                    } // end if
+//					if (pc.getOp() == Operation.REPLACE_CHAR_CHAR) {
+//						int arg2 = argList.get(1);
+//						if (arg2 != -1) {
+//							invConstraint.setArg2(allInverseConstraints.get(arg2));
+//						}
+//					}
+
+                } // end if
+
+            } // end if
+
+        }  // end for each printconstraint
+
+        //populate previous constraints -- need for BFS
+        //get all parents for the particular node
+        for (I_Inv_Constraint<T> p : allInverseConstraints.values()) {
+
+            HashSet<I_Inv_Constraint<T>> invParents = new HashSet<I_Inv_Constraint<T>>();
+            for (SymbolicEdge e : graph.outgoingEdgesOf(allConstraints.get(p.getID()))) {
+                PrintConstraint source = (PrintConstraint) e.getATarget();
+                //add to p's incoming set
+                I_Inv_Constraint<T> invSource = allInverseConstraints.get(source.getId());
+                //it could be null since it has not been processed yet
+                if (invSource != null) {
+                    invParents.add(allInverseConstraints.get(source.getId()));
+                }
+
+            }
+            printDebug("Parents  " + p + " are " + invParents);
+            I_Inv_Constraint<T> invP = allInverseConstraints.get(p.getID());
+            invP.setPrev(invParents);
+        }
+
     } // end buildICG_r3
-    
-    
-    
+
+
     /*
      * solves inputs after all forward analysis is complete
      */
-    protected void solveInputs () {
-        
-    	// output finalized inverse constraints for debug
+    protected void solveInputs() {
+
+        // output finalized inverse constraints for debug
         if (false) {
-        	System.out.println(cid);
-        	System.out.println(cid + "Inverse Constraint Set:");
-        	for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
-        		System.out.println(cid + c.toString() + "\t" + allConstraints.get(c.getID()).toString());
-        	}
-        	System.out.println(cid);
+            System.out.println(cid);
+            System.out.println(cid + "Inverse Constraint Set:");
+            for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
+                System.out.println(cid + c.toString() + "\t" + allConstraints.get(c.getID()).toString());
+            }
+            System.out.println(cid);
         }
-        
+
         long startTime = System.nanoTime();
-        
+
         // initialize our copy of the symbolic string map as it is right now
         invSolver.initStringMap();
-        
+
         // this treats all predicates as unrelated.
         // need to replace with queue and backtracking across predicates.
         for (Integer predicateID : predicateIDs) {
             // get a reference to the predicate inverse constraint
             I_Inv_Constraint<T> predicate = allInverseConstraints.get(predicateID);
-            
+
             // ********************************
             // The call that starts it all ....
             predicate.evaluate(null, 0);
             // ******************************** 
-            
+
         }
-    	
+
         long endTime = System.nanoTime();
-        
+
         long durationInNano = (endTime - startTime);
-        
+
         long durationInMillis = TimeUnit.NANOSECONDS.toMillis(durationInNano);
-        
-        for (I_Inv_Constraint<T> i : allInverseConstraints.values())  {
-        	if (i.getOp() == Operation.INIT_SYM) {
-        		if (i.getSolution() == null) {
-        			System.out.println("\nFAILURE: Failed to get solution to one or more inputs...");
-        			System.out.println("\nSOLUTION TIME ms: 0");
-        			return;
-        		}
-        	}
+
+        for (I_Inv_Constraint<T> i : allInverseConstraints.values()) {
+            if (i.getOp() == Operation.INIT_SYM) {
+                if (i.getSolution() == null) {
+                    System.out.println("\nFAILURE: Failed to get solution to one or more inputs...");
+                    System.out.println("\nSOLUTION TIME ms: 0");
+                    return;
+                }
+            }
         }
-        
+
         System.out.println("\nSOLUTION TIME ms: " + durationInMillis);
 
         for (I_Inv_Constraint<T> i : allInverseConstraints.values()) {
-        	if (i.getOp() == Operation.INIT_SYM) {
-        		T solution = i.getSolution();
+            if (i.getOp() == Operation.INIT_SYM) {
+                T solution = i.getSolution();
 
-        		// populate map for output to file/SPF
-        		inputSolution.put(i.getID(), solution);
+                // populate map for output to file/SPF
+                inputSolution.put(i.getID(), solution);
 
-				System.out.println(i.getID() + ": " + solution.getShortestExampleString());
+                System.out.println(i.getID() + ": " + solution.getShortestExampleString());
 
-        	}
+            }
         }
-        
-        
-    	
+
+
     }
 
     @Override

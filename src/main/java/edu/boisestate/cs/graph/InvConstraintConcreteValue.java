@@ -3,10 +3,7 @@
  */
 package edu.boisestate.cs.graph;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 //import edu.boisestate.cs.solvers.Solver_Inverse;
@@ -87,13 +84,22 @@ public class InvConstraintConcreteValue<T extends A_Model_Inverse<T>>  extends A
 		
 		T concrete = solver.getSymbolicModel(ID);
 		String test = concrete.getShortestExampleString();
-		Iterator<I_Inv_Constraint<T>> iter = prevConstraint.iterator();
+		Iterator<I_Inv_Constraint<T>> iter = (new ArrayList<>(prevConstraint)).iterator();
 		I_Inv_Constraint<T> prev = iter.next();
 		//System.out.println("prev " + prev);
+		//skip over replaceCC because it isnt formulated to include concrete outputs of its arguments
+		while (prev.getOp() == Operation.REPLACE_CHAR_CHAR) {
+			prev = iter.next();
+		}
+
 		T inputs = prev.output(this);
 		
 		while(iter.hasNext()) {
-				inputs = inputs.intersect(iter.next().output(this));
+			I_Inv_Constraint<T> nextC = iter.next();
+			// issue occurs because of way replaceCC outputSet is handled.
+			if (nextC.getOp() == Operation.REPLACE_CHAR_CHAR) continue;
+			T next = nextC.output(this);
+			inputs = inputs.intersect(next);
 		}
 
 		if (inputs == null || inputs.isEmpty()) {

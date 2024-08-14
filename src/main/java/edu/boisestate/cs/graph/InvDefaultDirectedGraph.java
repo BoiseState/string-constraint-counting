@@ -41,7 +41,7 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
 
         for (PrintConstraint s : vertexSet()) {
             // TODO: this will sometimes not identify the symbolic inputs
-            if (this.inDegreeOf(s) == 0 && s.getSplitValue().startsWith("r")) {
+            if (this.inDegreeOf(s) == 0 && (s.getSplitValue().startsWith("r") || s.getSplitValue().startsWith("$r"))) {
                 sources.add(s);
                 //System.out.println(s.getSplitValue());
             }

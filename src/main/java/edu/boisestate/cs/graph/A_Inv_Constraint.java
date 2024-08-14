@@ -30,6 +30,7 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 	protected int nextID = -1;
 	protected Set<Integer> prevIDs = new HashSet<Integer>();
 	protected int argID = -1;
+	protected int arg2ID = -1;
 	
 	public int fallbackCount = 0;
 	public int evaluateCount = 0;
@@ -39,6 +40,7 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 	protected Set<I_Inv_Constraint<T>> prevConstraint;
 	protected I_Inv_Constraint<T> nextConstraint;
 	protected I_Inv_Constraint<T> argConstraint;
+	protected I_Inv_Constraint<T> arg2Constraint;
 	
 	protected SolutionSetInternal<T> solutionSet;
 	
@@ -123,16 +125,19 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 
 	@Override
 	public void setNext(I_Inv_Constraint<T> constraint) {
-		
 		this.nextConstraint = constraint;
 		this.nextID = constraint.getID();
 	}
 	
 	@Override
 	public void setArg(I_Inv_Constraint<T> constraint) {
-		
 		this.argConstraint = constraint;
 		this.argID = constraint.getID();
+	}
+
+	public void setArg2(I_Inv_Constraint<T> constraint) {
+		this.arg2Constraint = constraint;
+		this.arg2ID = constraint.getID();
 	}
 
 	@Override

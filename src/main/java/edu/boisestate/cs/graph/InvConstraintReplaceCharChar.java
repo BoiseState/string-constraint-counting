@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import dk.brics.automaton.BasicAutomata;
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 import edu.boisestate.cs.solvers.*;
 import edu.boisestate.cs.util.Tuple;
@@ -117,7 +118,13 @@ public class InvConstraintReplaceCharChar<T extends A_Model_Inverse<T>> extends 
 				// halt solving, fallback
 				ret = new Tuple<Boolean,Boolean>(false, true);
 			} else {
-				outputSet.put(1, resModel);	
+				outputSet.put(1, resModel);
+				// for concrete values that are the find and replace we need to properly put those back
+				// so evaluate can grab from the output set
+//				T f = solver.modelManager.createString(Character.toString((char) find));
+//				T r = solver.modelManager.createString(Character.toString((char) replace));
+//				outputSet.put(2, f);
+//				outputSet.put(3, r);
 			}
 		}
 
