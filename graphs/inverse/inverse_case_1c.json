@@ -11,7 +11,7 @@
 			"sourceConstraints": [],
 			"timeStamp": 1482521433,
 			"type": 0,
-			"id": 5,
+			"id": 25,
 			"value": "r5!:!getStringValue!!"
 		},
 		{
@@ -39,7 +39,7 @@
 			"actualValue": "bb",
 			"incomingEdges": [
 				{
-					"source": 5,
+					"source": 25,
 					"type": "t"
 				},
 				{
@@ -60,7 +60,7 @@
 			"sourceConstraints": [],
 			"timeStamp": 1482521433,
 			"type": 0,
-			"id": 31,
+			"id": 40,
 			"value": "\"AA\"!:!<init>"
 		},
 		{
@@ -87,11 +87,11 @@
 			"actualValue": "true",
 			"incomingEdges": [
 				{
-					"source": 12,
+					"source": 212,
 					"type": "t"
 				},
 				{
-					"source": 31,
+					"source": 40,
 					"type": "s1"
 				}
 			],
@@ -106,14 +106,14 @@
 			"actualValue": "AA",
 			"incomingEdges": [
 				{
-					"source": 5,
+					"source": 25,
 					"type": "t"
 				}
 			],
 			"sourceConstraints": [],
 			"timeStamp": 1482521433,
 			"type": 0,
-			"id": 12,
+			"id": 212,
 			"value": "toUpperCase!!!:!0"
 		}
 

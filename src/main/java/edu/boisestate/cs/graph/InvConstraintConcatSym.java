@@ -22,6 +22,7 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 	//	private I_Inv_Constraint suffixConstraint;
 	//	private int suffixID;
 	//	private boolean initialized = false;
+	//this in not for BFS as Marlin done origianlly
 	private List<Tuple<T,T>> outputs;
 	//	private T inputModel;
 	// private int input, arg, base;
