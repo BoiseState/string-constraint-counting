@@ -261,6 +261,10 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
             return new Model_Acyclic_Inverse(BasicAutomata.makeEmpty(), alphabet, 0);
         }
 
+        if (notContainedModel.isSingleton() && notContainedModel.boundLength > this.boundLength) { // if contained is longer than this then impossible to be contained
+            return this;
+        }
+
         notContained = getRequiredCharAutomaton(notContained, alphabet, boundLength);
 
         Automaton result = automaton;
