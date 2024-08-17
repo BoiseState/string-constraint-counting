@@ -267,7 +267,7 @@ public abstract class A_Model <T extends A_Model <T>> implements Cloneable, I_Mo
         }
 
         // if no required single characters
-        if (requiredCharMap.isEmpty()) {
+        if (requiredCharMap.isEmpty() || accept < 0) {
             return BasicAutomata.makeEmpty();
         }
 
@@ -278,8 +278,11 @@ public abstract class A_Model <T extends A_Model <T>> implements Cloneable, I_Mo
         // create required char automaton
         int length = boundLength;
         if (accept >= 0) {
-            length = accept + 1;
-        }
+           length = accept + 1;
+        } // if accept state wasn't found within bound length then return automaton
+//        else {
+//            return BasicAutomata.makeEmpty();
+//        }
         for (int i = 0; i < length; i ++) {
             // create new destination state
             State dest = new State();

@@ -246,7 +246,7 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 //								System.out.println("inpu12Copy " + input2Copy.getFiniteStrings());
 								mapInOut.put(input1, currOutput);
 							}
-							System.out.println("map1 : " /* + mapInOut*/);
+							printDebug("map1 : " /* + mapInOut*/);
 							if(mapInOut.isEmpty()) {
 								partition++;
 							}
@@ -265,7 +265,7 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 //								System.out.println("inpu2 " + input2.getFiniteStrings());
 								mapInOut.put(input1Copy, currOutput);
 							}
-							System.out.println("map2 : " /* + mapInOut*/);
+							printDebug("map2 : " /* + mapInOut*/);
 
 							//case 3 intersection
 							//when a string is present in both sets
@@ -342,7 +342,7 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 
 						//if both have no common strings: intersection is empty
 						boolean common = !solver.intersect(inputs, argID).isEmpty();
-						System.out.println("Target and args have common strings? " + common);
+						printDebug("Target and args have common strings? " + common);
 
 						//if no common string then propagate them both up
 						if(!common) { //turn back to !common after done debugging
@@ -380,7 +380,7 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 								input2.minus(input1);
 							}
 
-													System.out.println("target: " + input1.getFiniteStrings() + "\targ: " +
+													printDebug("target: " + input1.getFiniteStrings() + "\targ: " +
 															input2.getShortestExampleString());
 							//send them up
 							outputSet.put(1, input1);

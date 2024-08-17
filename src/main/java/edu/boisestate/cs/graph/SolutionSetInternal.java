@@ -5,6 +5,7 @@ package edu.boisestate.cs.graph;
 
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
@@ -16,6 +17,7 @@ import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 
 	Map<Integer,T> solutions;
+	HashSet<T> sols;
 	int ID;
 	
 	/**
@@ -27,6 +29,7 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 	public SolutionSetInternal (int ID) {
 		
 		this.ID = ID;
+		sols = new HashSet<>();
 		solutions = new HashMap<Integer,T>();
 	}
 	
@@ -36,20 +39,28 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 	 * @param solution - Automata solution
 	 */
 	public void setSolution (Integer incomingEdge, T solution) {
-		
+
 		solutions.put(incomingEdge, solution);
 	}
-	
+
+	public void addSolution(T solution) {
+		sols.add(solution);
+	}
+
+	public void remSolution(T solution) {
+		sols.remove(solution);
+	}
+
 	/**
 	 * Removes a solution from solutions set
 	 * @param incomingEdge - ID of incoming edge
 	 */
 	public boolean remSolution (Integer incomingEdge) {
-		
+
 		if (solutions.containsKey(incomingEdge)) {
 			solutions.remove(incomingEdge);
 			return true;
-		} 
+		}
 		return false;
 	}
 	
@@ -59,7 +70,7 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 	 * @return Automata solution for single incoming edge
 	 */
 	public T getSolution (Integer incomingEdge) {
-		
+
 		if (solutions.containsKey(incomingEdge)) {
 			return solutions.get(incomingEdge);
 		}
@@ -74,13 +85,23 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 		
 		T firstSolution = null;
 		
-		for (Integer ID: solutions.keySet()) {
-			T thisSolution = solutions.get(ID);
+//		for (Integer ID: solutions.keySet()) {
+//			T thisSolution = solutions.get(ID);
+//			if (thisSolution != null) {
+//				if (firstSolution == null) {
+//					firstSolution = thisSolution.clone();
+//				} else {
+//					firstSolution = firstSolution.intersect(thisSolution);
+//				}
+//			}
+//		}
+
+		for (T thisSolution: sols) {
 			if (thisSolution != null) {
 				if (firstSolution == null) {
 					firstSolution = thisSolution.clone();
 				} else {
-					firstSolution = firstSolution.intersect(thisSolution);	
+					firstSolution = firstSolution.intersect(thisSolution);
 				}
 			}
 		}
@@ -94,25 +115,27 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 	 */
 	public boolean isConsistent() {
 		
-		System.out.println("CHECKING CONSISTENCY - SOLUTIONS PRESENT: " + solutions.size());
+//		System.out.println("CHECKING CONSISTENCY - SOLUTIONS PRESENT: " + solutions.size());
 		
-		if (solutions.size() == 0) {
+		if (sols.isEmpty()) {
 			return false;
 		}
 		
-		T firstSolution = null;
-		
-		for (Integer ID: solutions.keySet()) {
-			T thisSolution = solutions.get(ID);
-			if (thisSolution != null) {
-				if (firstSolution == null) {
-					firstSolution = thisSolution;
-				} else {
-					firstSolution = firstSolution.intersect(thisSolution);	
-				}
-			}
-		}
-		
+//		T firstSolution = null;
+//
+//		for (Integer ID: solutions.keySet()) {
+//			T thisSolution = solutions.get(ID);
+//			if (thisSolution != null) {
+//				if (firstSolution == null) {
+//					firstSolution = thisSolution;
+//				} else {
+//					firstSolution = firstSolution.intersect(thisSolution);
+//				}
+//			}
+//		}
+
+		T firstSolution = getSolution();
+
 		if (firstSolution != null) {
 			if (firstSolution.isEmpty()) {
 				return false;

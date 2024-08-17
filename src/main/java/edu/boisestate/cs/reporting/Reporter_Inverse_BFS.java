@@ -210,6 +210,9 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 					T prev = inputSolution.get(i.getID());
 					solution = prev.intersect(solution);
 				}
+				if (solution.isEmpty()) {
+					printDebug("INPUT SOLUTION SET INCONSISTENT: " + i.getID());
+				}
 				inputSolution.put(i.getID(), solution);
 
 				printDebug(i.getID() + ": " + solution.getShortestExampleString());

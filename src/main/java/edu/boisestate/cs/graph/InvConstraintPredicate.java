@@ -115,13 +115,12 @@ public class InvConstraintPredicate<T extends A_Model_Inverse<T>> extends A_Inv_
         printDebug("EVALUATE PREDICATE " + ID + " ...");
 
         // nps - 8.9.24 - isEmpty predicate is not handled. also it seems like result is not checked?
-        // i think there is potentially only contains and isEmpty predicates other than equals which is already
-        // properly handled
+        // i think there is potentially only contains and isEmpty predicates other than equals which is handled seperately
 
 //		System.out.format("\nBFS EVALUATE PREDICATE %d ...\n",ID);
         Tuple<Boolean, Boolean> ret = new Tuple<Boolean, Boolean>(true, true);
         //T predicateResult = solver.getSymbolicModel(ID);
-        T predicateResult = solver.getSymbolicModel(nextConstraint.getID());
+        T predicateResult = solver.getSymbolicModel(nextConstraint.getID()); // forward result from target constraint
 //	System.out.println("solver " + solver);
         //System.out.println("nextConstr " + nextConstraint.getID());
         //System.out.println("predicate " + predicateResult.getFiniteStrings());
@@ -149,7 +148,7 @@ public class InvConstraintPredicate<T extends A_Model_Inverse<T>> extends A_Inv_
                     indxSymb = 2;
                     indxConcr = 1;
                 }
-                printDebug("arg " + (this.argConstraint == null ? null : this.argConstraint.getOp()));
+                printDebug("arg " + (this.argConstraint == null ? null : this.argConstraint.getOp())); // arg null for isEmpty for example
                 printDebug("oper " + this.nextConstraint.getOp());
 //		System.out.println("arg " + (this.argConstraint==null? null : this.argConstraint.getOp()));
 //		System.out.println("oper " + this.nextConstraint.getOp());

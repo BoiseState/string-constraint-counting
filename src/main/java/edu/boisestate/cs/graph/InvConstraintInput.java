@@ -105,14 +105,14 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 //			//solutionSet.set(solution, solutionIndex);
 //		}
 		
-		System.out.format("SETTING INPUT %d INCOMING EDGE %d\n", ID, inputConstraint.getID());
-		solutionSet.setSolution(inputConstraint.getID(), solution);
-		
-		if (!solutionSet.isConsistent()) {
-			System.out.println("      solution set " + this.ID + " not consistent, falling back ...");
-			solutionSet.remSolution(inputConstraint.getID());
-			return false;
-		}
+//		System.out.format("SETTING INPUT %d INCOMING EDGE %d\n", ID, inputConstraint.getID());
+//		solutionSet.setSolution(inputConstraint.getID(), solution);
+//
+//		if (!solutionSet.isConsistent()) {
+//			System.out.println("      solution set " + this.ID + " not consistent, falling back ...");
+//			solutionSet.remSolution(inputConstraint.getID());
+//			return false;
+//		}
 		
 		//if (debug) {
 			System.out.println("      solution set " + ID + " consistent ...");
@@ -142,6 +142,7 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 		//if consistent
 		if(!inputs.isEmpty()) {
 			printDebug("DEBUG " + op.toString() + " " + ID);
+			printDebug("Current SOLUTION: " + inputs.getShortestExampleString());
 
 //    		BigInteger oneHundred = new BigInteger("300");
 //
@@ -154,7 +155,19 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 ////    			}
 //    		System.out.println();
 //    		}
-    		this.outputSet.put(0, inputs);
+
+			printDebug("Setting new found solution for input " + ID + " of " + inputs.getShortestExampleString());
+			solutionSet.addSolution(inputs);
+
+			if (!solutionSet.isConsistent()) {
+				printDebug("Solution set " + this.ID + " not consistent, falling back ...");
+				solutionSet.remSolution(inputs);
+				ret = new Tuple<>(false, true); //backtrack as solution for input for currentbackprop not consistent with a previous solution
+				// TODO: does not backtrack to previous run
+			} else {
+				this.outputSet.put(0, inputs);
+			}
+
 		} else {
 			//solution not consistent, then backtrack
 			ret = new Tuple<Boolean, Boolean> (false, true);

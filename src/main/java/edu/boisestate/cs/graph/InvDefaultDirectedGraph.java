@@ -16,6 +16,8 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
     private Map<Integer, Set<Integer>> predDependID;
     private ArrayList<PrintConstraint> necessaryPredicates = new ArrayList<>();
     private HashSet<PrintConstraint> sources = new HashSet<>();
+    private Map<Integer, Set<Integer>> symDepend = new HashMap<Integer, Set<Integer>>(); // map of predicates and the symbolics in their ancestors...
+    private Map<Integer, Set<Integer>> dependSym = new HashMap<Integer, Set<Integer>>(); // map of symbolics and the predicates that depend on them...
 
     public InvDefaultDirectedGraph(Class<? extends SymbolicEdge> edgeClass) {
         super(edgeClass);
@@ -79,6 +81,8 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
         }
 
         findNecessaryPredicates();
+        makeSymDepend();
+        makeDependSym();
 
 //		//resulting map
 //		for(Entry<PrintConstraint, Set<PrintConstraint>> e : predDepend.entrySet()) {
@@ -193,6 +197,31 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
             }
         }
         return false;
+    }
+
+    // get each predicate and the symbolics that it has as ancestors
+    private void makeSymDepend() {
+        for (PrintConstraint p : predDepend.keySet()) {
+            Set<Integer> symSet = new HashSet<Integer>();
+            for (int a : getAncestors(p)) {
+                if (sources.contains(getConstraint(a))) {
+                    symSet.add(a);
+                }
+            }
+            symDepend.put(p.getId(), symSet);
+        }
+    }
+
+    private void makeDependSym() {
+        for (PrintConstraint s : sources) {
+            dependSym.put(s.getId(), new HashSet<>());
+        }
+        for (Entry<Integer, Set<Integer>> e : symDepend.entrySet()) {
+            for (Integer sym : e.getValue()) {
+                dependSym.get(sym).add(e.getKey());
+            }
+
+        }
     }
 
 }

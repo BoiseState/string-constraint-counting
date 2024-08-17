@@ -282,7 +282,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
         //invSolver.initStringMap();
         //invSolver.initStringMapAccum();
         // we will rebuild all constraints, since this is a new path
-        allInverseConstraints.clear();
+//        allInverseConstraints.clear();
 
         // clear previous input solutions
         //inputSolutions.clear();
@@ -304,7 +304,10 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
         processIt.remove();
 
         // build the transposed graph of inverse constraints
-        buildICG_r3();
+        if (build) {
+            buildICG_r3();
+            build = false; // only building once and keeping the inverse constaints from before, which may be wrong
+        }
 
         if (debug) {
             for (I_Inv_Constraint<T> con : allInverseConstraints.values()) {
