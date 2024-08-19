@@ -820,7 +820,7 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 
 	/**
 	 * Given a regex and a replacement String, iterate through all possible
-	 * solutions of the target automaton. For each solution, run
+	 * solutions of the target automaton. For each example, run
 	 * String.replaceFirst(regex, String). Convert this String into an automaton,
 	 * then union said automaton with the result automaton. Return the final
 	 * automaton.
@@ -837,7 +837,7 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 			return new Model_Acyclic(this.automaton, this.alphabet, this.boundLength);
 		// start with an empty automaton
 		Automaton result = Automaton.makeEmpty();
-		// for each solution, replace the first occurrence of the regex and concatenate
+		// for each example, replace the first occurrence of the regex and concatenate
 		// it with the result automaton
 		for (String str : solutions) {
 			Automaton a = BasicAutomata.makeString(str.replaceFirst(regexString, replacement));
@@ -859,7 +859,7 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 			return new Model_Acyclic(this.automaton, this.alphabet, this.boundLength);
 		// start with an empty automaton
 		Automaton result = Automaton.makeEmpty();
-		// for each solution, replace the first occurrence of the regex and concatenate
+		// for each example, replace the first occurrence of the regex and concatenate
 		// it with the result automaton
 		for (String str : solutions) {
 			Automaton a = BasicAutomata.makeString(str.replaceAll(regexString, replacement));
@@ -930,12 +930,12 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 							stateStack.push(targetState);
 							while (true) {
 								transition = null;
-								// if there is a further solution, update parent variables
+								// if there is a further example, update parent variables
 								if (subRegexState.isAccept()) {
 									targetState = subTargetState;
 									prefix.append(subPrefix.toString());
 									subPrefix.delete(0, subPrefix.length());
-									// find out if there is an even further solution
+									// find out if there is an even further example
 									for (Transition subT : subTargetState.getTransitions()) {
 										for (Transition subR : subRegexState.getTransitions()) {
 											transition = getSharedTransition(subT, subR);
@@ -952,7 +952,7 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 									if (transition == null)
 										break;
 								} else {
-									// if current state is not a solution, find out if there is a potential further
+									// if current state is not a example, find out if there is a potential further
 									// path
 									for (Transition subT : subTargetState.getTransitions()) {
 										for (Transition subR : subRegexState.getTransitions()) {
@@ -1120,12 +1120,12 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 							stateStack.push(targetState);
 							while (true) {
 								transition = null;
-								// if there is a further solution, update parent variables
+								// if there is a further example, update parent variables
 								if (subRegexState.isAccept()) {
 									targetState = subTargetState;
 									prefix.append(subPrefix.toString());
 									subPrefix.delete(0, subPrefix.length());
-									// find out if there is an even further solution
+									// find out if there is an even further example
 									for (Transition subT : subTargetState.getTransitions()) {
 										for (Transition subR : subRegexState.getTransitions()) {
 											transition = getSharedTransition(subT, subR);
@@ -1142,7 +1142,7 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 									if (transition == null)
 										break;
 								} else {
-									// if current state is not a solution, find out if there is a potential further
+									// if current state is not a example, find out if there is a potential further
 									// path
 									for (Transition subT : subTargetState.getTransitions()) {
 										for (Transition subR : subRegexState.getTransitions()) {

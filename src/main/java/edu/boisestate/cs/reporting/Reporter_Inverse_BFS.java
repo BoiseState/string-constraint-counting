@@ -190,33 +190,47 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 			I_Inv_Constraint<T> i = allInverseConstraints.get(id);
 			if (i.getOp() == Operation.INIT_SYM) {
 				if (i.output(0) == null || i.output(0).isEmpty()) {
-					printDebug("FAILURE: Failed to get solution to one or more inputs...");
+					printDebug("FAILURE: Failed to get example to one or more inputs...");
 					inputSolution.remove(i.getID());
 					return;
 				}
 			}
 		}
 
-		printDebug("\nSOLUTION TIME ms: " + durationInMillis);
+		printDebug("\nSOLUTION TIME FOR LAST BACKPROP ms: " + durationInMillis);
 
 		//for (I_Inv_Constraint<T> i : allInverseConstraints.values()) {
-		for(int id : processedID) {
+		// debug branch so don't loop for now reason ....
+		if (debug) { // nps 8.19.24 example consistency is now checked when solving an input constraint
+			printDebug("INPUT SOLUTIONS FOUND:");
+			for (int id : processedID) {
+				I_Inv_Constraint<T> i = allInverseConstraints.get(id);
+				if (i.getOp() == Operation.INIT_SYM) {
+					T solution = i.getSolution();
+//				T example = i.output(0);//symbolic nodes hold their example in the output values
+
+					// populate map for output to file/SPF
+//				if (inputSolution.get(i.getID()) != null) {
+//					T prev = inputSolution.get(i.getID());
+//					example = prev.intersect(example);
+//				}
+					if (solution.isEmpty()) { // should never happen
+						printDebug("INPUT SOLUTION SET INCONSISTENT: " + i.getID());
+					}
+//				inputSolution.put(i.getID(), example);
+
+					printDebug(i.getID() + ": " + solution.getShortestExampleString());
+
+				}
+			}
+		}
+
+		/// nps - here the solutions are added to the actual solution set after a backpropagation occurs
+		for (int id : processedID) {
 			I_Inv_Constraint<T> i = allInverseConstraints.get(id);
 			if (i.getOp() == Operation.INIT_SYM) {
-				T solution = i.output(0);//symbolic nodes hold their solution in the output values
-
-				// populate map for output to file/SPF
-				if (inputSolution.get(i.getID()) != null) {
-					T prev = inputSolution.get(i.getID());
-					solution = prev.intersect(solution);
-				}
-				if (solution.isEmpty()) {
-					printDebug("INPUT SOLUTION SET INCONSISTENT: " + i.getID());
-				}
-				inputSolution.put(i.getID(), solution);
-
-				printDebug(i.getID() + ": " + solution.getShortestExampleString());
-
+				T solution = i.getSolution();
+				solutions.add(id, solution);
 			}
 		}
 

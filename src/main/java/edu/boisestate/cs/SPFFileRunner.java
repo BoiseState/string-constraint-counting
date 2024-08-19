@@ -69,7 +69,7 @@ public class SPFFileRunner {
 		
 		run_Acyclic_Inverse(graph);
 		
-		// add code to open solution file, populate SPFsym with SPF symbolic string matching ID
+		// add code to open example file, populate SPFsym with SPF symbolic string matching ID
         // create json object mapper
         ObjectMapper mapper = new ObjectMapper();
   		mapper.enable(SerializationFeature.INDENT_OUTPUT);

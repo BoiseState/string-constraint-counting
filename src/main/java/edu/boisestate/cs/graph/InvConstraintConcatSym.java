@@ -132,7 +132,7 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 		} else {
 
 			//System.out.println("inputs " + inputs.getFiniteStrings());
-			//remove one solution from the inputs
+			//remove one example from the inputs
 			T input = ostrich? inputs : inputs.getShortestExampleModel();
 //			System.out.println("input " + input.getFiniteStrings() + " hash " + input.hashCode());
 			List<Tuple<T,T>> currOutput = new ArrayList<Tuple<T,T>>();

@@ -40,37 +40,37 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 	}
 	
 	
-	public InvConstraintInput (int ID, Solver_Inverse<T> solver, List<Integer> args, SolutionSet<T> solutionSet) {
-		
-		// Store reference to solver
-		this.solver = solver;
-		this.ID = ID;
-		this.argList = args;
-		this.op  = Operation.INPUT;
-		this.argString = "[NONE]";
-		//this.solutionSet = solutionSet;
-	}
-	
-	public InvConstraintInput (int ID, Solver_Inverse<T> solver, List<Integer> args, SolutionSet<T> solutionSet, int base, int input) {
-		
-		// Store reference to solver
-		this.solver = solver;
-		this.ID = ID;
-		this.argList = args;
-		this.op  = Operation.INPUT;
-		this.argString = "[NONE]";
-		//this.solutionSet = solutionSet;
-		this.nextID = base;
-		this.prevIDs = new HashSet<Integer>(); prevIDs.add(input);
-		solver.duplicateString(args.get(0), ID);
-		solver.duplicateString(args.get(0), ID);
-	}
+//	public InvConstraintInput (int ID, Solver_Inverse<T> solver, List<Integer> args, SolutionSet<T> solutionSet) {
+//
+//		// Store reference to solver
+//		this.solver = solver;
+//		this.ID = ID;
+//		this.argList = args;
+//		this.op  = Operation.INPUT;
+//		this.argString = "[NONE]";
+//		//this.solutionSet = solutionSet;
+//	}
+//
+//	public InvConstraintInput (int ID, Solver_Inverse<T> solver, List<Integer> args, SolutionSet<T> solutionSet, int base, int input) {
+//
+//		// Store reference to solver
+//		this.solver = solver;
+//		this.ID = ID;
+//		this.argList = args;
+//		this.op  = Operation.INPUT;
+//		this.argString = "[NONE]";
+//		//this.solutionSet = solutionSet;
+//		this.nextID = base;
+//		this.prevIDs = new HashSet<Integer>(); prevIDs.add(input);
+//		solver.duplicateString(args.get(0), ID);
+//		solver.duplicateString(args.get(0), ID);
+//	}
 	
 	
 	@Override
 	public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex)  {
 		
-		//T solution = solver.getSymbolicModel(this.prevConstraint.getID());
+		//T example = solver.getSymbolicModel(this.prevConstraint.getID());
 		System.out.format("EVALUATE INPUT %d ...\n",ID);
 		T solution = inputConstraint.output(sourceIndex);
 		
@@ -84,14 +84,14 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
     			System.out.print("Too many values to output,  " + solution.modelCount() + "  example: ");
     			System.out.println(solution.getShortestExampleString());
     		} else {
-//    			for (String s : solution.getFiniteStrings()) {
+//    			for (String s : example.getFiniteStrings()) {
 //    				System.out.print(s + " ");
 //    			}
     		System.out.println();
     		}			
 			
 			
-//			for (String s : solution.getFiniteStrings()) {
+//			for (String s : example.getFiniteStrings()) {
 //				System.out.print(s + " ");
 //			}
 //			System.out.println();
@@ -100,22 +100,22 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 		}
 		
 //		if (solutionIndex == -1) {
-//			//solutionIndex = solutionSet.add(solution);
+//			//solutionIndex = solutionSet.add(example);
 //		} else { 
-//			//solutionSet.set(solution, solutionIndex);
+//			//solutionSet.set(example, solutionIndex);
 //		}
 		
 //		System.out.format("SETTING INPUT %d INCOMING EDGE %d\n", ID, inputConstraint.getID());
-//		solutionSet.setSolution(inputConstraint.getID(), solution);
+//		solutionSet.setSolution(inputConstraint.getID(), example);
 //
 //		if (!solutionSet.isConsistent()) {
-//			System.out.println("      solution set " + this.ID + " not consistent, falling back ...");
+//			System.out.println("      example set " + this.ID + " not consistent, falling back ...");
 //			solutionSet.remSolution(inputConstraint.getID());
 //			return false;
 //		}
 		
 		//if (debug) {
-			System.out.println("      solution set " + ID + " consistent ...");
+			System.out.println("      example set " + ID + " consistent ...");
 		//}
 		
 		return true;
@@ -156,23 +156,23 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 //    		System.out.println();
 //    		}
 
-			printDebug("Setting new found solution for input " + ID + " of " + inputs.getShortestExampleString());
+			printDebug("Setting new found example for input " + ID + " of " + inputs.getShortestExampleString());
 			solutionSet.addSolution(inputs);
 
 			if (!solutionSet.isConsistent()) {
-				printDebug("Solution set " + this.ID + " not consistent, falling back ...");
+				printDebug("Solution set " + ID + " not consistent, falling back ...");
 				solutionSet.remSolution(inputs);
-				ret = new Tuple<>(false, true); //backtrack as solution for input for currentbackprop not consistent with a previous solution
+				ret = new Tuple<>(false, true); //backtrack as example for input for currentbackprop not consistent with a previous example
 				// TODO: does not backtrack to previous run
 			} else {
 				this.outputSet.put(0, inputs);
 			}
 
 		} else {
-			//solution not consistent, then backtrack
+			//example not consistent, then backtrack
 			ret = new Tuple<Boolean, Boolean> (false, true);
-			printDebug("      solution set " + this.ID + " not consistent, falling back ...");
-//			System.out.println("      solution set " + this.ID + " not consistent, falling back ...");
+			printDebug("      example set " + this.ID + " not consistent, falling back ...");
+//			System.out.println("      example set " + this.ID + " not consistent, falling back ...");
 		}
 		return ret;//never backtrack here
 	}

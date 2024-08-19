@@ -41,7 +41,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Reporter that attempts to determine input solution for each predicate encountered.
+ * Reporter that attempts to determine input example for each predicate encountered.
  *
  * @param <T> - Automata model that implements inverse operations.
  * @author Marlin Roberts
@@ -54,13 +54,14 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
     protected Map<Integer, I_Inv_Constraint<T>> allInverseConstraints = new HashMap<>();
     //protected Map<Integer,SolutionSet<T>> inputSolutions = new HashMap<>();
     protected Map<Integer, T> inputSolution = new HashMap<>();
+    protected SolutionSet<T> solutions;
     protected Map<Integer, Integer> inputIndexes = new HashMap<>();
     protected List<Integer> predicateIDs = new ArrayList<>();
     private boolean saveResults = false;
     private String graphName;
     private String saveFile = "src\\test\\automata\\";
 
-    // temporary implementation of solution output to file
+    // temporary implementation of example output to file
     public String solutionFile = "./temp/solutions.txt";
 
     // prefix for output when running inside SPF
@@ -96,7 +97,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
     }
 
     /**
-     * sets save option for file output, used for getting solution back to SPF
+     * sets save option for file output, used for getting example back to SPF
      *
      * @param save - boolean true = save to file
      * @param name - filename
@@ -282,7 +283,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
         //invSolver.initStringMap();
         //invSolver.initStringMapAccum();
         // we will rebuild all constraints, since this is a new path
-//        allInverseConstraints.clear();
+        allInverseConstraints.clear();
 
         // clear previous input solutions
         //inputSolutions.clear();
@@ -303,9 +304,11 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
         // ------------------------
         processIt.remove();
 
+        buildICG_r3();
         // build the transposed graph of inverse constraints
         if (build) {
-            buildICG_r3();
+//            buildICG_r3();
+            solutions = new SolutionSet<>(((InvDefaultDirectedGraph) graph).getNumSymInputs());
             build = false; // only building once and keeping the inverse constaints from before, which may be wrong
         }
 
@@ -337,15 +340,15 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
         // check for SAT here ...
 
-        // TODO: consolidate solutions from inside sink nodes into a solution set
+        // TODO: consolidate solutions from inside sink nodes into a example set
         // then either output solutions or write them to a file
         // THIS CODE DOES NOT CURRENTLY DO ANYTHING ....
 
         // indicate if output going to file ..
 //        if (solutionFile != "") {
-//        	printDebug(cid + "Outputting to solution file: " + solutionFile);
+//        	printDebug(cid + "Outputting to example file: " + solutionFile);
 //
-//        	// Code to output json solution file here ...
+//        	// Code to output json example file here ...
 //        	// A set of SPF inputs
 //        	SPFInputSet SPFInputs = new SPFInputSet();
 //
@@ -386,45 +389,51 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
         // output all input solutions
 
         // ------------------------------------------------------------------------------------    	
-        // The input solution process stops here.
+        // The input example process stops here.
         // ------------------------------------------------------------------------------------
 
 
-        if (debug) { //printing of solutions done each iteration just print unsat/sat
-            if (toProcess.isEmpty()) {//processing is done
-                System.out.println("DONE PROCESSING\n");
-                if (inputSolution.size() != ((InvDefaultDirectedGraph) graph).getNumSymInputs()) {
-                    System.out.println("error in solutions set");
-                    System.out.println("expected: " + ((InvDefaultDirectedGraph) graph).getNumSymInputs());
-                    System.out.println("actual: " + inputSolution.size());
-                    for (Integer id : inputSolution.keySet()) {
-                        System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
-                    }
-                    System.out.println("unsat");
-                } else {
-                    System.out.println("sat,");
-                    for (Integer id : inputSolution.keySet()) {
-                        System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
-                    }
-                }
-            }
-        } else {
-            if (toProcess.isEmpty()) { //done
-                if (inputSolution.size() != ((InvDefaultDirectedGraph) graph).getNumSymInputs())
-                    System.out.println("unsat");
-                else {
-                    System.out.println("sat,");
-                    for (Integer id : inputSolution.keySet()) {
-                        System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
-                    }
-//					for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
-//						if (c.getOp() == Operation.INIT_SYM){
-//							System.out.println(c.getID() + ": \"" + c.output(0).getShortestExampleString() + "\"");
-//						}
-//					}
-                }
-            }
+        if (toProcess.isEmpty()) {
+            printDebug("DONE PROCESSING\n");
+            printDebug(solutions.toString());
+            System.out.println(solutions.getSolutions());
         }
+
+//        if (debug) { //printing of solutions done each iteration just print unsat/sat
+//            if (toProcess.isEmpty()) {//processing is done
+//                System.out.println("DONE PROCESSING\n");
+//                if (inputSolution.size() != ((InvDefaultDirectedGraph) graph).getNumSymInputs()) {
+//                    System.out.println("error in solutions set");
+//                    System.out.println("expected: " + ((InvDefaultDirectedGraph) graph).getNumSymInputs());
+//                    System.out.println("actual: " + inputSolution.size());
+//                    for (Integer id : inputSolution.keySet()) {
+//                        System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
+//                    }
+//                    System.out.println("unsat");
+//                } else {
+//                    System.out.println("sat,");
+//                    for (Integer id : inputSolution.keySet()) {
+//                        System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
+//                    }
+//                }
+//            }
+//        } else {
+//            if (toProcess.isEmpty()) { //done
+//                if (inputSolution.size() != ((InvDefaultDirectedGraph) graph).getNumSymInputs())
+//                    System.out.println("unsat");
+//                else {
+//                    System.out.println("sat,");
+//                    for (Integer id : inputSolution.keySet()) {
+//                        System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
+//                    }
+////					for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
+////						if (c.getOp() == Operation.INIT_SYM){
+////							System.out.println(c.getID() + ": \"" + c.output(0).getShortestExampleString() + "\"");
+////						}
+////					}
+//                }
+//            }
+//        }
 
 
     }
@@ -764,7 +773,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
         for (I_Inv_Constraint<T> i : allInverseConstraints.values()) {
             if (i.getOp() == Operation.INIT_SYM) {
                 if (i.getSolution() == null) {
-                    System.out.println("\nFAILURE: Failed to get solution to one or more inputs...");
+                    System.out.println("\nFAILURE: Failed to get example to one or more inputs...");
                     System.out.println("\nSOLUTION TIME ms: 0");
                     return;
                 }

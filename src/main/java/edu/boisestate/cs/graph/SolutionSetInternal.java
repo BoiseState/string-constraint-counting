@@ -21,8 +21,8 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 	int ID;
 	
 	/**
-	 * Constructs solution set for use inside an inverse constraint.
-	 * Maps incoming edge to solution.
+	 * Constructs example set for use inside an inverse constraint.
+	 * Maps incoming edge to example.
 	 * 
 	 * @param ID = Containing Inverse constraint ID.
 	 */
@@ -34,9 +34,9 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 	}
 	
 	/**
-	 * Sets a solution for an incoming edge ID
+	 * Sets a example for an incoming edge ID
 	 * @param incomingEdge - ID of incoming edge
-	 * @param solution - Automata solution
+	 * @param solution - Automata example
 	 */
 	public void setSolution (Integer incomingEdge, T solution) {
 
@@ -52,7 +52,7 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 	}
 
 	/**
-	 * Removes a solution from solutions set
+	 * Removes a example from solutions set
 	 * @param incomingEdge - ID of incoming edge
 	 */
 	public boolean remSolution (Integer incomingEdge) {
@@ -65,9 +65,9 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 	}
 	
 	/**
-	 * Gets a single solution for incoming edge ID
+	 * Gets a single example for incoming edge ID
 	 * @param incomingEdge ID
-	 * @return Automata solution for single incoming edge
+	 * @return Automata example for single incoming edge
 	 */
 	public T getSolution (Integer incomingEdge) {
 
@@ -79,7 +79,7 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 	
 	/**
 	 * Gets intersection of solutions for all incoming edges
-	 * @return Automata solution for all incoming edges
+	 * @return Automata example for all incoming edges
 	 */
 	public T getSolution () {
 		
@@ -159,7 +159,7 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 		fm.format("\nINPUT:      [%d]\n", ID);
 		fm.format("EDGES:      [%d]\n", solutions.size());
 		fm.format("CONSISTENT: [%s]\n", this.isConsistent() ? "YES" : "NO");
-//		fm.format("COUNT:      [%d]\n", solution.modelCount());
+//		fm.format("COUNT:      [%d]\n", example.modelCount());
 		fm.close();
 
 		return output.toString();

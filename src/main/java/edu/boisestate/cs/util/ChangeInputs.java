@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 /**
  * It takes two json files:
  * file1: constraint json file
- * file2: inverse solution json file
+ * file2: inverse example json file
  * It creates a copy of file1, where
  * the concrete values of the symbolic nodes
  * are substituded with the values from

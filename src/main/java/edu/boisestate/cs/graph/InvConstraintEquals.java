@@ -356,7 +356,7 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 
 							//TOD: an optimization where inputs, over which we iterate
 							//single values has the smallest number of strings in
-							//its solution set.
+							//its example set.
 
 							T input1 = inputs.getShortestExampleModel();
 							//remove it from the set

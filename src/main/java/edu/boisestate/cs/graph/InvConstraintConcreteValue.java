@@ -36,30 +36,30 @@ public class InvConstraintConcreteValue<T extends A_Model_Inverse<T>>  extends A
 	}
 	
 	
-	public InvConstraintConcreteValue (int ID, Solver_Inverse<T> solver, List<Integer> args, SolutionSet<T> solutionSet) {
-		
-		// Store reference to solver
-		this.solver = solver;
-		this.ID = ID;
-		this.argList = args;
-		this.op  = Operation.INIT_CON;
-		this.argString = "[NONE]";
-		//this.solutionSet = solutionSet;
-	}
-	
-	public InvConstraintConcreteValue (int ID, Solver_Inverse<T> solver, List<Integer> args, SolutionSet<T> solutionSet, int base, int input) {
-		
-		// Store reference to solver
-		this.solver = solver;
-		this.ID = ID;
-		this.argList = args;
-		this.op  = Operation.INIT_CON;
-		this.argString = "[NONE]";
-		//this.solutionSet = solutionSet;
-		this.nextID = base;
-		this.prevIDs = new HashSet<Integer>(); prevIDs.add(input);
-		solver.duplicateString(args.get(0), ID);
-	}
+//	public InvConstraintConcreteValue (int ID, Solver_Inverse<T> solver, List<Integer> args, SolutionSet<T> solutionSet) {
+//
+//		// Store reference to solver
+//		this.solver = solver;
+//		this.ID = ID;
+//		this.argList = args;
+//		this.op  = Operation.INIT_CON;
+//		this.argString = "[NONE]";
+//		//this.solutionSet = solutionSet;
+//	}
+//
+//	public InvConstraintConcreteValue (int ID, Solver_Inverse<T> solver, List<Integer> args, SolutionSet<T> solutionSet, int base, int input) {
+//
+//		// Store reference to solver
+//		this.solver = solver;
+//		this.ID = ID;
+//		this.argList = args;
+//		this.op  = Operation.INIT_CON;
+//		this.argString = "[NONE]";
+//		//this.solutionSet = solutionSet;
+//		this.nextID = base;
+//		this.prevIDs = new HashSet<Integer>(); prevIDs.add(input);
+//		solver.duplicateString(args.get(0), ID);
+//	}
 	
 	
 	@Override

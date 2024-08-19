@@ -1421,7 +1421,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 			//some states might become unreachable
 			//in the first/prefix one we just change what accepting states
 			//are, which can also change how equivalent states can be collapsed.
-			//So both of them needs to be minimized before adding the solution set
+			//So both of them needs to be minimized before adding the example set
 			prefixModel.automaton.minimize();
 			suffixModel.automaton.minimize();
 			//if the split on state s is feasible for both base and arg then
