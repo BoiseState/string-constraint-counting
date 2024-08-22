@@ -53,8 +53,8 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
     protected Map<Integer, PrintConstraint> allConstraints = new HashMap<>();
     protected Map<Integer, I_Inv_Constraint<T>> allInverseConstraints = new HashMap<>();
     //protected Map<Integer,SolutionSet<T>> inputSolutions = new HashMap<>();
-    protected Map<Integer, T> inputSolution = new HashMap<>();
-    protected SolutionSet<T> solutions;
+//    protected Map<Integer, T> inputSolution = new HashMap<>();
+//    protected SolutionSet<T> solutions;
     protected Map<Integer, Integer> inputIndexes = new HashMap<>();
     protected List<Integer> predicateIDs = new ArrayList<>();
     private boolean saveResults = false;
@@ -112,12 +112,12 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
      * called when forward analysis reaches predicate, computes stats and inputs
      */
     @Override
-    protected void calculateStats(PrintConstraint constraint) {
+    protected void calculateStats(PrintConstraint constraint) { // nps: constraint isn't actually used. backprop is all handled in BFS subclass
 
         // get constraint info as variables
 //        Map<String, Integer> sourceMap = constraint.getSourceMap();
 //        StringBuilder stats = new StringBuilder();
-        String actualVal = constraint.getActualVal();
+//        String actualVal = constraint.getActualVal();
 //        int base = sourceMap.get("t");
 //        long tTime, fTime, inMCTime, tMCTime, fMCTime = 0;
 
@@ -178,10 +178,10 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 //        solver.revertLastPredicate();
 
         // if actual execution did not produce either true or false
-        if (!actualVal.equals("true") && !actualVal.equals("false")) {
-            System.err.println("warning constraint detected without true/false value");
-            return;
-        }
+//        if (!actualVal.equals("true") && !actualVal.equals("false")) {
+//            System.err.println("warning constraint detected without true/false value");
+//            return;
+//        }
 
         // determine result of actual execution
 //        boolean result = true;
@@ -283,16 +283,16 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
         //invSolver.initStringMap();
         //invSolver.initStringMapAccum();
         // we will rebuild all constraints, since this is a new path
-        allInverseConstraints.clear();
+//        allInverseConstraints.clear();
 
         // clear previous input solutions
         //inputSolutions.clear();
 
         // save this predicate ID so we can grab the new inverse constraint
         // from the allInverseConstraints container later
-        int predID = constraint.getId();
+//        int predID = constraint.getId();
 
-        predicateIDs.add(predID);
+//        predicateIDs.add(predID);
 
         // this stops any backprop from happening until forward prop has finished
         // also currently only works on a necessary subset though the soundness should be confirmed
@@ -302,15 +302,15 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 //			return;
 //		}
         // ------------------------
-        processIt.remove();
+//        processIt.remove();
 
         buildICG_r3();
         // build the transposed graph of inverse constraints
-        if (build) {
-//            buildICG_r3();
-            solutions = new SolutionSet<>(((InvDefaultDirectedGraph) graph).getNumSymInputs());
-            build = false; // only building once and keeping the inverse constaints from before, which may be wrong
-        }
+//        if (build) {
+////            buildICG_r3();
+//            solutions = new SolutionSet<>(((InvDefaultDirectedGraph) graph).getNumSymInputs());
+//            build = false; // only building once and keeping the inverse constaints from before, which may be wrong
+//        }
 
         if (debug) {
             for (I_Inv_Constraint<T> con : allInverseConstraints.values()) {
@@ -388,16 +388,28 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
         // output all input solutions
 
+        for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
+            if (c.getOp() == Operation.INIT_SYM) {
+                if (c.getSolution() == null) {
+                    System.out.println("\nFAILURE: Failed to get example to one or more inputs...");
+                    System.out.println("\nSOLUTION TIME ms: 0");
+                    return;
+                } else {
+
+                }
+            }
+        }
+
         // ------------------------------------------------------------------------------------    	
         // The input example process stops here.
         // ------------------------------------------------------------------------------------
 
 
-        if (toProcess.isEmpty()) {
-            printDebug("DONE PROCESSING\n");
-            printDebug(solutions.toString());
-            System.out.println(solutions.getSolutions());
-        }
+//        if (toProcess.isEmpty()) {
+//            printDebug("DONE PROCESSING\n");
+//            printDebug(solutions.toString());
+//            System.out.println(solutions.getSolutions());
+//        }
 
 //        if (debug) { //printing of solutions done each iteration just print unsat/sat
 //            if (toProcess.isEmpty()) {//processing is done
@@ -782,17 +794,17 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
         System.out.println("\nSOLUTION TIME ms: " + durationInMillis);
 
-        for (I_Inv_Constraint<T> i : allInverseConstraints.values()) {
-            if (i.getOp() == Operation.INIT_SYM) {
-                T solution = i.getSolution();
-
-                // populate map for output to file/SPF
-                inputSolution.put(i.getID(), solution);
-
-                System.out.println(i.getID() + ": " + solution.getShortestExampleString());
-
-            }
-        }
+//        for (I_Inv_Constraint<T> i : allInverseConstraints.values()) {
+//            if (i.getOp() == Operation.INIT_SYM) {
+//                T solution = i.getSolution();
+//
+//                // populate map for output to file/SPF
+//                inputSolution.put(i.getID(), solution);
+//
+//                System.out.println(i.getID() + ": " + solution.getShortestExampleString());
+//
+//            }
+//        }
 
 
     }

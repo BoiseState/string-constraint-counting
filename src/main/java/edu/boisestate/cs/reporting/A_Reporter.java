@@ -29,10 +29,10 @@ abstract public class A_Reporter <T extends A_Model<T>> {
     protected final Map<Integer, String[]> operationsMap;
     protected final Map<Integer, Long> timerMap;
 
-    protected boolean build = true;
+//    protected boolean build = true;
 
-    protected ArrayList<PrintConstraint> toProcess;
-    protected Iterator<PrintConstraint> processIt;
+//    protected ArrayList<PrintConstraint> toProcess;
+//    protected Iterator<PrintConstraint> processIt;
     /**
      * 
      * @param graph
@@ -233,16 +233,14 @@ abstract public class A_Reporter <T extends A_Model<T>> {
         // if this.solver == inverse or something?
 
         // optimized?
-        toProcess = ((InvDefaultDirectedGraph)graph).getNecessaryPredicates();
+//        toProcess = ((InvDefaultDirectedGraph)graph).getNecessaryPredicates();
         // not optimized
 //        toProcess = ((InvDefaultDirectedGraph)graph).getPredicates();
 
-        processIt = toProcess.iterator();
+//        processIt = toProcess.iterator();
         // this is basically just cause we check if toProcess is empty to determine if we are done solving
 
-        while (processIt.hasNext()) {
-            calculateStats(processIt.next());
-        }
+        calculateStats(null);
         //solveInputs();
         
         // shut down solver

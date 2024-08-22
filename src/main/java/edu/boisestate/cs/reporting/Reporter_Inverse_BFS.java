@@ -1,25 +1,15 @@
 package edu.boisestate.cs.reporting;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.HashSet;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
+import edu.boisestate.cs.graph.*;
 import org.jgrapht.DirectedGraph;
 
 import edu.boisestate.cs.Parser_2;
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
-import edu.boisestate.cs.graph.I_Inv_Constraint;
-import edu.boisestate.cs.graph.InvDefaultDirectedGraph;
-import edu.boisestate.cs.graph.Operation;
-import edu.boisestate.cs.graph.PrintConstraint;
-import edu.boisestate.cs.graph.SymbolicEdge;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
 
@@ -28,10 +18,12 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 	//allConstraints
 	
 	//private BufferedWriter out;
+	private SolutionSet<T> solutions;
 
-	public Reporter_Inverse_BFS(DirectedGraph<PrintConstraint, SymbolicEdge> graph, Parser_2<T> parser, 
+	public Reporter_Inverse_BFS(DirectedGraph<PrintConstraint, SymbolicEdge> graph, Parser_2<T> parser,
 			Solver_Inverse<T> invSolver, boolean debug) {
 		super(graph, parser, invSolver, debug);
+		this.solutions = new SolutionSet<T>(((InvDefaultDirectedGraph)graph).getNumSymInputs());
 //		// TODO Auto-generated constructor stub
 //		try {
 //			out = new BufferedWriter(new FileWriter("./temp/solutions.txt"));
@@ -63,15 +55,27 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 
 		printDebug("Solving using BFS");
 		//create a queue of all dependent predicates
+		// get covering set of predicates that will process all nodes and inputs
+		ArrayList<PrintConstraint> toProcess = ((InvDefaultDirectedGraph)graph).getNecessaryPredicates();
+		for (PrintConstraint c : toProcess) {
+			predicateIDs.add(c.getId());
+		}
+
 		printDebug(predicateIDs.toString());
 		InvDefaultDirectedGraph eGraph = (InvDefaultDirectedGraph)graph;
 		TreeSet <Integer> qID = new TreeSet<Integer>();
 		//predicateIDs have the last predicate is the current constraint predicate
 		//and it contains all predicates solved so far
 //		qID.addAll(predicateIDs);
-		qID.addAll((eGraph.getDependedPredicates(predicateIDs.get(predicateIDs.size()-1))));
+		for (int id : predicateIDs) {
+			qID.addAll(eGraph.getDependedPredicates(id));
+		}
+		qID.addAll(eGraph.getPredicatesID());
+//		qID.addAll((eGraph.getDependedPredicates(predicateIDs.get(predicateIDs.size()-1))));
 		//sort it so the predicate with the largest ids processed first
-		//Collections.sort(qID, Collections.reverseOrder());
+		ArrayList<Integer> qIDL = new ArrayList<Integer>(qID);
+		Collections.sort(qIDL, Collections.reverseOrder());
+		qID = new TreeSet<Integer>(qIDL);
 		printDebug("Q " + qID);
 		printDebug(predicateIDs.toString());
 		List<I_Inv_Constraint<T>> q = new ArrayList<I_Inv_Constraint<T>>();
@@ -81,6 +85,19 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 			//remove nodes that have not been processed as predicates
 			actual.addAll(eGraph.getAncestors(allConstraints.get(val)));
 			actual.add(val);
+		}
+		boolean found = false;
+		for (PrintConstraint p : eGraph.getPredicates()) {
+			found=false;
+			for (int id : qID){
+				if (p.getId() == id) {
+					found=true;
+					continue;
+				}
+			}
+			if (!found) {
+				System.out.println("predicate  not in qID " + p.getId());
+			}
 		}
 		printDebug("actuall " + actual);
 		//iterate over all actual nodes and remove them from the parents
@@ -120,6 +137,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 					qID.add(curr.getArgID());
 				}
 				if(!result.get2()) {
+					printDebug("ADDING TO BACKTRACK MAP " + curr.getID());
 					//add to the backtrack queue
 					TreeSet<Integer> backtrackQ = new TreeSet<Integer>();
 					//just for debuging -- check to make sure there is no
@@ -142,9 +160,15 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 				Integer backtrackID = Integer.MAX_VALUE; //all our nodes have positive ids
 				for(Integer ids : backtrackMap.keySet()) {
 					if(backtrackID > ids) {
-						backtrackID = ids;
+						// only backtrack to most recent & relevant node
+						if (eGraph.getChildren(allConstraints.get(currID)).contains(ids)){
+							backtrackID = ids;
+						}
 					}
 				}
+				// nps - 8.21.24 - most recently processed backtrackable node may not contain a node that is relevant.
+				// e.g. the parents of teh node with the issue aren't include in the backtrack map
+
 				printDebug("backtrackID " + backtrackID);
 				//case when nothing to backtrack to
 				if(backtrackID != Integer.MAX_VALUE) {
@@ -186,53 +210,55 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 
 		//for (I_Inv_Constraint<T> i : allInverseConstraints.values())  {
 		//those inputs that have been processed
-		for(int id : processedID) {
-			I_Inv_Constraint<T> i = allInverseConstraints.get(id);
-			if (i.getOp() == Operation.INIT_SYM) {
-				if (i.output(0) == null || i.output(0).isEmpty()) {
-					printDebug("FAILURE: Failed to get example to one or more inputs...");
-					inputSolution.remove(i.getID());
-					return;
+		for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
+			if (c.getOp() == Operation.INIT_SYM) {
+				T solution = c.getSolution();
+				if (solution == null || solution.isEmpty()) {
+					printDebug("INPUT SOLUTION SET INCONSISTENT: " + c.getID());
+				} else {
+					solutions.add(c.getID(), solution);
 				}
 			}
 		}
-
+		printDebug(solutions.toString());
 		printDebug("\nSOLUTION TIME FOR LAST BACKPROP ms: " + durationInMillis);
 
 		//for (I_Inv_Constraint<T> i : allInverseConstraints.values()) {
 		// debug branch so don't loop for now reason ....
-		if (debug) { // nps 8.19.24 example consistency is now checked when solving an input constraint
-			printDebug("INPUT SOLUTIONS FOUND:");
-			for (int id : processedID) {
-				I_Inv_Constraint<T> i = allInverseConstraints.get(id);
-				if (i.getOp() == Operation.INIT_SYM) {
-					T solution = i.getSolution();
-//				T example = i.output(0);//symbolic nodes hold their example in the output values
-
-					// populate map for output to file/SPF
-//				if (inputSolution.get(i.getID()) != null) {
-//					T prev = inputSolution.get(i.getID());
-//					example = prev.intersect(example);
+//		if (debug) { // nps 8.19.24 consistency is now checked when solving an input constraint
+//			printDebug("INPUT SOLUTIONS FOUND:");
+//			for (int id : processedID) {
+//				I_Inv_Constraint<T> i = allInverseConstraints.get(id);
+//				if (i.getOp() == Operation.INIT_SYM) {
+//					T solution = i.getSolution();
+////				T example = i.output(0);//symbolic nodes hold their example in the output values
+//
+//					// populate map for output to file/SPF
+////				if (inputSolution.get(i.getID()) != null) {
+////					T prev = inputSolution.get(i.getID());
+////					example = prev.intersect(example);
+////				}
+//					if (solution.isEmpty()) { // should never happen
+//						printDebug("INPUT SOLUTION SET INCONSISTENT: " + i.getID());
+//					}
+////				inputSolution.put(i.getID(), example);
+//
+//					printDebug(i.getID() + ": " + solution.getShortestExampleString());
+//
 //				}
-					if (solution.isEmpty()) { // should never happen
-						printDebug("INPUT SOLUTION SET INCONSISTENT: " + i.getID());
-					}
-//				inputSolution.put(i.getID(), example);
-
-					printDebug(i.getID() + ": " + solution.getShortestExampleString());
-
-				}
-			}
-		}
+//			}
+//		}
 
 		/// nps - here the solutions are added to the actual solution set after a backpropagation occurs
-		for (int id : processedID) {
-			I_Inv_Constraint<T> i = allInverseConstraints.get(id);
-			if (i.getOp() == Operation.INIT_SYM) {
-				T solution = i.getSolution();
-				solutions.add(id, solution);
-			}
-		}
+//		for (int id : processedID) {
+//			I_Inv_Constraint<T> i = allInverseConstraints.get(id);
+//			if (i.getOp() == Operation.INIT_SYM) {
+//				T solution = i.getSolution();
+//				solutions.add(id, solution);
+//			}
+//		}
+
+		System.out.println(solutions.getSolutions());
 
 	}
 

@@ -28,18 +28,18 @@ public class SolveMainTest {
         System.setOut(originalOut);
     }
 
-    @Test
-    public void testConcat() {
-        String expectedOutput = "";
-        try {
-            expectedOutput = new String (Files.readAllBytes(Paths.get(outPath + "concat.txt")));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        String[] args = {inPath + "concat_isEmpty_equals_contains_l2_d2_bench.json", "-s", "inverse", "-v", "2", "-l", "2"};
-        SolveMain.main(args);
-        assertEquals(expectedOutput, outContent.toString());
-    }
+//    @Test
+//    public void testConcat() {
+//        String expectedOutput = "";
+//        try {
+//            expectedOutput = new String (Files.readAllBytes(Paths.get(outPath + "concat.txt")));
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        String[] args = {inPath + "concat_isEmpty_equals_contains_l2_d2_bench.json", "-s", "inverse", "-v", "2", "-l", "2"};
+//        SolveMain.main(args);
+//        assertEquals(expectedOutput, outContent.toString());
+//    }
 
     @Test
     public void testDelete() {

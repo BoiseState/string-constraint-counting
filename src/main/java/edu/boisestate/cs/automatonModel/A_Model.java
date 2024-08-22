@@ -210,6 +210,8 @@ public abstract class A_Model <T extends A_Model <T>> implements Cloneable, I_Mo
     @Override
 	public abstract T clone();
 
+    // finds the required character automaton for the given automaton, i.e. searches for any necessary path
+    // of single char transitions and returns a generic automata of length boundLength with that path.
     static Automaton getRequiredCharAutomaton(Automaton a, Alphabet alphabet, int boundLength) {
         // if initial state is accepting
         State initialState = a.getInitialState();
@@ -240,7 +242,7 @@ public abstract class A_Model <T extends A_Model <T>> implements Cloneable, I_Mo
                     continue;
                 }
                 // check if transition destination is an accepting state
-                for (Transition t : s.getTransitions()) {
+                for (Transition t : s.getTransitions()) { //s.getTransitions.size == 1
                     newStates.add(t.getDest());
                     if (t.getDest().isAccept()) {
                         accept = i;
@@ -266,7 +268,7 @@ public abstract class A_Model <T extends A_Model <T>> implements Cloneable, I_Mo
             states = newStates;
         }
 
-        // if no required single characters
+        // if no required single characters or no accept state found
         if (requiredCharMap.isEmpty() || accept < 0) {
             return BasicAutomata.makeEmpty();
         }

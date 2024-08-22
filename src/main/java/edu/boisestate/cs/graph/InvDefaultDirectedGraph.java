@@ -6,7 +6,6 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -116,15 +115,15 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
         return ret;
     }
 
-//    public Set<Integer> getChildren(PrintConstraint start) {
-//        Set<Integer> ret = new HashSet<Integer>();
-//        BreadthFirstIterator<PrintConstraint, SymbolicEdge> breadthFirstIterator =
-//                new BreadthFirstIterator<PrintConstraint, SymbolicEdge>(this, start);
-//        while (breadthFirstIterator.hasNext()) {
-//            ret.add(breadthFirstIterator.next().getId());
-//        }
-//        return ret;
-//    }
+    public Set<Integer> getChildren(PrintConstraint start) {
+        Set<Integer> ret = new HashSet<Integer>();
+        BreadthFirstIterator<PrintConstraint, SymbolicEdge> breadthFirstIterator =
+                new BreadthFirstIterator<PrintConstraint, SymbolicEdge>(this, start);
+        while (breadthFirstIterator.hasNext()) {
+            ret.add(breadthFirstIterator.next().getId());
+        }
+        return ret;
+    }
 
     public PrintConstraint getConstraint(Integer id) {
         for (PrintConstraint c : vertexSet()) {
@@ -137,6 +136,10 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
 
     public Set<PrintConstraint> getPredicates() {
         return predDepend.keySet();
+    }
+
+    public Set<Integer> getPredicatesID() {
+        return predDependID.keySet();
     }
 
     public Integer getNumSymInputs() {

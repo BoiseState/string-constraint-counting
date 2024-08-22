@@ -265,6 +265,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 //            return new Model_Acyclic_Inverse(this.automaton, this.alphabet, this.boundLength);
 //        }
 
+
         // gets automaton of required chars if any
         notContained = getRequiredCharAutomaton(notContained, alphabet, boundLength);
 
