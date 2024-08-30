@@ -21,7 +21,7 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 
 	//	private I_Inv_Constraint suffixConstraint;
 	//	private int suffixID;
-	//	private boolean initialized = false;
+		private boolean initialized = false;
 	//this in not for BFS as Marlin done origianlly
 	private List<Tuple<T,T>> outputs;
 	//	private T inputModel;
@@ -111,7 +111,7 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 		super.clear();
 		inputs = null;
 		mapInOut.clear();
-
+		initialized = false;
 	}
 
 	@Override
@@ -119,12 +119,19 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 		Tuple<Boolean, Boolean> ret = new Tuple<Boolean, Boolean>(true, true); //continue and don't add to backtrack
 		//compute the intersection of all incoming values
 		boolean ostrich = true;
-		
-		if(inputs == null) {
+
+		if (!initialized) {
+			printDebug("INITIAL EVAL OF CONCAT " + ID + " ...");
+			initialized = true;
+			inputs = incoming();
+		}
+		if(inputs == null) { // this would now mean there is nothing less to process.. however we would not always want to backtrack to a parent from here.
+			// this shuoldnt ever be reached cause we will jsut find another ancestor during backtracking
 			printDebug("inputs is null");
+			return new Tuple<Boolean, Boolean>(false, true);
 			//the first time the node is evaluated
 			//do the intersection
-			inputs = incoming();
+//			inputs = incoming();
 		}
 		if(inputs.isEmpty()) {
 			printDebug("CONCAT SYMV INCOMING SET INCONSISTENT...");
@@ -226,14 +233,25 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 			if(!currOutput.isEmpty()) {
 				ret = new Tuple<Boolean, Boolean>(true, false);//continue and add to backtrack
 			} else {
+				// nps - 8.28.24 - since ostrich propogates models we do not need to remove input as below
+				// we are still propogating our final model but should remove the entry from mapInOut and add
+				// to backtrack still so that when we come back we know to backtrack even further
+				// this will presumably require new backtracking logic in additon to the parental check, as we
+				// do not want to backtrack to one of the parents of this node necessarily but potentially just a sibling
+
 				//this input has been processed
 				//remove from inputs and from the map
-				inputs.minus(input);
+//				inputs.minus(input);
 				mapInOut.remove(input);
-				//check if more input left
-				if(!inputs.isEmpty()) {
-					ret = new Tuple<Boolean, Boolean>(true, false);//continue and add to backtrack since there are more inputs
+//				//check if more input left
+				if (!mapInOut.isEmpty()) {
+					inputs = mapInOut.keySet().iterator().next();
+				} else {
+					inputs = null;
 				}
+//				if(!inputs.isEmpty()) {
+					ret = new Tuple<Boolean, Boolean>(true, false);//continue and add to backtrack since there are more inputs
+//				}
 			}
 
 			//System.out.format("CHOSE: P %4s  S %4s\n", prefix.getShortestExampleString(), suffix.getShortestExampleString());
@@ -242,6 +260,11 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 
 
 		return ret;
+	}
+
+
+	public boolean inputsEmpty() {
+		return inputs == null;
 	}
 
 }

@@ -161,39 +161,92 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 				for(Integer ids : backtrackMap.keySet()) {
 					if(backtrackID > ids) {
 						// only backtrack to most recent & relevant node
-						if (eGraph.getChildren(allConstraints.get(currID)).contains(ids)){
-							backtrackID = ids;
+						// and want to ensure the node being backtracked to isn't fully spent, i.e. its inputs/output option have been exhausted
+						if (eGraph.getChildren(allConstraints.get(currID)).contains(ids)) { // in parents (inverse)
+							// only inv concats have input/output options
+							if (allInverseConstraints.get(ids).getOp() == Operation.CONCAT_SYM) {
+								// only backtrack to a concat if it has more options else find another node to backtrack to
+								if (!((InvConstraintConcatSym<T>) allInverseConstraints.get(ids)).inputsEmpty()) {
+									backtrackID = ids;
+								}
+							} else {
+								backtrackID = ids;
+							}
 						}
 					}
 				}
 				// nps - 8.21.24 - most recently processed backtrackable node may not contain a node that is relevant.
 				// e.g. the parents of teh node with the issue aren't include in the backtrack map
+				// nps - 8.27.24 if we want to only backtrack to nodes that are in parents we need to adjust the clearing
+				// and continuing beloew. we would want to jump back and reprocess the node we backtrack to but then jump
+				// ahead again to whichever node caused the issue... except that wouldn't account for potential effects on
+				// those later nodes, but maybe we could just check for consistency? certainly could just clear back to relevant node
 
 				printDebug("backtrackID " + backtrackID);
 				//case when nothing to backtrack to
 				if(backtrackID != Integer.MAX_VALUE) {
 					//get the queue
-					qID = backtrackMap.get(backtrackID);
+					qID = backtrackMap.remove(backtrackID);
 					//remove backtrackID from the map
-					backtrackMap.remove(backtrackID);
 					//it should not contain backtrackID
-					Set<Integer> clearSet = new HashSet<Integer>();
+
+//					Set<Integer> clearSet = new HashSet<Integer>();
+
+					// nps 8.27.24 - don't need to remove other backtrack maps cause propogation will recontinue and re-add them anyways
+					// do need to clear all constraints processed after this though
+					// problem is map doesn't hold additional constraint of newer nodes that may have been added.
+//					Set<Integer> backtrackClear = new HashSet<>();
+//					for (int id : backtrackMap.keySet()) {
+//						if (id < backtrackID){ // these ids have been processed
+//							clearSet.addAll(backtrackMap.get(id)); // add any
+//							clearSet.add(id);
+//							backtrackClear.add(id);
+//						}
+//					}
+					// remove from backtrack map just in case
+//					for (int id : backtrackClear) backtrackMap.remove(id);
+
 					//include all descendants of the elements in qID
-					for(int clearEl : qID) {
-							clearSet.addAll(eGraph.getAncestors(allConstraints.get(clearEl)));
+//					for(int clearEl : qID) {
+//							clearSet.addAll(eGraph.getAncestors(allConstraints.get(clearEl)));
+//					}
+
+					// nps - 8.27.24 - i imagine this could all be handled with processedID list as that shoudl store all
+					// evaluated nodes
+					int backIndex = processedID.indexOf(backtrackID);
+//					List<Integer> rems = new ArrayList<>();
+					for (int i = backIndex + 1; i < processedID.size(); i ++) {
+						// only need to clear descendants of backtrackID
+						I_Inv_Constraint<T> rem = allInverseConstraints.get(processedID.get(i));
+//						if (eGraph.getChildren(allConstraints.get(backtrackID)).contains(rem.getID())) {
+							rem.clear();
+							backtrackMap.remove(rem.getID());
+//							rems.add(i);
+//						} else {
+							// if it's not a descendant it may likely still be in the queue,
+							// techncially would need to add qID the descendants that were added..... (maybe evaluating again is fine?
+							// so we need to remove it from the queue
+//							qID.remove(rem.getID());
+//						}
+						// but backtrackMaps queue for this backtrack ID may contain nodes that have been processed and don't need to be reprocessed
 					}
-					clearSet.remove(backtrackID);//remove the node itself to make more choices
-					clearSet.retainAll(processedID);//only keep those that have been computed
-					processedID.removeAll(clearSet);//now remove them from processed -- they will be added again
-					printDebug("clearing  " + clearSet);
-					//iterate for the clearSet and call clear on each inverse constraint 
-					for(int nodeID : clearSet) {
-						allInverseConstraints.get(nodeID).clear();
-					}
+//					processedID.removeAll(rems);
+
+					processedID = processedID.subList(0,backIndex); // backtrack ID abouyt to be added to processedID anyways
+
+//					clearSet.remove(backtrackID);//remove the node itself to make more choices
+//					clearSet.retainAll(processedID);//only keep those that have been computed
+//					processedID.removeAll(clearSet);//now remove them from processed -- they will be added again
+//					printDebug("clearing  " + clearSet);
+//					//iterate for the clearSet and call clear on each inverse constraint
+//					for(int nodeID : clearSet) {
+//						allInverseConstraints.get(nodeID).clear();
+//					}
 
 				} else {
 					//nothing to backtrack to stop iterations
 					//need to try for the next length
+					printDebug("NOTHING TO BACKTRACK TO, UNSAT AT THIS LENGTH");
 					break;
 				}
 			}

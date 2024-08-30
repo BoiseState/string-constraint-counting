@@ -177,6 +177,10 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 		return ret;//never backtrack here
 	}
 
+	public void clear() {
+		super.clear();
+		solutionSet.clear();
+	}
 
 
 }

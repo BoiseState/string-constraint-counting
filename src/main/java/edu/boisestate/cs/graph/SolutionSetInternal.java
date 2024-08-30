@@ -164,6 +164,10 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 
 		return output.toString();
 	}
-	
+
+	public void clear() {
+		solutions.clear();
+		sols.clear();
+	}
 	
 }
