@@ -21,7 +21,7 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 
 	//	private I_Inv_Constraint suffixConstraint;
 	//	private int suffixID;
-		private boolean initialized = false;
+//		private boolean initialized = false;
 	//this in not for BFS as Marlin done origianlly
 	private List<Tuple<T,T>> outputs;
 	//	private T inputModel;
@@ -111,7 +111,7 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 		super.clear();
 		inputs = null;
 		mapInOut.clear();
-		initialized = false;
+//		initialized = false;
 	}
 
 	@Override
@@ -120,18 +120,16 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 		//compute the intersection of all incoming values
 		boolean ostrich = true;
 
-		if (!initialized) {
-			printDebug("INITIAL EVAL OF CONCAT " + ID + " ...");
-			initialized = true;
-			inputs = incoming();
-		}
-		if(inputs == null) { // this would now mean there is nothing less to process.. however we would not always want to backtrack to a parent from here.
-			// this shuoldnt ever be reached cause we will jsut find another ancestor during backtracking
+//		if (!initialized) {
+//			printDebug("INITIAL EVAL OF CONCAT " + ID + " ...");
+//			initialized = true;
+//			inputs = incoming();
+//		}
+		if(inputs == null) { // first time processing (or after clear)
 			printDebug("inputs is null");
-			return new Tuple<Boolean, Boolean>(false, true);
 			//the first time the node is evaluated
 			//do the intersection
-//			inputs = incoming();
+			inputs = incoming();
 		}
 		if(inputs.isEmpty()) {
 			printDebug("CONCAT SYMV INCOMING SET INCONSISTENT...");

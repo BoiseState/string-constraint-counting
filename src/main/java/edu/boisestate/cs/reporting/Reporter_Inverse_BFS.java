@@ -182,6 +182,10 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 				// ahead again to whichever node caused the issue... except that wouldn't account for potential effects on
 				// those later nodes, but maybe we could just check for consistency? certainly could just clear back to relevant node
 
+				// nat - 9.2.24 - as part of what mentioned below. we only need to backtrack to the path/lineage for the conflict
+				//i.e. we don't need the full queue just backtrack to the parent with more options, then propogate that down to the conflict.
+				// but we need to check every constraint that is a descendant of the backtrack node, and cler/reprocess those.
+
 				printDebug("backtrackID " + backtrackID);
 				//case when nothing to backtrack to
 				if(backtrackID != Integer.MAX_VALUE) {
@@ -213,6 +217,17 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 
 					// nps - 8.27.24 - i imagine this could all be handled with processedID list as that shoudl store all
 					// evaluated nodes
+
+					// nat - 9.2.24 - so it'd be better to be able to not clear all nodes that were processed after the node
+					// we bactrack to. that is avoid as much as possble retracking. the issue is that the current qid contains
+					// either processed IDs and/or parents of them. We would need to keep the current id before backtrack.
+					// remove children of backtrackID from the current qid and merge it with backtrack id (curr after backtrack)
+					// that way we can safely not clear nodes, and only remove backrtack and its child from processedid.
+					//TODO: this ^ (insteadt of just redoing it all)
+					// just clear processed IDs that are descendants of the backtrackID
+					// don't need backtrackID queue at all? just add it to q and clear descendants from q and processedID
+
+
 					int backIndex = processedID.indexOf(backtrackID);
 //					List<Integer> rems = new ArrayList<>();
 					for (int i = backIndex + 1; i < processedID.size(); i ++) {
