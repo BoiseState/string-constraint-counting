@@ -164,14 +164,14 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 						// and want to ensure the node being backtracked to isn't fully spent, i.e. its inputs/output option have been exhausted
 						if (eGraph.getChildren(allConstraints.get(currID)).contains(ids)) { // in parents (inverse)
 							// only inv concats have input/output options
-							if (allInverseConstraints.get(ids).getOp() == Operation.CONCAT_SYM) {
+//							if (allInverseConstraints.get(ids).getOp() == Operation.CONCAT_SYM) {
 								// only backtrack to a concat if it has more options else find another node to backtrack to
-								if (!((InvConstraintConcatSym<T>) allInverseConstraints.get(ids)).inputsEmpty()) {
-									backtrackID = ids;
-								}
-							} else {
+//								if (!((InvConstraintConcatSym<T>) allInverseConstraints.get(ids)).inputsEmpty()) {
+//									backtrackID = ids;
+//								}
+//							} else {
 								backtrackID = ids;
-							}
+//							}
 						}
 					}
 				}

@@ -233,14 +233,10 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 			if(!currOutput.isEmpty()) {
 				ret = new Tuple<Boolean, Boolean>(true, false);//continue and add to backtrack
 			} else {
-				// nps - 8.28.24 - since ostrich propogates models we do not need to remove input as below
-				// we are still propogating our final model but should remove the entry from mapInOut and add
-				// to backtrack still so that when we come back we know to backtrack even further
-				// this will presumably require new backtracking logic in additon to the parental check, as we
-				// do not want to backtrack to one of the parents of this node necessarily but potentially just a sibling
+				// nps - 9.2.24 - do not add to backtrack map, all the outputs have been processed
 
-				//this input has been processed
-				//remove from inputs and from the map
+				//probably don't need to do mapinout stuff here but leaving for now
+				//TODO: remove this
 //				inputs.minus(input);
 				mapInOut.remove(input);
 //				//check if more input left
@@ -249,9 +245,8 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 				} else {
 					inputs = null;
 				}
-//				if(!inputs.isEmpty()) {
-					ret = new Tuple<Boolean, Boolean>(true, false);//continue and add to backtrack since there are more inputs
-//				}
+				//if no more inputs left then don't add to backtrack
+				ret = new Tuple<Boolean, Boolean>(true, true);// don't add to backtrack cause this is last output
 			}
 
 			//System.out.format("CHOSE: P %4s  S %4s\n", prefix.getShortestExampleString(), suffix.getShortestExampleString());
@@ -263,8 +258,8 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 	}
 
 
-	public boolean inputsEmpty() {
-		return inputs == null;
-	}
+//	public boolean inputsEmpty() {
+//		return inputs == null;
+//	}
 
 }
