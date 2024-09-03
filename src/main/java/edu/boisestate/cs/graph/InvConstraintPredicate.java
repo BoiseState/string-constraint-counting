@@ -144,12 +144,12 @@ public class InvConstraintPredicate<T extends A_Model_Inverse<T>> extends A_Inv_
                 //could be target or a source
                 int indxSymb = 1;
                 int indxConcr = 2;
-                if (this.nextConstraint.getOp() == Operation.INIT_CON) {
-                    indxSymb = 2;
-                    indxConcr = 1;
-                }
-                printDebug("arg " + (this.argConstraint == null ? null : this.argConstraint.getOp())); // arg null for isEmpty for example
-                printDebug("oper " + this.nextConstraint.getOp());
+//                if (nextConstraint.getOp() == Operation.INIT_CON) {
+//                    indxSymb = 2;
+//                    indxConcr = 1;
+//                }
+                printDebug("arg " + (argConstraint == null ? null : argConstraint.getOp())); // arg null for isEmpty for example
+                printDebug("oper " + nextConstraint.getOp());
 //		System.out.println("arg " + (this.argConstraint==null? null : this.argConstraint.getOp()));
 //		System.out.println("oper " + this.nextConstraint.getOp());
                 // place symbolic string from solver string table into output set, position 1

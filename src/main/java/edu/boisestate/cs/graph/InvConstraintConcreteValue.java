@@ -99,13 +99,17 @@ public class InvConstraintConcreteValue<T extends A_Model_Inverse<T>>  extends A
 			// issue occurs because of way replaceCC outputSet is handled.
 			if (nextC.getOp() == Operation.REPLACE_CHAR_CHAR) continue;
 			T next = nextC.output(this);
+			if (next == null) {
+				System.err.println("NO VALUE FOR CONCRETE EXISTS " + ID );
+				System.exit(1);
+			}
 			inputs = inputs.intersect(next);
+			if (inputs == null || inputs.isEmpty()) {
+				System.err.println("NO VALUE FOR CONCRETE EXISTS " + ID );
+				System.exit(1);
+			}
 		}
 
-		if (inputs == null || inputs.isEmpty()) {
-			System.err.println("NO VALUE FOR CONCRETE EXISTS " + ID );
-			System.exit(1);
-		}
 		//eas: sanity check mare sure the inputs is the
 		//actual concrete value - add || inputs.getFiniteStrings().size() != 1
 

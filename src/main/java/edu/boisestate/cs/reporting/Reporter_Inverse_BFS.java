@@ -37,14 +37,14 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 	protected void solveInputs() {
 		//from Marlin's code
 		// output finalized inverse constraints for debug
-		if (true) {
+
 			printDebug(cid);
 			printDebug(cid + "Inverse Constraint Set:");
 			for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
 				printDebug(cid + c.toString() + "\t" + allConstraints.get(c.getID()).toString());
 			}
 			printDebug(cid);
-		}
+
 
 		long startTime = System.nanoTime();
 
@@ -52,6 +52,8 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 		invSolver.initStringMap();
 		//end from Marlin's code
 
+
+		// TODO: nat- 9.2.24 - i don't see why we can't just add all constraints to the queue
 
 		printDebug("Solving using BFS");
 		//create a queue of all dependent predicates
@@ -190,7 +192,8 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 				//case when nothing to backtrack to
 				if(backtrackID != Integer.MAX_VALUE) {
 					//get the queue
-					qID = backtrackMap.remove(backtrackID);
+//					qID = backtrackMap.remove(backtrackID);
+					TreeSet<Integer> newQ = backtrackMap.remove(backtrackID);
 					//remove backtrackID from the map
 					//it should not contain backtrackID
 
@@ -227,27 +230,44 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 					// just clear processed IDs that are descendants of the backtrackID
 					// don't need backtrackID queue at all? just add it to q and clear descendants from q and processedID
 
-
-					int backIndex = processedID.indexOf(backtrackID);
-//					List<Integer> rems = new ArrayList<>();
-					for (int i = backIndex + 1; i < processedID.size(); i ++) {
-						// only need to clear descendants of backtrackID
-						I_Inv_Constraint<T> rem = allInverseConstraints.get(processedID.get(i));
-//						if (eGraph.getChildren(allConstraints.get(backtrackID)).contains(rem.getID())) {
-							rem.clear();
-							backtrackMap.remove(rem.getID());
-//							rems.add(i);
-//						} else {
-							// if it's not a descendant it may likely still be in the queue,
-							// techncially would need to add qID the descendants that were added..... (maybe evaluating again is fine?
-							// so we need to remove it from the queue
-//							qID.remove(rem.getID());
-//						}
-						// but backtrackMaps queue for this backtrack ID may contain nodes that have been processed and don't need to be reprocessed
+					PrintConstraint backtrack = allConstraints.get(backtrackID);
+					Set<Integer> descendants = eGraph.getAncestors(backtrack);
+					Set<Integer> clearAdd = new HashSet<>();
+					// clear and remove descendants
+					for (int i=processedID.indexOf(backtrackID) + 1; i<processedID.size(); i++) { // check any nodes processed after backtrack node
+						if (descendants.contains(processedID.get(i))){ // get any constraints effected by this backtrack
+							clearAdd.add(processedID.get(i));
+						}
 					}
+					for (Integer id : clearAdd) { // add to queue, remove from processed, and clear
+						processedID.remove(id);
+						qID.add(id);
+						allInverseConstraints.get(id).clear();
+					}
+					qID.add(backtrackID);
+					processedID.remove(backtrackID);
+
+
+//					int backIndex = processedID.indexOf(backtrackID);
+////					List<Integer> rems = new ArrayList<>();
+//					for (int i = backIndex + 1; i < processedID.size(); i ++) {
+//						// only need to clear descendants of backtrackID
+//						I_Inv_Constraint<T> rem = allInverseConstraints.get(processedID.get(i));
+////						if (eGraph.getChildren(allConstraints.get(backtrackID)).contains(rem.getID())) {
+//							rem.clear();
+//							backtrackMap.remove(rem.getID());
+////							rems.add(i);
+////						} else {
+//							// if it's not a descendant it may likely still be in the queue,
+//							// techncially would need to add qID the descendants that were added..... (maybe evaluating again is fine?
+//							// so we need to remove it from the queue
+////							qID.remove(rem.getID());
+////						}
+//						// but backtrackMaps queue for this backtrack ID may contain nodes that have been processed and don't need to be reprocessed
+//					}
 //					processedID.removeAll(rems);
 
-					processedID = processedID.subList(0,backIndex); // backtrack ID abouyt to be added to processedID anyways
+//					processedID = processedID.subList(0,backIndex); // backtrack ID abouyt to be added to processedID anyways
 
 //					clearSet.remove(backtrackID);//remove the node itself to make more choices
 //					clearSet.retainAll(processedID);//only keep those that have been computed
