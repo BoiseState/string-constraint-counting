@@ -503,7 +503,7 @@ public class SolveMain {
 					System.out.println("[IGEN] Using initial bound from JSON file .. " + initialBound);
 				} else {
 					initialBound = defaultBound;
-					System.out.println("[IGEN] Using initial bound default ..." + initialBound);
+					printDebug("[IGEN] Using initial bound default ..." + initialBound);
 				}
 			}
 
