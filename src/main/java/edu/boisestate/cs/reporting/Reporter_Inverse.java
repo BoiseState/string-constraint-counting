@@ -388,17 +388,17 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
         // output all input solutions
 
-        for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
-            if (c.getOp() == Operation.INIT_SYM) {
-                if (c.getSolution() == null) {
-                    System.out.println("\nFAILURE: Failed to get example to one or more inputs...");
-                    System.out.println("\nSOLUTION TIME ms: 0");
-                    return;
-                } else {
-
-                }
-            }
-        }
+//        for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
+//            if (c.getOp() == Operation.INIT_SYM) {
+//                if (c.getSolution() == null) {
+//                    System.out.println("\nFAILURE: Failed to get example to one or more inputs...");
+//                    System.out.println("\nSOLUTION TIME ms: 0");
+//                    return;
+//                } else {
+//
+//                }
+//            }
+//        }
 
         // ------------------------------------------------------------------------------------    	
         // The input example process stops here.
