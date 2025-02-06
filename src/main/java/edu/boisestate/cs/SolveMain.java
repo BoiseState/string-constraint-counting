@@ -77,11 +77,11 @@ public class SolveMain {
 			if (debug)printHeader(inputFile, initialBound, "Inverse", "Inverse", "Acyclic");
 			reduce = true;
 			InvDefaultDirectedGraph graph = (InvDefaultDirectedGraph) loadGraph(inputFile);
-			printDebug("=".repeat(42) + "GRAPH STATS" + "=".repeat(42));
+			printDebug("===========================================================" + "GRAPH STATS" + "============================================================");;
 			printDebug("NUM CONSTRAINTS:\t" + graph.vertexSet().size());
 			printDebug("NUM PREDICATES:\t\t" + graph.getPredicates().size());
 			printDebug("NUM SYMBOLIC INPUTS:\t" + graph.getNumSymInputs());
-			printDebug("=".repeat(95));
+			printDebug("========================================================================================================================");
 			run_Acyclic_Inverse_r3(graph);
 
 
