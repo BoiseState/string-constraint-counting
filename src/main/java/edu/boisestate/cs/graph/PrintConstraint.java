@@ -93,6 +93,16 @@ public class PrintConstraint implements Serializable,
         sourceConstraints.add(this);
         this.op = UNDEFINED;
     }
+
+    // PrintConstraint contributor for SPF. much unnecessary info.
+    public PrintConstraint(int id, String SPF_constraint, String MAS_constraint) {
+        this.id = id;
+        this.actualVal = SPF_constraint;
+        this.value = MAS_constraint;
+        this.sourceConstraints = new ArrayList<PrintConstraint>();
+        sourceConstraints.add(this);
+        this.op = UNDEFINED;
+    }
     
     
     public long getTimeStamp(){
