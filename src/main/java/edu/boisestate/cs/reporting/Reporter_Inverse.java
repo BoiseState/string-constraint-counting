@@ -833,4 +833,9 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
         // output header
         printDebug(cid + header);
     }
+
+    @Override
+    public SolutionSet<T> getSolutionSet() {
+        throw new UnsupportedOperationException("getSolutions not supported yet for this reporter");
+    }
 }

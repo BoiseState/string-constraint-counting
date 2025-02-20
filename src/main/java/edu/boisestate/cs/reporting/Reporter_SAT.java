@@ -5,6 +5,7 @@ import edu.boisestate.cs.Parser_2;
 import edu.boisestate.cs.automatonModel.A_Model;
 import edu.boisestate.cs.automatonModel.Model_Concrete_Singleton_Manager;
 import edu.boisestate.cs.graph.PrintConstraint;
+import edu.boisestate.cs.graph.SolutionSet;
 import edu.boisestate.cs.graph.SymbolicEdge;
 //import edu.boisestate.cs.solvers.ExtendedSolver;
 import edu.boisestate.cs.solvers.Solver;
@@ -18,10 +19,15 @@ import java.util.Map;
 
 public class Reporter_SAT<T extends A_Model<T>> extends A_Reporter<T> {
 
+    @Override
+    protected SolutionSet<T> getSolutionSet() {
+        return null;
+    }
+
     public Reporter_SAT(DirectedGraph<PrintConstraint, SymbolicEdge> graph,
-                       Parser_2<T> parser,
-                       Solver<T> solver,
-                       boolean debug) {
+                        Parser_2<T> parser,
+                        Solver<T> solver,
+                        boolean debug) {
 
         super(graph, parser, solver, debug);
     }
