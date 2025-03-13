@@ -657,6 +657,17 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
                     break;
 
+                case REPLACE_FIRST:
+
+                    args = pc.getArgList();
+                    newConstraint = new InvConstraintReplaceFirst<T>(ID, invSolver, args);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId() + " " + args);
+                    }
+
+                    break;
                 default:
 
                     if (localDebug) {

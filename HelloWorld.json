@@ -1,7 +1,7 @@
 {
   "alphabet" : {
     "size" : 7,
-    "declaration" : "H,e,l,o,W,r,d"
+    "declaration" : "0-z"
   },
   "vertices" : [
     {
@@ -29,6 +29,22 @@
       "actualValue" : "true",
       "incomingEdges" :[
         {
+          "source" : 0,
+          "type" : "s1"
+        }, {
+          "source" : 1,
+          "type" : "t"
+        }],
+      "sourceConstraints" : [ ],
+      "timeStamp" : 1691007827231,
+      "type" : 0,
+      "id" : 2,
+      "value" : "contains!!Ljava/lang/CharSequence;!:!0"
+    },{
+      "num" : 0,
+      "actualValue" : "false",
+      "incomingEdges" :[
+        {
           "source" : 1,
           "type" : "s1"
         }, {
@@ -38,6 +54,6 @@
       "sourceConstraints" : [ ],
       "timeStamp" : 1691007827231,
       "type" : 0,
-      "id" : 2,
-      "value" : "equals!!Ljava/lang/Object;!:!0"
-    } ] }
+      "id" : 3,
+      "value" : "contains!!Ljava/lang/CharSequence;!:!0"}
+  ] }
