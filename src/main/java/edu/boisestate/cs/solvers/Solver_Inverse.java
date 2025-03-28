@@ -190,6 +190,13 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver_Count<T
 	}
 
 	@Override
+	public T inv_replaceFirst(T input, String find, String replace) {
+		T resModel = input.inv_replaceFirst(find, replace);
+		return resModel;
+
+	}
+
+	@Override
 	public void inv_replaceCharReplaceKnown(int id, int base, char replace) {
 		// TODO REPLACE with r3 model
 		

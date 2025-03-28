@@ -11,13 +11,7 @@ import edu.boisestate.cs.automatonModel.operations.*;
 import edu.boisestate.cs.util.Tuple;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 
@@ -1476,38 +1470,155 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
 	}
 	
-
+    /**
+     * Replaces the first occurrence of a substring matching the regex with the replacement string.
+     *
+     * @param regexString the regex to match and replace
+     * @param replacementString the string to replace with
+     * @return a new Model_Acyclic_Inverse with the replaced string
+     */
 	@Override
 	public Model_Acyclic_Inverse replaceFirst(String regexString, String replacementString) {
 		Automaton regexAut = new RegExp(regexString).toAutomaton();
 		Automaton origAut = Automaton.minimize(automaton.clone());
-		Automaton anyPrefixAndSuffix = Automaton.makeAnyString().concatenate(regexAut)
-				.concatenate(Automaton.makeAnyString());
+        Automaton anyPrefixAndSuffix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat().concatenate(regexAut)
+                .concatenate(Automaton.makeCharSet(this.alphabet.getCharSet()).repeat());
 		// Automaton containing all Strings in the originalAutomaton's language which
 		// contain a substring which satisfies the regex
 		Automaton intersection = Automaton.minimize(origAut.intersection(anyPrefixAndSuffix));
 		// if there are no matches to operate on, return the originalAutomaton
 		if (intersection.isEmpty()) {
-					return new Model_Acyclic_Inverse(origAut, this.alphabet, this.boundLength);
+					return new Model_Acyclic_Inverse(automaton, this.alphabet, this.boundLength);
 		}
-		
+
 		//separate out the unchanged by replaceFirst portion of the original automaton
 		origAut= Automaton.minimize(origAut.minus(anyPrefixAndSuffix));
-		
-		//start state
-		
-		return null;
+
+
+        HashMap<State, Automaton> prefixMap = new HashMap<>();
+        // suffix is the pattern match etc. so need to check suffixes later
+        HashMap<State, Automaton> suffixMap = new HashMap<>();
+
+        // PREFIX MATCHIING:
+        // find all possible prefixes in the automaton that precede a pattern match
+        while (!intersection.isEmpty()) {
+            Stack<State> stack = new Stack<>();
+            stack.push(intersection.getInitialState());
+            while (!stack.isEmpty()) {
+                // looking the state that starts the prefix
+                State start = stack.peek();
+                // automaton for new start
+                State oldStart = intersection.getInitialState();
+                intersection.setInitialState(start);
+                Automaton newStart = intersection.clone();
+                // set new start
+                intersection.setInitialState(oldStart); // set interseciton back to original start state
+
+                // set all states to final to check for pattern existence at newStart
+                Automaton newStartFinal = newStart.clone();
+                for (State state: newStartFinal.getStates()) {
+                    state.setAccept(true);
+                }
+                // intersection with current state as the initial state mathcing a pattern
+                Automaton temp = newStartFinal.intersection(regexAut.concatenate(Automaton.makeCharSet(this.alphabet.getCharSet()).repeat()));
+                Automaton suffix = newStart.intersection(regexAut.concatenate(Automaton.makeCharSet(this.alphabet.getCharSet()).repeat()));
+                // note this suffix represents a pattern and its suffix and we still need ot identify the actual suffixes
+                //push children of start state, prefix not yet found
+                if (!temp.isEmpty()) { // pattern found!
+                    Stack<State> stackCopy = (Stack<State>) stack.clone();
+                    Automaton prefix = automatonFromStack(stackCopy);
+                    prefixMap.put(start, prefix);
+                    suffixMap.put(start, suffix);
+                    //remove the prefix suffix pair from our search
+                    intersection = Automaton.minimize(intersection.minus(prefix.concatenate(suffix)));
+                    break;
+                } else { //no prefix found
+                    // add a child to explore another path
+                    // note: all paths shold have a pattern match at some point due to nature of intersection
+                    stack.push(start.getTransitions().iterator().next().getDest());
+                    // this shuold also never be null otherwise intersection would be empty
+                }
+            }
+        }
+
+        // SUFFIX ENUMERATING:
+        // now we have a map of prefixes and suffixes
+        // but we need to enumerate possible suffix matches for each prefix
+        HashMap<Automaton, Automaton> suffixPrefixMap = new HashMap<>(); // suffixes will be unique
+        for (State sufStart : suffixMap.keySet()) {
+            Automaton patternSuffix = suffixMap.get(sufStart).clone();
+            // find unique suffix patterns
+            while (!patternSuffix.isEmpty()) {
+                Stack<State> stack = new Stack<>();
+                stack.push(sufStart);
+                while (!stack.isEmpty()) {
+                    for (State s : patternSuffix.getStates()) {
+                        s.setAccept(false);
+                    }
+                    State pivot = stack.peek();
+                    pivot.setAccept(true);
+                    Automaton inter = patternSuffix.intersection(regexAut);
+                    // we are looking for paths where the patternsuffix is not a match
+                    // this will be disjoint sets of patterns and a corresponding suffix
+                    if (!inter.isEmpty()) { //found a match
+                        // save this pattern suffix pair and remove from search
+                        Stack<State> stackCopy = (Stack<State>) stack.clone();
+                        Automaton pattern = automatonFromStack(stackCopy);
+                        Automaton prefix = prefixMap.get(sufStart);
+                        // get original patternsuffix and use pivot to construct suffix
+                        Automaton suffix = suffixMap.get(sufStart);
+                        // set the suffix initial state to the pivot
+                        Iterator<State> psIt = patternSuffix.getStates().iterator();
+                        Iterator<State> sIt = suffix.getStates().iterator();
+                        while (psIt.hasNext() && sIt.hasNext()) {
+                            State psState = psIt.next();
+                            State sState = sIt.next();
+                            if (psState.equals(pivot)) {
+                                suffix.setInitialState(sState);
+                                break;
+                            }
+                        }
+                        suffix.minimize();
+                        suffixPrefixMap.put(suffix, prefix);
+                        // set minus of what was removed from patternSuffix to continue searching
+                        // have to get original patternsuffix so acceptin gstates are correct
+                        patternSuffix = suffixMap.get(sufStart).clone().minus(pattern.concatenate(suffix));
+                        patternSuffix.minimize();
+                        break;
+                    } else {
+                        // no match found, add child to stack
+                        stack.push(pivot.getTransitions().iterator().next().getDest()); // shuold also be non null etc. ?
+                    }
+                }
+            }
+
+
+        }
+        // now we shuold have a disjoint set of all automata that are possible prefix.pattern.suffix permutations.
+        // replace pattern in each with replacement string
+
+        // REPLACING:
+        //im going ot create a set of the replaced automatons though mayb ehtis is not optimal
+        Automaton result = Automaton.makeEmpty();
+        for (Automaton suffix : suffixPrefixMap.keySet()) {
+            Automaton prefix = suffixPrefixMap.get(suffix);
+            Automaton replacedAut = prefix.concatenate(new RegExp(replacementString).toAutomaton()).concatenate(suffix);
+            result = result.union(replacedAut);
+        }
+		result = result.union(origAut);
+
+        return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
 	}
 
-	@Override
+    @Override
+    public Model_Acyclic_Inverse inv_replaceFirst(String find, String replace) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
 	public Model_Acyclic_Inverse replaceAll(String arg1String, String arg2String) {
 		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Model_Acyclic_Inverse inv_replaceFirst() {
-		// TODO Auto-generated method stub`
 		return null;
 	}
 
@@ -1517,5 +1628,92 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 		return null;
 	}
 
+
+    // create automaton from stack that represents specific prefix path
+    public static Automaton automatonFromStack(Stack<State> stack){
+        Automaton automaton = new Automaton();
+        State myStart = new State();
+        automaton.setInitialState(myStart);
+
+        State current = myStart;
+        while (!stack.isEmpty()) {
+            State originalState = stack.remove(0);
+            State nextState = stack.isEmpty() ? null : stack.get(0);
+
+            for (Transition t : originalState.getTransitions()) {
+                if (t.getDest().equals(nextState)) {
+                    State newState = new State();
+                    current.addTransition(new Transition(t.getMin(), t.getMax(), newState));
+                    current = newState;
+                    break;
+                }
+            }
+        }
+
+        // Set the last state in the path as the final state
+        current.setAccept(true);
+        automaton.minimize(); // jic
+        return automaton;
+    }
+
+//   /**
+//    * Creates an acyclic automaton that matches strings containing the pattern,
+//    * respecting the bound on string length.
+//    *
+//    * @param pattern The pattern to find
+//    * @return An acyclic automaton matching strings containing the pattern
+//    */
+//   public Automaton makeAcyclicAnyPrefixAndSuffix(String pattern) {
+//       Automaton patternAut = new RegExp(pattern).toAutomaton();
+//       int patternLength = pattern.length();
+//
+//       // Result will be union of all valid prefix+pattern+suffix combinations
+//       Automaton result = Automaton.makeEmpty();
+//
+//       // Generate all valid prefix+pattern+suffix combinations within the bound
+//       for (int prefixLen = 0; prefixLen <= boundLength - patternLength; prefixLen++) {
+//           for (int suffixLen = 0; suffixLen <= boundLength - patternLength - prefixLen; suffixLen++) {
+//               // Create automaton for any string of length exactly prefixLen
+//               Automaton prefix = makeExactLengthAnyString(prefixLen);
+//
+//               // Create automaton for any string of length exactly suffixLen
+//               Automaton suffix = makeExactLengthAnyString(suffixLen);
+//
+//               // Combine: prefix + pattern + suffix
+//               Automaton combined = prefix.concatenate(patternAut).concatenate(suffix);
+//
+//               // Add to result
+//               result = result.union(combined);
+//           }
+//       }
+//
+//       return result;
+//   }
+//
+//   /**
+//    * Creates an acyclic automaton that matches any string of exactly the given length
+//    * using the current alphabet.
+//    */
+//   private Automaton makeExactLengthAnyString(int length) {
+//       if (length == 0) {
+//           return BasicAutomata.makeEmptyString();
+//       }
+//
+//       // Create automaton for any single character from the alphabet
+//       Automaton anyChar = BasicAutomata.makeCharSet(alphabet.toString());
+//
+//       // For length 1, return the anyChar automaton
+//       if (length == 1) {
+//           return anyChar;
+//       }
+//
+//       // Otherwise, create concatenation of anyChar automata
+//       Automaton result = anyChar;
+//       for (int i = 1; i < length; i++) {
+//           result = result.concatenate(anyChar);
+//       }
+//
+//       return result;
+//   }
 
 }
