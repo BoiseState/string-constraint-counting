@@ -1503,7 +1503,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         // find all possible prefixes in the automaton that precede a pattern match
         while (!intersection.isEmpty()) {
             Stack<State> stack = new Stack<>();
-            stack.push(intersection.getInitialState());
+            stack.push(intersection.getInitialState()); // dont need to clone because we don't ever manipulate the initial state?
             while (!stack.isEmpty()) {
                 // looking the state that starts the prefix
                 State start = stack.peek();
@@ -1548,20 +1548,23 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         for (State sufStart : suffixMap.keySet()) {
             Automaton patternSuffix = suffixMap.get(sufStart).clone();
             // find unique suffix patterns
-            while (!patternSuffix.isEmpty()) {
+            while (!patternSuffix.intersection(regexAut).isEmpty()) { // no more paths to find
                 Stack<State> stack = new Stack<>();
-                stack.push(sufStart);
+                stack.push(patternSuffix.getInitialState()); // maybe need to clone as we manipulate the pivot.
                 while (!stack.isEmpty()) {
+                    State pivot = stack.peek();
+                    boolean pivotAccept = pivot.isAccept();
                     for (State s : patternSuffix.getStates()) {
                         s.setAccept(false);
                     }
-                    State pivot = stack.peek();
                     pivot.setAccept(true);
                     Automaton inter = patternSuffix.intersection(regexAut);
                     // we are looking for paths where the patternsuffix is not a match
                     // this will be disjoint sets of patterns and a corresponding suffix
                     if (!inter.isEmpty()) { //found a match
                         // save this pattern suffix pair and remove from search
+                        // need ot reset the pivot
+                        pivot.setAccept(pivotAccept);
                         Stack<State> stackCopy = (Stack<State>) stack.clone();
                         Automaton pattern = automatonFromStack(stackCopy);
                         Automaton prefix = prefixMap.get(sufStart);
@@ -1588,6 +1591,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
                     } else {
                         // no match found, add child to stack
                         stack.push(pivot.getTransitions().iterator().next().getDest()); // shuold also be non null etc. ?
+
                     }
                 }
             }
@@ -1612,8 +1616,9 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
     @Override
     public Model_Acyclic_Inverse inv_replaceFirst(String find, String replace) {
-        // TODO Auto-generated method stub
-        return null;
+        // union of replaceFirst with find/replace swtiched and original
+        Model_Acyclic_Inverse result = this.replaceFirst(replace, find);
+        return result.union(this);
     }
 
     @Override
