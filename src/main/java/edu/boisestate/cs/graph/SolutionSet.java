@@ -3,6 +3,7 @@
  */
 package edu.boisestate.cs.graph;
 
+import edu.boisestate.cs.automatonModel.A_Model;
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 
 import java.util.ArrayList;
@@ -16,13 +17,13 @@ import java.util.List;
  * storing and updating the found soutions for output later.
  *
  */
-public class SolutionSet<T extends A_Model_Inverse<T>> {
+public class SolutionSet<T extends A_Model<T>> {
 
 	public class Solution implements Comparable<Solution> {
 
 		public int ID;
 		public String example;
-		public A_Model_Inverse<T> model; // model included for debugging i guess
+		public A_Model<T> model; // model included for debugging i guess
 
 		public Solution(int ID, String solution, T model) {
 			this.ID = ID;
@@ -50,7 +51,7 @@ public class SolutionSet<T extends A_Model_Inverse<T>> {
 	}
 
 	public void add(int id, T solution) {
-		Solution sol = new Solution(id, solution.getShortestExampleString(), solution);
+		Solution sol = new Solution(id, solution.getAcceptedStringExample(), solution);
 		for (Solution s : solutions) {
 			if (s.ID == id) {
 				solutions.remove(s);
@@ -83,5 +84,9 @@ public class SolutionSet<T extends A_Model_Inverse<T>> {
 			sb.append("\t").append(s.toString()).append("\n");
 		}
 		return sb.toString();
+	}
+
+	public boolean isSAT() {
+		return SAT;
 	}
 }

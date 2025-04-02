@@ -55,7 +55,10 @@ public class PrecisePrefix
                 transitions.addAll(states.removeFirst().getTransitions());
             }
             while (transitions.size() > 0) {
-                states.add(transitions.removeFirst().getDest());
+                State next = transitions.removeFirst().getDest();
+                if (!states.contains(next)) {
+                    states.add(next);
+                }
             }
         }
         Set<StatePair> epsilons = new HashSet<StatePair>();

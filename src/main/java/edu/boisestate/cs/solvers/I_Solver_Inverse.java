@@ -35,6 +35,8 @@ public interface I_Solver_Inverse<T extends A_Model_Inverse<T>> {
 
 	T inv_replaceCharKnown(T input, char find, char replace);
 
+	T inv_replaceFirst(T input, String find, String replace);
+
 	void inv_replaceCharReplaceKnown(int id, int base, char replace);
 
 	void inv_replaceCharUnknown(int id, int base);

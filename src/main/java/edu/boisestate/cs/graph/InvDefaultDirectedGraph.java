@@ -227,4 +227,19 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
         }
     }
 
+    // print visualization of graph for debugging (note this could be very big)
+    public void printGraph() {
+       Iterator<PrintConstraint> iter = new TopologicalOrderIterator<PrintConstraint, SymbolicEdge>(this);
+       // based on topological level, print out constraint name and then edges below it...
+        System.out.println("============ GRAPH ================");
+         while (iter.hasNext()) {
+             PrintConstraint c = iter.next();
+             System.out.println(c + ", actual val: " + c.getActualVal());
+             for (SymbolicEdge e : this.outgoingEdgesOf(c)) {
+                 System.out.println("-> " + e.getATarget());
+             }
+             System.out.println("-------------------------------");
+         }
+    }
+
 }

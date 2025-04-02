@@ -111,7 +111,7 @@
   <configuration>
     <archive>
       <manifest>
-        <mainClass>com.pwc.scfa.pensareautomatio3.Main</mainClass>
+        <mainClass>edu.boisestate.cs.SolveMain</mainClass>
       </manifest>
     </archive>
     <descriptorRefs>

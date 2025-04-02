@@ -5,6 +5,7 @@ import edu.boisestate.cs.Parser;
 import edu.boisestate.cs.Parser_2;
 import edu.boisestate.cs.Settings;
 import edu.boisestate.cs.automatonModel.A_Model;
+import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 import edu.boisestate.cs.graph.*;
 //import edu.boisestate.cs.solvers.ExtendedSolver;
 import edu.boisestate.cs.solvers.Solver;
@@ -21,6 +22,7 @@ import java.util.*;
  * @param <T>
  */
 abstract public class A_Reporter <T extends A_Model<T>> {
+    protected abstract SolutionSet<T> getSolutionSet();
 
     protected final DirectedGraph<PrintConstraint, SymbolicEdge> graph;
     protected final Parser_2<T> parser;

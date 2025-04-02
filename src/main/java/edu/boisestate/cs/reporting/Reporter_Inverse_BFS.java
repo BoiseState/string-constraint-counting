@@ -350,4 +350,9 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 
 	}
 
+	@Override
+	public SolutionSet<T> getSolutionSet() {
+		return solutions;
+	}
+
 }

@@ -623,6 +623,7 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
     	// start timer
     	BasicTimer.start();
     	// perform replaceFirst string operation
+        // this replaceFirst does take find argument as regex as well
     	baseModel = baseModel.replaceFirst(arg1String, arg2String);
     	// stop timer
     	BasicTimer.stop();
@@ -893,6 +894,10 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 
         // return results
         return new Tuple<>(charValue, isKnown);
+    }
+
+    public String getConcreteString(int id) {
+        return this.concreteStringMap.get(id);
     }
 
 }

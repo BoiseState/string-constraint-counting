@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Set;
 
 /**
- * Automaton operation for {@link String#toUpperCase()}.
+ * Automaton operation for {@link String#replace(char, char)}.
  */
 public class InverseReplaceCC extends UnaryOperation {
 	char c, d;

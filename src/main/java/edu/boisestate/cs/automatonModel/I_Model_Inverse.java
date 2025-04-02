@@ -43,7 +43,7 @@ public interface I_Model_Inverse<T extends I_Model_Inverse<T>> {
 
 	T inv_trim();
 	
-	T inv_replaceFirst();
+	T inv_replaceFirst(String find, String replace);
 	
 	T inv_replaceAll();
 	

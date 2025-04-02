@@ -3,28 +3,7 @@ package edu.boisestate.cs.reporting;
 import edu.boisestate.cs.BasicTimer;
 import edu.boisestate.cs.Parser_2;
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
-import edu.boisestate.cs.graph.I_Inv_Constraint;
-import edu.boisestate.cs.graph.InvConstraintConcatSym;
-import edu.boisestate.cs.graph.InvConstraintConcreteValue;
-import edu.boisestate.cs.graph.InvConstraintDeleteCharAt;
-import edu.boisestate.cs.graph.InvConstraintDeleteStartEnd;
-import edu.boisestate.cs.graph.InvConstraintEquals;
-import edu.boisestate.cs.graph.InvConstraintInput;
-import edu.boisestate.cs.graph.InvConstraintPredicate;
-import edu.boisestate.cs.graph.InvConstraintPropagation;
-import edu.boisestate.cs.graph.InvConstraintReplaceCharChar;
-import edu.boisestate.cs.graph.InvConstraintSetLength;
-import edu.boisestate.cs.graph.InvConstraintSubStringStart;
-import edu.boisestate.cs.graph.InvConstraintSubStringStartEnd;
-import edu.boisestate.cs.graph.InvConstraintToLowerCase;
-import edu.boisestate.cs.graph.InvConstraintToUpperCase;
-import edu.boisestate.cs.graph.InvDefaultDirectedGraph;
-import edu.boisestate.cs.graph.Operation;
-import edu.boisestate.cs.graph.PrintConstraint;
-import edu.boisestate.cs.graph.SPFInput;
-import edu.boisestate.cs.graph.SPFInputSet;
-import edu.boisestate.cs.graph.SolutionSet;
-import edu.boisestate.cs.graph.SymbolicEdge;
+import edu.boisestate.cs.graph.*;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 
 import org.jgrapht.DirectedGraph;
@@ -657,6 +636,17 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
                     break;
 
+                case REPLACE_FIRST:
+
+                    args = pc.getArgList();
+                    newConstraint = new InvConstraintReplaceFirst<T>(ID, invSolver, args);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId() + " " + args);
+                    }
+
+                    break;
                 default:
 
                     if (localDebug) {
@@ -832,5 +822,10 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
         // output header
         printDebug(cid + header);
+    }
+
+    @Override
+    public SolutionSet<T> getSolutionSet() {
+        throw new UnsupportedOperationException("getSolutions not supported yet for this reporter");
     }
 }

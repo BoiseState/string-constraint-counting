@@ -4,6 +4,7 @@ import edu.boisestate.cs.BasicTimer;
 import edu.boisestate.cs.Parser_2;
 import edu.boisestate.cs.automatonModel.A_Model;
 import edu.boisestate.cs.graph.PrintConstraint;
+import edu.boisestate.cs.graph.SolutionSet;
 import edu.boisestate.cs.graph.SymbolicEdge;
 import edu.boisestate.cs.solvers.Solver_Count;
 import org.jgrapht.DirectedGraph;
@@ -240,6 +241,11 @@ public class Reporter_Count<T extends A_Model<T>> extends A_Reporter<T> {
 //        System.out.println(((AcyclicWeightedAutomatonModel) solver.getValue(base)).getAutomaton());
 //        System.out.println(((AcyclicWeightedAutomatonModel) solver.getValue(arg)).getAutomaton());
 //        System.exit(2);
+    }
+
+    @Override
+    protected SolutionSet<T> getSolutionSet() {
+        return null;
     }
 
     @Override
