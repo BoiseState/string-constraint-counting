@@ -801,7 +801,18 @@ public class Model_Bounded extends A_Model<Model_Bounded> {
 	}
 
 	@Override
+	public Model_Bounded replaceFirst(Model_Bounded arg1Model, Model_Bounded arg2Model) {
+		return null;
+	}
+
+	@Override
 	public Model_Bounded replaceAll(String arg1String, String arg2String) {
 		return null;
 	}
+
+	@Override
+	public Model_Bounded replaceAll(Model_Bounded arg1Model, Model_Bounded arg2Model) {
+		return null;
+	}
+
 }

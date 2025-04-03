@@ -4,6 +4,7 @@ import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.BasicTimer;
 import edu.boisestate.cs.automatonModel.A_Model;
 import edu.boisestate.cs.automatonModel.A_Model_Manager;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Manager;
 import edu.boisestate.cs.util.Tuple;
 import edu.boisestate.cs.automatonModel.Model_Acyclic;
 
@@ -587,14 +588,28 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
     	T baseModel = this.symbolicStringMap.get(base);
     	if (baseModel.getClass() != Model_Acyclic.class)
     		return;
-    	String arg1String = this.concreteStringMap.get(argOne);
-    	String arg2String = this.concreteStringMap.get(argTwo);
+
+        // nps - switched to models: untested as of 4.3.25
+        T arg1, arg2;
+        if (this.concreteStringMap.get(argOne) == null) {
+            arg1 = this.symbolicStringMap.get(argOne);
+        } else {
+            String arg1String = this.concreteStringMap.get(argOne);
+            arg1 = this.modelManager.createString(arg1String);
+        }
+        if (this.concreteStringMap.get(argTwo) == null) {
+            arg2 = this.symbolicStringMap.get(argTwo);
+        } else {
+            String arg2String = this.concreteStringMap.get(argTwo);
+            arg2 = this.modelManager.createString(arg2String);
+        }
+
 //    	System.out.println("Before:\n" + baseModel.getFiniteStrings());
 //    	System.out.println("\n==========\n\nStarting Automaton:\n\n" + baseModel.getAutomaton().toString() + "\n\n========\n\n");
     	// start timer
     	BasicTimer.start();
     	// perform replaceFirst string operation
-    	baseModel = baseModel.replaceAll(arg1String, arg2String);
+    	baseModel = baseModel.replaceAll(arg1, arg2);
     	// stop timer
     	BasicTimer.stop();
 //    	System.out.println("After:\n" + baseModel.getFiniteStrings());
@@ -617,14 +632,26 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
     	T baseModel = this.symbolicStringMap.get(base);
 //    	if (baseModel.getClass() != Model_Acyclic.class)
 //    		return;
-    	String arg1String = this.concreteStringMap.get(argOne);
-    	String arg2String = this.concreteStringMap.get(argTwo);
+        // nps - tryingot handle concrete and symbolic arguments.
+        T arg1, arg2;
+        if (this.concreteStringMap.get(argOne) == null) {
+            arg1 = this.symbolicStringMap.get(argOne);
+        } else {
+            String arg1String = this.concreteStringMap.get(argOne);
+            arg1 = this.modelManager.createString(arg1String);
+        }
+        if (this.concreteStringMap.get(argTwo) == null) {
+            arg2 = this.symbolicStringMap.get(argTwo);
+        } else {
+            String arg2String = this.concreteStringMap.get(argTwo);
+            arg2 = this.modelManager.createString(arg2String);
+        }
 //    	System.out.println("Before:\n" + baseModel.getFiniteStrings());
     	// start timer
     	BasicTimer.start();
     	// perform replaceFirst string operation
         // this replaceFirst does take find argument as regex as well
-    	baseModel = baseModel.replaceFirst(arg1String, arg2String);
+    	baseModel = baseModel.replaceFirst(arg1, arg2);
     	// stop timer
     	BasicTimer.stop();
 //    	System.out.println("After:\n" + baseModel.getFiniteStrings());

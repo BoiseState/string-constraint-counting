@@ -296,6 +296,15 @@ public class Model_Concrete_Singleton extends A_Model<Model_Concrete_Singleton >
 	public Model_Concrete_Singleton replaceAll(String arg1String, String arg2String) {
 		return singleton == null ? new Model_Concrete_Singleton(null) : new Model_Concrete_Singleton(singleton.replaceAll(arg1String, arg2String));
 	}
-	
+
+	@Override
+	public Model_Concrete_Singleton replaceFirst(Model_Concrete_Singleton f, Model_Concrete_Singleton r){
+		return null;
+	}
+
+	@Override
+	public Model_Concrete_Singleton replaceAll(Model_Concrete_Singleton f, Model_Concrete_Singleton r){
+		return null;
+	}
 
 }

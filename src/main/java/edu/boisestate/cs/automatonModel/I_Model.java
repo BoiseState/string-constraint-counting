@@ -78,6 +78,9 @@ public interface I_Model<T extends I_Model<T>> {
 
 	T replace(String find, String replace);
 
+	T replaceFirst(String find, String replace); // for all the non inverse stuff
+	T replaceFirst(T find, T replace);
+
 	T replaceChar();
 
 	T replaceFindKnown(char find);
@@ -104,8 +107,7 @@ public interface I_Model<T extends I_Model<T>> {
 
 	String getAutomaton();
 	
-	T replaceFirst(String regexString, String replacementString);
-
 	T replaceAll(String arg1String, String arg2String);
 
+	T replaceAll(T find, T replace);
 }

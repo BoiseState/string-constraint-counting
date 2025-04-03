@@ -10,6 +10,7 @@ import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.automatonModel.operations.*;
 import edu.boisestate.cs.util.Tuple;
 
+import javax.jws.WebParam;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -1469,7 +1470,15 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 		automaton = automaton.minus(remove);
 
 	}
-	
+
+    @Override
+    public Model_Acyclic_Inverse replaceFirst(String find, String replace) {
+        System.err.println("Shuoldnt be using `concrete` replaceFirst");
+        System.exit(1);
+        return null;
+    }
+    // Note that we do not use an operations class as we need visiblity of the solver instance
+    //
     /**
      * Replaces the first occurrence of a substring matching the regex with the replacement string.
      *
@@ -1477,9 +1486,12 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
      * @param replacementString the string to replace with
      * @return a new Model_Acyclic_Inverse with the replaced string
      */
-	@Override
-	public Model_Acyclic_Inverse replaceFirst(String regexString, String replacementString) {
-		Automaton regexAut = new RegExp(regexString).toAutomaton();
+//	@Override
+	public Model_Acyclic_Inverse replaceFirst(Model_Acyclic_Inverse regexString, Model_Acyclic_Inverse replacementString) {
+		// wrote this algorithm when arguments were a regexString and replacement string, now they are themselves models
+        // potentially its extra work to convert them to automata :shrug:
+//        Automaton regexAut = new RegExp(regexString).toAutomaton();
+        Automaton regexAut = regexString.automaton;
 		Automaton origAut = Automaton.minimize(automaton.clone());
         Automaton anyPrefixAndSuffix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat().concatenate(regexAut)
                 .concatenate(Automaton.makeCharSet(this.alphabet.getCharSet()).repeat());
@@ -1606,7 +1618,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         Automaton result = Automaton.makeEmpty();
         for (Automaton suffix : suffixPrefixMap.keySet()) {
             Automaton prefix = suffixPrefixMap.get(suffix);
-            Automaton replacedAut = prefix.concatenate(new RegExp(replacementString).toAutomaton()).concatenate(suffix);
+            Automaton replacedAut = prefix.concatenate(replacementString.automaton.concatenate(suffix));
             result = result.union(replacedAut);
         }
 		result = result.union(origAut);
@@ -1615,17 +1627,30 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 	}
 
     @Override
-    public Model_Acyclic_Inverse inv_replaceFirst(String find, String replace) {
+    public Model_Acyclic_Inverse inv_replaceFirst(Model_Acyclic_Inverse find, Model_Acyclic_Inverse replace) {
         // union of replaceFirst with find/replace swtiched and original
         Model_Acyclic_Inverse result = this.replaceFirst(replace, find);
         return result.union(this);
     }
 
     @Override
-	public Model_Acyclic_Inverse replaceAll(String arg1String, String arg2String) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    public Model_Acyclic_Inverse replaceAll(String find, String replace) {
+        System.err.println("Shuold not be using this replaceAll");
+        System.exit(1);
+        return null;
+    }
+
+    @Override
+    public Model_Acyclic_Inverse replaceAll(Model_Acyclic_Inverse regexString, Model_Acyclic_Inverse replacementString) {
+        // assuming prefix seleciton is fairly straightforward calling replaceFirst iteratively shuoldnt be much less efficienct
+        Model_Acyclic_Inverse result, next;
+        do {
+            result = this.replaceFirst(regexString, replacementString);
+            next = result.replaceFirst(regexString, replacementString);
+
+        } while (!result.intersect(next).isEmpty());
+        return result;
+    }
 
 	@Override
 	public Model_Acyclic_Inverse inv_replaceAll() {

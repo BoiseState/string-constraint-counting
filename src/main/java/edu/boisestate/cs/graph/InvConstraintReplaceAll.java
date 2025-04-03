@@ -7,12 +7,12 @@ import edu.boisestate.cs.util.Tuple;
 import java.util.HashMap;
 import java.util.List;
 
-public class InvConstraintReplaceFirst<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
+public class InvConstraintReplaceAll<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
 
     private final T find, replace;
     // these could/can be symbolics based on regexes but currently not implemented to take symbolic as arg.
 
-    public InvConstraintReplaceFirst(int id, Solver_Inverse<T> invSolver, List<Integer> args) {
+    public InvConstraintReplaceAll(int id, Solver_Inverse<T> invSolver, List<Integer> args) {
         this.solver = invSolver;
         this.ID = id;
         this.argList = args;

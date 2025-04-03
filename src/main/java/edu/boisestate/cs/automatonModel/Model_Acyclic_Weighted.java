@@ -961,5 +961,15 @@ public class Model_Acyclic_Weighted extends A_Model<Model_Acyclic_Weighted>{
 		return null;
 	}
 
+	@Override
+	public Model_Acyclic_Weighted replaceFirst(Model_Acyclic_Weighted find, Model_Acyclic_Weighted replace) {
+		return null;
+	}
+
+	@Override
+	public Model_Acyclic_Weighted replaceAll(Model_Acyclic_Weighted find, Model_Acyclic_Weighted replace) {
+		return null;
+	}
+
 
 }

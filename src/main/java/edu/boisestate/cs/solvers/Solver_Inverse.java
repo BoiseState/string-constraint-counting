@@ -189,11 +189,18 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver_Count<T
 		
 	}
 
+	// calls the Model Acyclic method
 	@Override
-	public T inv_replaceFirst(T input, String find, String replace) {
+	public T inv_replaceFirst(T input, T find, T replace) {
 		T resModel = input.inv_replaceFirst(find, replace);
 		return resModel;
 
+	}
+
+	@Override
+	public T inv_replaceAll(T input, T find, T replace) {
+		T resModel = input.inv_replaceAll(find, replace);
+		return resModel;
 	}
 
 	@Override

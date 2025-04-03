@@ -682,7 +682,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
                 if (!argList.isEmpty() && pc.getOp() != Operation.SUBSTR_STRT_END &&
                         pc.getOp() != Operation.SUBSTRING_START &&
                         pc.getOp() != Operation.SET_LENGTH &&
-                        pc.getOp() != Operation.REPLACE_CHAR_CHAR &&
+//                        pc.getOp() != Operation.REPLACE_CHAR_CHAR &&
                         pc.getOp() != Operation.DELETE_START_END) {
 
 
@@ -697,6 +697,14 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
                         invConstraint.setArg(allInverseConstraints.get(arg));
                     } // end if
+                    if (argList.size()==2){
+                        if (pc.getOp() == Operation.REPLACE_FIRST || pc.getOp() == Operation.REPLACE_ALL) {
+                            int arg2 = argList.get(1);
+                            if (arg2 != -1) {
+                                invConstraint.setArg2(allInverseConstraints.get(arg2));
+                            }
+                        }
+                    }
 //					if (pc.getOp() == Operation.REPLACE_CHAR_CHAR) {
 //						int arg2 = argList.get(1);
 //						if (arg2 != -1) {

@@ -108,8 +108,19 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 			index = 1;
 		} else if (childConstraint.equals(argConstraint)) {
 			index = 2;
+		} else if (childConstraint.equals(arg2Constraint)) {
+			index = 3;
 		}
-		return outputSet.get(index);
+		if (index == -1) {
+			System.err.println("ERROR: output() called with invalid childConstraint");
+			System.exit(1);
+		}
+		T output = outputSet.get(index);
+		if (output == null) {
+			System.err.println("ERROR: outputSet for"+ this + "does not contain constraint: " + childConstraint);
+			System.exit(1);
+		}
+		return output;
 	}
 	
 //	@Override

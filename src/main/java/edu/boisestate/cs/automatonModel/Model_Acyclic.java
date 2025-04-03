@@ -1322,4 +1322,14 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 		return replaceAllOptimized(arg1String, arg2String);
 	}
 
+	@Override
+	public Model_Acyclic replaceFirst(Model_Acyclic f, Model_Acyclic r) {
+		return null;
+	}
+
+	@Override
+	public Model_Acyclic replaceAll(Model_Acyclic f, Model_Acyclic r) {
+		return null;
+	}
+
 }

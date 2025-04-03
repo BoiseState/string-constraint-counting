@@ -28,7 +28,8 @@ public interface I_Inv_Constraint<T extends A_Model_Inverse<T>> {
 	
 	public void setArg(I_Inv_Constraint<T> constraint);
 	
-	
+	public void setArg2(I_Inv_Constraint<T> constraint);
+
 	public int getArgID();
 	
 	public void setNext(I_Inv_Constraint<T> constraint);
