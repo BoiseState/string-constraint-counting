@@ -45,7 +45,7 @@ public interface I_Model_Inverse<T extends I_Model_Inverse<T>> {
 	
 	T inv_replaceFirst(T find, T replace);
 	
-	T inv_replaceAll();
+	T inv_replaceAll(T find, T replace);
 	
 	/**
 	 * 

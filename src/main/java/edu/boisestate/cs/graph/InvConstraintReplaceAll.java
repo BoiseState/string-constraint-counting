@@ -44,15 +44,15 @@ public class InvConstraintReplaceAll<T extends A_Model_Inverse<T>> extends A_Inv
 
     public Tuple<Boolean, Boolean> evaluate() {
         Tuple<Boolean, Boolean> ret = new Tuple<>(true, true);
-        printDebug("EVALUATE REPLACE FIRST " + ID + " ...");
+        printDebug("EVALUATE REPLACE ALL " + ID + " ...");
         T inputs = incoming();
-        printDebug("REPLACE FIRST INCOMING: " + inputs.getShortestExampleString());
+        printDebug("REPLACE ALL INCOMING: " + inputs.getShortestExampleString());
         if(inputs.isEmpty()){
-            printDebug("REPLACE FIRST INCOMING SET INCONSISTENT");
+            printDebug("REPLACE ALL INCOMING SET INCONSISTENT");
             ret = new Tuple<>(false, true);
         } else {
             // calls the solver_inverse method which calls the model_acyclic method
-            T resModel = solver.inv_replaceFirst(inputs, find, replace);
+            T resModel = solver.inv_replaceAll(inputs, find, replace);
             if (resModel != null) {
                 // add the result to the outputSet
                 // for some reason we use a hashmap that is indexed not by the ID by just by liek 1,2,3? i guess to do with source vs target but still unclear
