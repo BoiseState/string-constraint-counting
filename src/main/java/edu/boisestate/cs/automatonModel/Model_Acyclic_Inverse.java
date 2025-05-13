@@ -1566,8 +1566,15 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
         Automaton regexAut = regexString.automaton;
 		Automaton origAut = Automaton.minimize(automaton.clone());
-        Automaton anyPrefixAndSuffix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat().concatenate(regexAut)
-                .concatenate(Automaton.makeCharSet(this.alphabet.getCharSet()).repeat()); // nps 5.13.25 - TODO: should this take into account the Bound?
+        // nps 5.13.25 - Need to manually concatenate bounds as repeat uses loops
+        int repeat = boundLength - regexString.getBoundLength();
+        // to account for all possibilities add to front and back
+        String charSet = this.alphabet.getCharSet();
+        Automaton padding = Automaton.makeCharSet(charSet).repeat(repeat).union(Automaton.makeEmptyString());
+        Automaton anyPrefixAndSuffix = padding.concatenate(regexAut).concatenate(padding);
+
+//        Automaton anyPrefixAndSuffix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat().concatenate(regexAut)
+//                .concatenate(Automaton.makeCharSet(this.alphabet.getCharSet()).repeat());
 		// Automaton containing all Strings in the originalAutomaton's language which
 		// contain a substring which satisfies the regex
 		Automaton intersection = Automaton.minimize(origAut.intersection(anyPrefixAndSuffix));
@@ -1587,7 +1594,9 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
         // PREFIX MATCHIING:
         // find all possible prefixes in the automaton that precede a pattern match
-        printDebug("prefix matching for intersection: " + intersection.getFiniteStrings());
+        if (debug) { // getFiniteStrings itself is expensive
+            printDebug("prefix matching for intersection: " + intersection.getFiniteStrings());
+        }
         while (!intersection.isEmpty()) {
             Stack<State> stack = new Stack<>();
             stack.push(intersection.getInitialState()); // dont need to clone because we don't ever manipulate the initial state?
