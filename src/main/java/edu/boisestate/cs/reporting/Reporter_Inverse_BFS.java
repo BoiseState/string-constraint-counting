@@ -129,7 +129,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 			//1st true - continue, false - backtrack
 			//2nd true - don't add to the backtrack map, false do
 			Tuple<Boolean, Boolean> result = curr.evaluate();
-			printDebug("reslut " + result);
+			printDebug("result " + result);
 			if(result.get1()) {
 				//continue by extending the queue
 				if(curr.getNextID() != -1 && !qID.contains(curr.getNextID())) {

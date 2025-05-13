@@ -27,6 +27,10 @@ public abstract class A_Model_Inverse <T extends A_Model_Inverse <T>> extends A_
  	   return this.automaton;
     }
 
+    public void setDebug(boolean debug) {
+        this.debug = debug;
+    }
+
     protected void printDebug(String message) {
         if (debug) System.out.println(message);
     }

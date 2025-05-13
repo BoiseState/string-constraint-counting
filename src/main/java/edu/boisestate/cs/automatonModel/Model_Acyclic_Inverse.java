@@ -605,6 +605,20 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
     }
 
     @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Model_Acyclic_Inverse: ");
+        sb.append("alphabet: ");
+        sb.append(this.alphabet.toString());
+        sb.append(" boundLength: ");
+        sb.append(this.boundLength);
+        sb.append(" automaton: ");
+        sb.append(this.automaton.toString());
+        sb.append("\n");
+        return sb.toString();
+    }
+
+    @Override
     public Model_Acyclic_Inverse insert(int offset, Model_Acyclic_Inverse argModel) {
         //ensureAcyclicModel(argModel);
 
@@ -897,7 +911,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 		int resultLength = this.getBoundLength();		// should be a single string, length = bound
 		int prefixBound = base.getBoundLength();		// symbolic, could be any length up to bound
 		
-		System.out.println("attempting to split: ");
+		printDebug("attempting to split: ");
 //		for (String s : this.getFiniteStrings()) {
 //			System.out.println(s);
 //		}
@@ -1472,7 +1486,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
     // helper method for replaceFirst to determine correctness
     // enumerates all possible strings in model to perform operation
     public Model_Acyclic_Inverse replaceFirstBruteForce(Model_Acyclic_Inverse find, Model_Acyclic_Inverse replace) {
-        Model_Acyclic_Inverse result = new Model_Acyclic_Inverse(Automaton.makeEmpty(), this.alphabet, 0);
+        Model_Acyclic_Inverse result = new Model_Acyclic_Inverse(Automaton.makeEmpty(), this.alphabet, this.boundLength);
         // get all strings in model
         Set<String> thisStrings = this.automaton.getFiniteStrings();
         // get all strings in find model
@@ -1487,6 +1501,10 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
                     result = result.union(new Model_Acyclic_Inverse(Automaton.makeString(newString), this.alphabet, newString.length()));
                 }
             }
+        }
+        if (this.containsString("")){
+            // if the model contains the empty string, we need to add it to the result
+            result = result.union(new Model_Acyclic_Inverse(Automaton.makeEmptyString(), this.alphabet, 0));
         }
         return result;
     }
@@ -1509,6 +1527,10 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
                     result = result.union(new Model_Acyclic_Inverse(Automaton.makeString(newString), this.alphabet, this.boundLength));
                 }
             }
+        }
+        if (this.containsString("")) {
+            // if the model contains the empty string, we need to add it to the result
+            result = result.union(new Model_Acyclic_Inverse(Automaton.makeEmptyString(), this.alphabet, 0));
         }
         return result;
     }
@@ -1533,18 +1555,25 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 		// wrote this algorithm when arguments were a regexString and replacement string, now they are themselves models
         // potentially its extra work to convert them to automata :shrug:
 //        Automaton regexAut = new RegExp(regexString).toAutomaton();
-        Model_Acyclic_Inverse bruteModel = this.replaceFirstBruteForce(regexString, replacementString);
+        Model_Acyclic_Inverse bruteModel = null;
+        if(debug) {
+            bruteModel = this.replaceFirstBruteForce(regexString, replacementString);
+            printDebug("This: " + this.automaton.getFiniteStrings());
+            printDebug("Find: " + regexString.automaton.getFiniteStrings());
+            printDebug("Replace: " + replacementString.automaton.getFiniteStrings());
+            printDebug("Brute: " + bruteModel.automaton.getFiniteStrings());
+        }
 
         Automaton regexAut = regexString.automaton;
 		Automaton origAut = Automaton.minimize(automaton.clone());
         Automaton anyPrefixAndSuffix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat().concatenate(regexAut)
-                .concatenate(Automaton.makeCharSet(this.alphabet.getCharSet()).repeat());
+                .concatenate(Automaton.makeCharSet(this.alphabet.getCharSet()).repeat()); // nps 5.13.25 - TODO: should this take into account the Bound?
 		// Automaton containing all Strings in the originalAutomaton's language which
 		// contain a substring which satisfies the regex
 		Automaton intersection = Automaton.minimize(origAut.intersection(anyPrefixAndSuffix));
 		// if there are no matches to operate on, return the originalAutomaton
 		if (intersection.isEmpty()) {
-            System.out.println("No pattern to match, returning same model");
+            printDebug("No pattern to match, returning same model");
             return new Model_Acyclic_Inverse(automaton, this.alphabet, this.boundLength);
 		}
 
@@ -1558,7 +1587,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
         // PREFIX MATCHIING:
         // find all possible prefixes in the automaton that precede a pattern match
-        System.out.println("prefix matching for intersection: " + intersection.getFiniteStrings());
+        printDebug("prefix matching for intersection: " + intersection.getFiniteStrings());
         while (!intersection.isEmpty()) {
             Stack<State> stack = new Stack<>();
             stack.push(intersection.getInitialState()); // dont need to clone because we don't ever manipulate the initial state?
@@ -1598,43 +1627,53 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
                 }
             }
         }
-        System.out.println("This: " + this.automaton.getFiniteStrings());
-        System.out.println("Without regex: " + origAut.getFiniteStrings());
-        System.out.println("Find: " + regexString.automaton.getFiniteStrings());
-        System.out.println("Replace: " + replacementString.automaton.getFiniteStrings());
-        System.out.println("Splits: ");
+        printDebug("This: " + this.automaton.getFiniteStrings());
+        printDebug("Without regex: " + origAut.getFiniteStrings());
+        printDebug("Find: " + regexString.automaton.getFiniteStrings());
+        printDebug("Replace: " + replacementString.automaton.getFiniteStrings());
+        printDebug("Splits: ");
         for (State s : prefixMap.keySet()) {
-            System.out.println("    Prefix: " + prefixMap.get(s).getFiniteStrings());
-            System.out.println("    PatternSuffix: " + suffixMap.get(s).getFiniteStrings());
+            printDebug("    Prefix: " + prefixMap.get(s).getFiniteStrings());
+            printDebug("    PatternSuffix: " + suffixMap.get(s).getFiniteStrings());
         }
 
         // SUFFIX ENUMERATING:
         // now we have a map of prefixes and suffixes
         // but we need to enumerate possible suffix matches for each prefix
-        HashMap<Automaton, Automaton> suffixPrefixMap = new HashMap<>(); // suffixes will be unique (no they might not be)
         Set<Automaton> results = new HashSet<>();
         for (State sufStart : suffixMap.keySet()) {
-            Automaton patternSuffix = suffixMap.get(sufStart).clone();
-            System.out.println("---Searching for suffixes in " + patternSuffix.getFiniteStrings());
+//            Automaton patternSuffix = suffixMap.get(sufStart).clone();
+            Tuple<Automaton, HashMap<State,State>> tuple = cloneAndGetStateMap(suffixMap.get(sufStart));
+            Automaton patternSuffix = tuple.get1();
+            HashMap<State, State> ogToPsStateMap = tuple.get2();
+            printDebug("---Searching for suffixes in " + patternSuffix.getFiniteStrings());
             // find unique suffix patterns
-            while (!patternSuffix.intersection(regexAut).isEmpty()) { // paths to find
+            Automaton anySuffix = regexAut.concatenate(Automaton.makeCharSet(this.alphabet.getCharSet()).repeat());
+            while (!patternSuffix.intersection(anySuffix).isEmpty()) { // paths to find
                 Stack<State> stack = new Stack<>();
                 stack.push(patternSuffix.getInitialState()); // maybe need to clone as we manipulate the pivot.
                 while (!stack.isEmpty()) {
                     State pivot = stack.peek();
                     boolean pivotAccept = pivot.isAccept();
+                    HashMap<State, Boolean> acceptMap = new HashMap<>();
                     for (State s : patternSuffix.getStates()) {
+                        acceptMap.put(s, s.isAccept()); // needs to be saved to restore
                         s.setAccept(false);
                     }
                     pivot.setAccept(true);
 
-                    System.out.println("Find: " + regexAut.getFiniteStrings());
-                    System.out.println("PatternSuffix with new pivot: " + patternSuffix.getFiniteStrings());
+                    printDebug("Find: " + regexAut.getFiniteStrings());
+                    printDebug("PatternSuffix with new pivot: " + patternSuffix.getFiniteStrings());
 
-                    Automaton inter = patternSuffix.intersection(regexAut);
+                    Automaton inter = patternSuffix.intersection(anySuffix);
+
+                    //restore patternSuffix?
+                    for (State s : patternSuffix.getStates()) {
+                        s.setAccept(acceptMap.get(s));
+                    }
 
                     if (inter.isEmpty()) {
-                        System.out.println("no match");
+                        printDebug("no match");
                     }
                     // we are looking for paths where the patternsuffix is not a match
                     // this will be disjoint sets of patterns and a corresponding suffix
@@ -1645,33 +1684,33 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
                         Automaton pattern = automatonFromStack(stackCopy);
                         Automaton prefix = prefixMap.get(sufStart);
                         // get original patternsuffix and use pivot to construct suffix
-                        Automaton suffix = suffixMap.get(sufStart).clone();
+                        Automaton suffix = suffixMap.get(sufStart);
                         // set the suffix initial state to the pivot
-                        // comparison faces challenges
-                        int get = getStateNumber(pivot);
-                        for (State sState : suffix.getStates()) {
-                            if (getStateNumber(sState) == get) { // Compare names
-                                suffix.setInitialState(sState); // Set the matching state as the initial state
-                                break;
+                        for (State s : suffix.getStates()) {
+                            if (pivot.equals(ogToPsStateMap.get(s))) {
+                                suffix.setInitialState(s);
                             }
                         }
+
                         suffix.minimize();
 //                        suffixPrefixMap.put(suffix, prefix);
                         // adding result to the set of results
-                        System.out.println("Found a match, intersection: " + inter.getFiniteStrings());
-                        System.out.println("    Prefix: " + prefix.getFiniteStrings());
-                        System.out.println("    Pattern: " + pattern.getFiniteStrings());
-                        System.out.println("    Suffix: " + suffix.getFiniteStrings());
+                        printDebug("Found a match, intersection: " + inter.getFiniteStrings());
+                        printDebug("    Prefix: " + prefix.getFiniteStrings());
+                        printDebug("    Pattern: " + pattern.getFiniteStrings());
+                        printDebug("    Suffix: " + suffix.getFiniteStrings());
                         Automaton result = prefix.concatenate(replacementString.automaton.concatenate(suffix));
                         result.minimize();
-                        System.out.println("    Result: " + result.getFiniteStrings());
+                        printDebug("    Result: " + result.getFiniteStrings());
                         results.add(result);
                         // set minus of what was removed from patternSuffix to continue searching
                         // have to get original patternsuffix so acceptin gstates are correct
-                        System.out.println("    Removing found pattern-Suffix: " + pattern.concatenate(suffix).getFiniteStrings());
-                        System.out.println("    From patternSuffix: " + patternSuffix.getFiniteStrings());
-                        System.out.println("    Original pattern-suffix?:" + suffixMap.get(sufStart).getFiniteStrings());
-                        patternSuffix = suffixMap.get(sufStart).clone().minus(pattern.concatenate(suffix));
+                        printDebug("Prefix: " + prefix + "Pattern: " + pattern + " Suffix: " + suffix + " -> " + pattern.concatenate(suffix));
+                        printDebug("    Removing found pattern-Suffix: " + pattern.concatenate(suffix).getFiniteStrings());
+                        printDebug("    From patternSuffix: " + patternSuffix.getFiniteStrings());
+                        printDebug("    Original pattern-suffix?:" + suffixMap.get(sufStart).getFiniteStrings());
+
+                        patternSuffix = patternSuffix.minus(pattern.concatenate(suffix));
                         patternSuffix.minimize();
                         break;
                     } else {
@@ -1692,16 +1731,19 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         for (Automaton r : results) {
             res = res.union(r);
         }
-        res.union(origAut); // add back original without any patterns
+        res = res.union(origAut); // add back original without any patterns
         Model_Acyclic_Inverse result = new Model_Acyclic_Inverse(res, this.alphabet, this.boundLength);
+        if(debug){
         if (bruteModel.equals(result)) {
-            System.out.println("Brute force and result match");
+            printDebug("Brute force and result match");
         } else {
             System.err.println("Brute force and result do not match");
             System.err.println("Brute force: " + bruteModel.getFiniteStrings());
+            System.err.println("    model: " + bruteModel.automaton);
             System.err.println("Result: " + result.getFiniteStrings());
+            System.err.println("    model: " + result.automaton);
             System.exit(1);
-        }
+        }}
         return result;
 	}
 
@@ -1724,13 +1766,14 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         // assuming prefix seleciton is fairly straightforward calling replaceFirst iteratively shuoldnt be much less efficienct
         Model_Acyclic_Inverse bruteForce = this.replaceAllBruteForce(regexString, replacementString);
         Model_Acyclic_Inverse result, next;
+        next = this.replaceFirst(regexString, replacementString);
         do {
-            result = this.replaceFirst(regexString, replacementString);
+            result = next;
             next = result.replaceFirst(regexString, replacementString);
 
         } while (!result.equals(next));
         if (bruteForce.equals(result)) {
-            System.out.println("Brute force and result match");
+            printDebug("Brute force and result match");
         } else {
             System.err.println("Brute force and result do not match");
             System.err.println("Brute force: " + bruteForce.getFiniteStrings());
@@ -1742,8 +1785,10 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
 	@Override
 	public Model_Acyclic_Inverse inv_replaceAll(Model_Acyclic_Inverse find, Model_Acyclic_Inverse replace) {
-		// TODO Auto-generated method stub
-		return null;
+        // union of replaceAll with find/replace swtiched and original
+        Model_Acyclic_Inverse result = this.replaceAll(replace, find);
+        return result.union(this);
+//        return null;
 	}
 
 
@@ -1833,20 +1878,51 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 //
 //       return result;
 //   }
+//
+//    public int getStateNumber(State s) {
+//        String[] parts = s.toString().split(" ");
+//        return Integer.parseInt(parts[1]);
+//    }
 
-    public int getStateNumber(State s) {
-        String[] parts = s.toString().split(" ");
-        return Integer.parseInt(parts[1]);
-    }
+//    /**
+//     * Creates a new automaton with a new start state and the same transitions as the original automaton.
+//     *
+//     * @param a The original automaton
+//     * @param newStart The new start state
+//     * @return A new automaton with the specified start state
+//     */
+//    public Automaton cloneWithNewStart(Automaton a, State newStart) {
+//        Automaton ret = new Automaton();
+//        // hashmap needed for transitions
+//        HashMap<State, State> stateMap = new HashMap<>();
+//        for (State s : a.getStates()) {
+//            stateMap.put(s,new State());
+//        }
+//        for (State s : a.getStates()) {
+//            State newState = stateMap.get(s);
+//            newState.setAccept(s.isAccept());
+//            if (s.equals(newState)) {
+//                ret.setInitialState(newState);
+//            }
+//            for (Transition t : s.getTransitions()) {
+//                State toState = stateMap.get(t.getDest());
+//                newState.addTransition(new Transition(t.getMin(), t.getMax(), toState));
+//            }
+//        }
+//        if (ret.getInitialState() == null) {
+//            System.err.println("STATE NOT IN AUTOMATON");
+//        }
+//        return ret;
+//    }
 
     /**
-     * Creates a new automaton with a new start state and the same transitions as the original automaton.
+     * Clones the automaton and returns a tuple containing the cloned automaton and a mapping of states.
+     * between the original and cloned automaton.
      *
      * @param a The original automaton
-     * @param newStart The new start state
-     * @return A new automaton with the specified start state
+     * @return A tuple containing the cloned automaton and a mapping of states
      */
-    public Automaton cloneWithNewStart(Automaton a, State newStart) {
+    public Tuple<Automaton, HashMap<State, State>> cloneAndGetStateMap(Automaton a) {
         Automaton ret = new Automaton();
         // hashmap needed for transitions
         HashMap<State, State> stateMap = new HashMap<>();
@@ -1854,8 +1930,17 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
             stateMap.put(s,new State());
         }
         for (State s : a.getStates()) {
-
+            State newState = stateMap.get(s);
+            newState.setAccept(s.isAccept());
+            if (s.equals(a.getInitialState())) {
+                ret.setInitialState(newState);
+            }
+            for (Transition t : s.getTransitions()) {
+                State toState = stateMap.get(t.getDest());
+                newState.addTransition(new Transition(t.getMin(), t.getMax(), toState));
+            }
         }
+        return new Tuple<Automaton, HashMap<State, State>>(ret, stateMap);
     }
 
 }

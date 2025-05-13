@@ -586,8 +586,9 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
     public void replaceAll(int id, int base, int argOne, int argTwo) {
     	// get models
     	T baseModel = this.symbolicStringMap.get(base);
-    	if (baseModel.getClass() != Model_Acyclic.class)
-    		return;
+        // nps - 04.16.25 - unsure why this is here
+//    	if (baseModel.getClass() != Model_Acyclic.class)
+//    		return;
 
         // nps - switched to models: untested as of 4.3.25
         T arg1, arg2;

@@ -16,7 +16,7 @@ public class InvConstraintReplaceAll<T extends A_Model_Inverse<T>> extends A_Inv
         this.solver = invSolver;
         this.ID = id;
         this.argList = args;
-        this.op = Operation.REPLACE_FIRST;
+        this.op = Operation.REPLACE_ALL;
         this.outputSet = new HashMap<Integer, T>();
         this.solutionSet = new SolutionSetInternal<T>(id);
         this.argString = "0:FIND 1:REPLACE";
@@ -57,13 +57,13 @@ public class InvConstraintReplaceAll<T extends A_Model_Inverse<T>> extends A_Inv
                 // add the result to the outputSet
                 // for some reason we use a hashmap that is indexed not by the ID by just by liek 1,2,3? i guess to do with source vs target but still unclear
                 outputSet.put(1, resModel);
-                // add find/replace to outputSet - TODO: make replacement use models for find/replace
+                // add find/replace to outputSet
                 outputSet.put(2, find);
-                printDebug("INVERSE REPLACE FIRST: FIND " + find.getShortestExampleString() + " REPLACE " + replace.getShortestExampleString());
+                printDebug("INVERSE REPLACE ALL: FIND " + find.getShortestExampleString() + " REPLACE " + replace.getShortestExampleString());
                 outputSet.put(3, replace);
-                printDebug("INVERSE REPLACE FIRST OUTPUT SET: " + resModel.getShortestExampleString());
+                printDebug("INVERSE REPLACE ALL OUTPUT SET: " + resModel.getShortestExampleString());
             } else {
-                System.err.println("INVERSE REPLACE FIRST OUTPUT SET IS NULL");
+                System.err.println("INVERSE REPLACE ALL OUTPUT SET IS NULL");
                 System.exit(1);
             }
         }

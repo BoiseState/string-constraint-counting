@@ -647,6 +647,16 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
                     }
 
                     break;
+                case REPLACE_ALL: // unsure why we need seperate cases for these?
+                    args = pc.getArgList();
+                    newConstraint = new InvConstraintReplaceAll<T>(ID, invSolver, args);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId() + " " + args);
+                    }
+
+                    break;
                 default:
 
                     if (localDebug) {
@@ -697,7 +707,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
                         invConstraint.setArg(allInverseConstraints.get(arg));
                     } // end if
-                    if (argList.size()==2){
+                    if (argList.size()==2){ // this shouldnt ever happen anymore as we handle replace first and all symboliclally - nps - 04/16/2025
                         if (pc.getOp() == Operation.REPLACE_FIRST || pc.getOp() == Operation.REPLACE_ALL) {
                             int arg2 = argList.get(1);
                             if (arg2 != -1) {
