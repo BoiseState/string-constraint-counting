@@ -862,101 +862,118 @@ public class Parser_2<T extends A_Model<T>> {
 
 		// ---------------- replace(char, char) ----------------------------
 		// string.replace(char oldChar, char newChar)
-
-		// first two params are char
-		if (params.equals("CC")) {
-
-			// create symbolic strings as characters
-			String arg1String = actualVals.get(arg1);
-			String arg2String = actualVals.get(arg2);
-
-			solver.newConcreteString(arg1, arg1String);
-			solver.newConcreteString(arg2, arg2String);
-
-			// check args constants
-			if (arg1String != null && arg1String.length() == 1 && arg2String != null && arg2String.length() == 1) {
-
-				char findChar = 0;
-				char replaceChar = 0;
-				boolean findKnown = false;
-				boolean replaceKnown = false;
-
-				// determine if old char is known
-				if (arg1String.charAt(0) != 0) {
-					findKnown = true;
-					findChar = arg1String.charAt(0);
-				}
-
-				// determine if new char is known
-				if (arg2String.charAt(0) != 0) {
-					replaceKnown = true;
-					replaceChar = arg2String.charAt(0);
-				}
-
-				// perform appropriate replace operation
-				if (findKnown && replaceKnown) {
-
-					// MJR store arguments in constraint for use during inverse
-					printDebug("findChar " + findChar + " replaceChar " + replaceChar);
-					constraint.addArg(findChar);
-					constraint.addArg(replaceChar);
-					constraint.setOp(REPLACE_CHAR_CHAR);
-
-					this.solver.replaceCharKnown(id, base, findChar, replaceChar);
-					operation = String.format("<S:%d>.replace('%s', '%s')", base, findChar, replaceChar);
-
-				} else if (findKnown) {
-
-					// MJR store arguments in constraint for use during inverse
-					constraint.addArg(findChar);
-					constraint.setOp(REPLACE_CHAR_UNK);
-
-					this.solver.replaceCharFindKnown(id, base, findChar);
-					operation = String.format("<S:%d>.replace('%s', <char>)", base, findChar);
-
-				} else if (replaceKnown) {
-
-					// MJR store arguments in constraint for use during inverse
-					constraint.addArg(replaceChar);
-					constraint.setOp(REPLACE_UNK_CHAR);
-
-					this.solver.replaceCharReplaceKnown(id, base, replaceChar);
-					operation = String.format("<S:%d>.replace(<char>, '%s')", base, replaceChar);
-
-				} else {
-
-					constraint.setOp(REPLACE_UNK_UNK);
-
-					this.solver.replaceCharUnknown(id, base);
-					operation = String.format("<S:%d>.replace(<char>, <char>)", base);
-
-				}
-			}
-		} // ---------------- replace(char, char) ----------------------------
-
 		// string.replace(CharSequence target, CharSequence replacement)
-		else if (params.equals("Ljava/lang/CharSequence;" + "Ljava/lang/CharSequence;")) {
+		// nps - 5.13.25 - replaceCC and others are deprecated by new replaceAll and replaceFirst
 
-			// get string representations
-			String str1 = actualVals.get(arg1);
-			String str2 = actualVals.get(arg2);
-
-			// set string representations
-			solver.newConcreteString(arg1, str1);
-			solver.newConcreteString(arg2, str2);
-
-			// MJR store arguments in constraint for use during inverse
+		else if (fName.startsWith("replace")){ // TODO: make certain this is comprehensive (note this will depend on whether for SPF what benches
+			// create new concrete strings in the solver
+			solver.newConcreteString(arg1, actualVals.get(arg1));
+			solver.newConcreteString(arg2, actualVals.get(arg2));
+			// add args to the constraint
 			constraint.addArg(arg1);
 			constraint.addArg(arg2);
-			constraint.setOp(REPLACE_CHARSEQ_CHARSEQ);
-
-			// perform solver specific operation
-			solver.replaceStrings(id, base, arg1, arg2);
-
-			// set operation string
-			operation = String.format("<S:%d>.replace(\"%s\", \"%s\")", base, str1, str2);
-
-		} else {
+			// set op
+			constraint.setOp(REPLACE_ALL);
+			// perform op
+			solver.replaceAll(id, base, arg1, arg2);
+			// return success status of operation
+			return String.format("<S:%d>.%s(<S:%d>, <S:%d>)", base, fName, arg1, arg2);
+		}
+//
+//		// first two params are char
+//		if (params.equals("CC")) {
+//
+//			// create symbolic strings as characters
+//			String arg1String = actualVals.get(arg1);
+//			String arg2String = actualVals.get(arg2);
+//
+//			solver.newConcreteString(arg1, arg1String);
+//			solver.newConcreteString(arg2, arg2String);
+//
+//			// check args constants
+//			if (arg1String != null && arg1String.length() == 1 && arg2String != null && arg2String.length() == 1) {
+//
+//				char findChar = 0;
+//				char replaceChar = 0;
+//				boolean findKnown = false;
+//				boolean replaceKnown = false;
+//
+//				// determine if old char is known
+//				if (arg1String.charAt(0) != 0) {
+//					findKnown = true;
+//					findChar = arg1String.charAt(0);
+//				}
+//
+//				// determine if new char is known
+//				if (arg2String.charAt(0) != 0) {
+//					replaceKnown = true;
+//					replaceChar = arg2String.charAt(0);
+//				}
+//
+//				// perform appropriate replace operation
+//				if (findKnown && replaceKnown) {
+//
+//					// MJR store arguments in constraint for use during inverse
+//					printDebug("findChar " + findChar + " replaceChar " + replaceChar);
+//					constraint.addArg(findChar);
+//					constraint.addArg(replaceChar);
+//					constraint.setOp(REPLACE_CHAR_CHAR);
+//
+//					this.solver.replaceCharKnown(id, base, findChar, replaceChar);
+//					operation = String.format("<S:%d>.replace('%s', '%s')", base, findChar, replaceChar);
+//
+//				} else if (findKnown) {
+//
+//					// MJR store arguments in constraint for use during inverse
+//					constraint.addArg(findChar);
+//					constraint.setOp(REPLACE_CHAR_UNK);
+//
+//					this.solver.replaceCharFindKnown(id, base, findChar);
+//					operation = String.format("<S:%d>.replace('%s', <char>)", base, findChar);
+//
+//				} else if (replaceKnown) {
+//
+//					// MJR store arguments in constraint for use during inverse
+//					constraint.addArg(replaceChar);
+//					constraint.setOp(REPLACE_UNK_CHAR);
+//
+//					this.solver.replaceCharReplaceKnown(id, base, replaceChar);
+//					operation = String.format("<S:%d>.replace(<char>, '%s')", base, replaceChar);
+//
+//				} else {
+//
+//					constraint.setOp(REPLACE_UNK_UNK);
+//
+//					this.solver.replaceCharUnknown(id, base);
+//					operation = String.format("<S:%d>.replace(<char>, <char>)", base);
+//
+//				}
+//			}
+//		} // ---------------- replace(char, char) ----------------------------
+//
+//		// string.replace(CharSequence target, CharSequence replacement)
+//		else if (params.equals("Ljava/lang/CharSequence;" + "Ljava/lang/CharSequence;")) {
+//
+//			// get string representations
+//			String str1 = actualVals.get(arg1);
+//			String str2 = actualVals.get(arg2);
+//
+//			// set string representations
+//			solver.newConcreteString(arg1, str1);
+//			solver.newConcreteString(arg2, str2);
+//
+//			// MJR store arguments in constraint for use during inverse
+//			constraint.addArg(arg1);
+//			constraint.addArg(arg2);
+//			constraint.setOp(REPLACE_CHARSEQ_CHARSEQ);
+//
+//			// perform solver specific operation
+//			solver.replaceStrings(id, base, arg1, arg2);
+//
+//			// set operation string
+//			operation = String.format("<S:%d>.replace(\"%s\", \"%s\")", base, str1, str2);
+//		}
+		 else {
 
 			solver.newSymbolicString(id);
 

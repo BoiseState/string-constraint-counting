@@ -1398,7 +1398,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 			//update and check if this split works with base
 			prefixModel = base.intersect(prefixModel);
 			if (prefixModel.isEmpty()) {
-                System.out.println("Going to the next split, prefix failed");
+                printDebug("Going to the next split, prefix failed");
 				//does not work, go to the next split
 				continue;
 			}
@@ -1419,7 +1419,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 			//update and check if this split worked for suffix
 			suffixModel = arg.intersect(suffixModel);
 			if(suffixModel.isEmpty()) {
-                System.out.println("Going to the next split, suffix failed");
+                printDebug("Going to the next split, suffix failed");
 				continue;
 			}
 			
@@ -1441,7 +1441,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 		}
 		
 		if(noMatch) {
-            System.out.println("No match found, returning empty set of tuples");
+            printDebug("No match found, returning empty set of tuples");
 		}
 		
 		return results;
