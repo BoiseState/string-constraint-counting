@@ -1570,7 +1570,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         int repeat = boundLength - regexString.getBoundLength();
         // to account for all possibilities add to front and back
         String charSet = this.alphabet.getCharSet();
-        Automaton padding = Automaton.makeCharSet(charSet).repeat(repeat).union(Automaton.makeEmptyString());
+        Automaton padding = Automaton.makeCharSet(charSet).repeat(0,repeat);
         Automaton anyPrefixAndSuffix = padding.concatenate(regexAut).concatenate(padding);
 
 //        Automaton anyPrefixAndSuffix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat().concatenate(regexAut)
@@ -1585,7 +1585,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 		}
 
 		//separate out the unchanged by replaceFirst portion of the original automaton
-		origAut= Automaton.minimize(origAut.minus(anyPrefixAndSuffix));
+		origAut = origAut.minus(anyPrefixAndSuffix);
+        origAut.minimize();
 
 
         HashMap<State, Automaton> prefixMap = new HashMap<>();
@@ -1616,21 +1617,26 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
                     state.setAccept(true);
                 }
                 // intersection with current state as the initial state mathcing a pattern
-                Automaton temp = newStartFinal.intersection(regexAut.concatenate(Automaton.makeCharSet(this.alphabet.getCharSet()).repeat()));
-                Automaton suffix = newStart.intersection(regexAut.concatenate(Automaton.makeCharSet(this.alphabet.getCharSet()).repeat()));
+                Automaton temp = newStartFinal.intersection(regexAut.concatenate(padding));
+                Automaton suffix = newStart.intersection(regexAut.concatenate(padding));
                 // note this suffix represents a pattern and its suffix and we still need ot identify the actual suffixes
                 //push children of start state, prefix not yet found
                 if (!temp.isEmpty()) { // pattern found!
                     Stack<State> stackCopy = (Stack<State>) stack.clone();
                     Automaton prefix = automatonFromStack(stackCopy);
+                    prefix.minimize();
                     prefixMap.put(start, prefix);
                     suffixMap.put(start, suffix);
                     //remove the prefix suffix pair from our search
-                    intersection = Automaton.minimize(intersection.minus(prefix.concatenate(suffix)));
+                    Automaton found = prefix.concatenate(suffix);
+                    found.minimize();
+                    intersection = intersection.minus(found);
+                    intersection.minimize();
                     break;
                 } else { //no prefix found
                     // add a child to explore another path
                     // note: all paths shold have a pattern match at some point due to nature of intersection
+//                    State next = start.getTransitions().iterator().next().getDest(); // need to mark visited cause can technically loop?
                     stack.push(start.getTransitions().iterator().next().getDest());
                     // this shuold also never be null otherwise intersection would be empty
                 }
@@ -1657,7 +1663,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
             HashMap<State, State> ogToPsStateMap = tuple.get2();
             printDebug("---Searching for suffixes in " + patternSuffix.getFiniteStrings());
             // find unique suffix patterns
-            Automaton anySuffix = regexAut.concatenate(Automaton.makeCharSet(this.alphabet.getCharSet()).repeat());
+            Automaton anySuffix = regexAut.concatenate(padding);
             while (!patternSuffix.intersection(anySuffix).isEmpty()) { // paths to find
                 Stack<State> stack = new Stack<>();
                 stack.push(patternSuffix.getInitialState()); // maybe need to clone as we manipulate the pivot.

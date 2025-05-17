@@ -1,5 +1,6 @@
 package edu.boisestate.cs.graph;
 
+import edu.boisestate.cs.Alphabet;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
