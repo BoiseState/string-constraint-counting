@@ -587,7 +587,7 @@ public class SolveMain {
 		//eas for efficient processing several predicates, we
 		//create a dependency map that indicate on which predicates a predicate is dependent
 		//we say that two predicates are dependent if there is a symbolic node among their common ancestors
-		
+		graphExtra.orderIDsTopologically();
 		graphExtra.computePredicateDependencies();
 		//System.exit(1);
 		return graphExtra;

@@ -97,10 +97,8 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
     }
 
     public Set<Integer> getDependedPredicates(Integer id) {
-        Set<Integer> ret = new HashSet<Integer>();
-        ret.addAll(predDependID.get(id));
 
-        return ret;
+        return new HashSet<Integer>(predDependID.get(id));
     }
 
     // note that this includes itself
@@ -228,7 +226,65 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
         }
     }
 
-    // print visualization of graph for debugging (note this could be very big)
+    public void orderIDsTopologically () {
+        // MAS algorithm requires the constraints to be IDed in topological order, otherwise the queue for evaluation will break
+        HashSet<PrintConstraint> processed = new HashSet<>();
+        ArrayList<PrintConstraint> toProcess = new ArrayList<>();
+        // should have made a getLeaves helper
+        for (PrintConstraint c : vertexSet()) {
+            if (this.outDegreeOf(c) == 0) {
+                toProcess.add(c);
+            }
+        }
+        toProcess.sort(new PrintConstraintComparator());
+        int id = vertexSet().size();
+        // we just need to make sure all ancestors of a constraint are processed before the constraint itself
+        while (!toProcess.isEmpty()) {
+
+            PrintConstraint current = toProcess.remove(0);
+
+            boolean parentsProcessed = true;
+            for (PrintConstraint next : this.getParents(current)) {
+                if (next!=current && !processed.contains(next)) {
+                    parentsProcessed = false;
+                    break;
+                }
+            }
+            if (parentsProcessed) {
+                processed.add(current);
+                current.setID(id--);
+                for (PrintConstraint child : this.getNextChildren(current)) {
+                    if (!toProcess.contains(child)) {
+                        toProcess.add(child);
+                    }
+                }
+            } else {
+                toProcess.add(current);
+            }
+        }
+    }
+
+    public ArrayList<PrintConstraint> getNextChildren(PrintConstraint c){
+       Set<SymbolicEdge> edges = this.incomingEdgesOf(c);
+       ArrayList<PrintConstraint> ret = new ArrayList<>();
+       for (SymbolicEdge e : edges) {
+            ret.add((PrintConstraint) e.getASource());
+       }
+       ret.sort(new PrintConstraintComparator());
+       return ret;
+    }
+
+    public ArrayList<PrintConstraint> getParents(PrintConstraint c){
+       Set<SymbolicEdge> edges = this.outgoingEdgesOf(c);
+       ArrayList<PrintConstraint> ret = new ArrayList<>();
+       for (SymbolicEdge e : edges) {
+            ret.add((PrintConstraint) e.getATarget());
+       }
+       ret.sort(new PrintConstraintComparator());
+       return ret;
+    }
+
+    // print 'visualization' of graph for debugging (note this could be very big)
     public void printGraph() {
        Iterator<PrintConstraint> iter = new TopologicalOrderIterator<PrintConstraint, SymbolicEdge>(this);
        // based on topological level, print out constraint name and then edges below it...
@@ -242,5 +298,7 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
              System.out.println("-------------------------------");
          }
     }
+
+
 
 }

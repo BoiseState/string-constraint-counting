@@ -53,7 +53,6 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 		//end from Marlin's code
 
 
-		// TODO: nat- 9.2.24 - i don't see why we can't just add all constraints to the queue
 
 		printDebug("Solving using BFS");
 		//create a queue of all dependent predicates
@@ -65,6 +64,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 
 		printDebug(predicateIDs.toString());
 		InvDefaultDirectedGraph eGraph = (InvDefaultDirectedGraph)graph;
+
 		TreeSet <Integer> qID = new TreeSet<Integer>();
 		//predicateIDs have the last predicate is the current constraint predicate
 		//and it contains all predicates solved so far

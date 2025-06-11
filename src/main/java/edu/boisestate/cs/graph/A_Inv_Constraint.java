@@ -116,7 +116,7 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 			System.exit(1);
 		}
 		T output = outputSet.get(index);
-		if (output == null) {
+		if (output == null) { // unless that constraint just hasn't been computed yet
 			System.err.println("ERROR: outputSet for"+ this + "does not contain constraint: " + childConstraint);
 			System.exit(1);
 		}

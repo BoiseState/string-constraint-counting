@@ -29,6 +29,48 @@ public class SolveMainTest {
     }
 
     @Test
+    public void testDeleteAgain(){
+        restoreStreams();
+        String[] args = {"Delete.json", "-s", "inverse", "-v", "2", "-l", "5"};
+        SolveMain.main(args);
+    }
+
+    @Test
+    public void testContains(){
+        restoreStreams();
+        String expectedOutput = "";
+        try {
+            expectedOutput = new String (Files.readAllBytes(Paths.get(outPath + "concat.txt")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String[] args = {"notContains.json", "-s", "inverse", "-v", "2", "-l", "2"};
+        SolveMain.main(args);
+//        assertEquals(expectedOutput, outContent.toString());
+    }
+
+//    @Test
+//    public void smtQueryPlaygroundTest(){
+//        restoreStreams();
+//        String query = "(declare-fun s () String)\n" +
+//                "(assert (not (str.contains \"HelloWorld\" s)))\n" +
+//                "(check-sat)\n" +
+//                "(get-model)";
+//        String tempFile = inPath + "query/smtQueryPlayground.smt2";
+//        try {
+//            Files.createDirectories(Paths.get(inPath + "query"));
+//            Files.write(Paths.get(tempFile), query.getBytes());
+//            ProcessBuilder pb = new ProcessBuilder("java", "-cp","~/Repos/SMT-parser-generator/target/GenJSONs-1.0-SNAPSHOT-jar-with-dependencies", "edu.boisestate.cs.MainJSON", inPath+"query");
+//
+//            System.out.println(pb.command());
+//            pb.start();
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+    @Test
     public void testConcat() {
         String expectedOutput = "";
         try {
