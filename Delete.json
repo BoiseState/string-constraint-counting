@@ -1,7 +1,7 @@
 {
   "alphabet" : {
     "size" : 7,
-    "declaration" : "H,e,l,o"
+    "declaration" : "H,e,l,o,0"
   },
   "vertices" : [
     {
@@ -77,7 +77,7 @@
       "value" : "\"Hello\"!:!<init>"
     },{
       "num" : 0,
-      "actualValue" : "true",
+      "actualValue" : "false",
       "incomingEdges" :[
         {
           "source" : 3,
@@ -93,7 +93,7 @@
       "value" : "equals!!Ljava/lang/Object;!:!0"
     },{
       "num" : 0,
-      "actualValue" : "true",
+      "actualValue" : "false",
       "incomingEdges" :[
         {
           "source" : 2,

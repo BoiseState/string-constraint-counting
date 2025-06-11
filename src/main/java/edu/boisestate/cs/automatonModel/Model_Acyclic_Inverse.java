@@ -1034,8 +1034,21 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 	public Model_Acyclic_Inverse inv_delete(int start, int end) {
 		
 		Model_Acyclic_Inverse anyString = modelManager.createAnyString(end - start);
+       // set bound to be equal to actual length
+        // make sure no index out of bounds, i.e. mark all states as reject
+        anyString.setBoundLength(end - start);
+        Set<State> states = anyString.getStatesOrdered();
+        Automaton aut = anyString.getAutomatonObject();
+
+        for (State state : states) {
+            state.setAccept(false);
+            if (state.getTransitions().isEmpty()) {
+                state.setAccept(true);
+            }
+        }
+
 		Model_Acyclic_Inverse result = this.insert(start, anyString);
-		
+
 		return result;
 	}
 
