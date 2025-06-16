@@ -1331,5 +1331,6 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 	public Model_Acyclic replaceAll(Model_Acyclic f, Model_Acyclic r) {
 		return null;
 	}
-
+	@Override
+	public Model_Acyclic charAt(int index) { return null;}
 }

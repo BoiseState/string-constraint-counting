@@ -208,6 +208,9 @@ public abstract class A_Model <T extends A_Model <T>> implements Cloneable, I_Mo
 	public abstract T trim();
 
     @Override
+    public abstract T charAt(int index);
+
+    @Override
 	public abstract T clone();
 
     // finds the required character automaton for the given automaton, i.e. searches for any necessary path

@@ -49,7 +49,8 @@ public enum Operation {	CONCAT,						// args:
 						PROPAGATION,				// args: 
 						TERMINAL,					// args: 
 						INPUT,					// args: 
-						UNDEFINED;					// args: 
+						UNDEFINED,
+						CHAR_AT;					// args:
 
 	
 	/**

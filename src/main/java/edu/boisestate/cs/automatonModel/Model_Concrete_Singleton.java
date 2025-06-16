@@ -306,5 +306,6 @@ public class Model_Concrete_Singleton extends A_Model<Model_Concrete_Singleton >
 	public Model_Concrete_Singleton replaceAll(Model_Concrete_Singleton f, Model_Concrete_Singleton r){
 		return null;
 	}
-
+	@Override
+	public Model_Concrete_Singleton charAt(int index) { return null;}
 }

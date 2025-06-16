@@ -103,6 +103,8 @@ public interface I_Model<T extends I_Model<T>> {
 
 	T trim();
 
+	T charAt(int index);
+
 	T clone();
 
 	String getAutomaton();

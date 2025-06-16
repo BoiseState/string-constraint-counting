@@ -29,6 +29,13 @@ public class SolveMainTest {
     }
 
     @Test
+    public void testCharAt(){
+        restoreStreams();
+        String[] args = {"CharAt.json", "-s", "inverse", "-v", "2", "-l", "5"};
+        SolveMain.main(args);
+    }
+
+    @Test
     public void testDeleteAgain(){
         restoreStreams();
         String[] args = {"Delete.json", "-s", "inverse", "-v", "2", "-l", "5"};

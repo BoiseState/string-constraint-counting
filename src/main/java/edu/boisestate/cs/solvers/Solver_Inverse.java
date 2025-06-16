@@ -454,5 +454,8 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver_Count<T
 		//invStringMap.put(id, resultModel);
 		return resModel;
 	}
-	
+
+	public T inv_charAt(T input, int index) {
+		return input.inv_charAt(index);
+	}
 }

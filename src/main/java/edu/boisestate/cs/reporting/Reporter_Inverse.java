@@ -657,11 +657,22 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
                     }
 
                     break;
+                case CHAR_AT:
+                    args = pc.getArgList();
+                    newConstraint = new InvConstraintCharAt<T>(ID, invSolver, args);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId() + " " + args);
+                    }
+
+                    break;
                 default:
 
                     if (localDebug) {
                         System.out.println("WARNING: Unhandled constraint type... " + op.toString() + "  " + pc.getId() + "  " + pc.getValue());
                     }
+                    System.err.println("WARNING: Unhandled constraint type... " + op.toString() + "  " + pc.getId() + "  " + pc.getValue());
 
 
             } // end switch
@@ -705,7 +716,9 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
                         }
 
 
-                        invConstraint.setArg(allInverseConstraints.get(arg));
+                        if (invConstraint.getOp()!=Operation.CHAR_AT) {// TODO: nps i should probably revisit this
+                            invConstraint.setArg(allInverseConstraints.get(arg));
+                        }
                     } // end if
                     if (argList.size()==2){ // this shouldnt ever happen anymore as we handle replace first and all symboliclally - nps - 04/16/2025
                         if (pc.getOp() == Operation.REPLACE_FIRST || pc.getOp() == Operation.REPLACE_ALL) {

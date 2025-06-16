@@ -230,8 +230,10 @@ public class Parser_2<T extends A_Model<T>> {
 			solver.toLowerCase(id, base);
 			operationString = String.format("<S:%d>.toLowerCase()", base);
 
-		} else if (fName.equals("toString") || fName.equals("intern") || fName.equals("trimToSize")
-				|| fName.equals("length") || fName.equals("charAt")) {
+		} else if (fName.equals("charAt")) {
+			operationString = processCharAt(constraint);
+		}else if (fName.equals("toString") || fName.equals("intern") || fName.equals("trimToSize")
+				|| fName.equals("length")) {
 
 			// perform string propagation
 			processPropagation(constraint);
@@ -251,6 +253,26 @@ public class Parser_2<T extends A_Model<T>> {
 
 		// return op string
 		return operationString;
+	}
+
+	private String processCharAt(PrintConstraint constraint) {
+		// get constraint info as variables
+		Map<String, Integer> sourceMap = constraint.getSourceMap();
+		int id = constraint.getId();
+		int base = sourceMap.get("t");
+
+		// get location index
+		int s1Id = sourceMap.get("s1");
+		String s1String = actualVals.get(s1Id);
+		int loc = Integer.parseInt(s1String);
+
+		constraint.addArg(loc);
+		constraint.setOp(CHAR_AT);
+
+		solver.charAt(id, base, loc);
+
+		// return operation string
+		return String.format("<S:%d>.charAt(%d)", base, loc);
 	}
 
 	/**

@@ -5,6 +5,7 @@ import edu.boisestate.cs.BasicTimer;
 import edu.boisestate.cs.automatonModel.A_Model;
 import edu.boisestate.cs.automatonModel.A_Model_Manager;
 import edu.boisestate.cs.automatonModel.Model_Acyclic_Manager;
+import edu.boisestate.cs.graph.PrintConstraint;
 import edu.boisestate.cs.util.Tuple;
 import edu.boisestate.cs.automatonModel.Model_Acyclic;
 
@@ -883,6 +884,12 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
         this.symbolicStringMap.put(id, baseModel);
     }
 
+    public void charAt(int id, int base, int index) {
+        T baseModel = this.symbolicStringMap.get(base);
+        baseModel = baseModel.charAt(index);
+        this.symbolicStringMap.put(id, baseModel);
+    }
+
     private Tuple<Character, Boolean> getCharFromString(String string) {
 
         // initialize result variables
@@ -927,5 +934,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
     public String getConcreteString(int id) {
         return this.concreteStringMap.get(id);
     }
+
 
 }

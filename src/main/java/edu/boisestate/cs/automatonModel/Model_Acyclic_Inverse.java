@@ -856,6 +856,60 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
                                          this.alphabet,
                                          this.boundLength);
     }
+
+    @Override
+    public Model_Acyclic_Inverse charAt(int index) {
+        if (this.boundLength <= index) {
+            throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for model with bound length " + this.boundLength);
+        }
+
+        // traverse automaton from start state to find each possible character at the given index
+        Set<State> currentStates = new HashSet<>();
+        currentStates.add(this.getAutomatonObject().getInitialState());
+        for (int i = 0; i < index; i++) {
+            Set<State> nextStates = new HashSet<>();
+            for (State state : currentStates ) {
+                for (Transition transition : state.getTransitions()){
+                    nextStates.add(transition.getDest());
+                }
+            }
+            currentStates = nextStates;
+        }
+        //now we have each state after traversing index number of transitions
+        // lets manually construct a new automaton
+        Automaton result = new Automaton();
+        State initialState = new State();
+        result.setInitialState(initialState);
+        State finalState = new State();
+        initialState.setAccept(false);
+        finalState.setAccept(true);
+
+        for (State state : currentStates) {
+            for (Transition transition : state.getTransitions()){
+                Transition newTransition = new Transition(transition.getMin(), transition.getMax(), finalState);
+                initialState.addTransition(newTransition);
+            }
+        }
+
+        return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
+    }
+
+    public Model_Acyclic_Inverse inv_charAt(int index) {
+        // take incoming model and return new model that fills bound lengths from index with anyStrings
+        if (this.boundLength <= index) { // chatgpt wanted this so why not
+            throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for model with bound length " + this.boundLength);
+        }
+        // create two automaton, one from 0 to index, and one from index to bound length
+
+        String alphabetCharSet = this.alphabet.getCharSet();
+        Automaton start = Automaton.makeCharSet(alphabetCharSet).repeat(0,index);// maybe off by 1?
+        Automaton end = Automaton.makeCharSet(alphabetCharSet).repeat(index, this.boundLength);
+        // concatenate the two automata with the charSet from incoming model
+        Automaton charSet = this.getAutomatonObject();
+        Automaton result = start.concatenate(charSet).concatenate(end);
+
+        return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
+    }
     
 
     /**

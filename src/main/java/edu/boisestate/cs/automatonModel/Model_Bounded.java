@@ -815,4 +815,7 @@ public class Model_Bounded extends A_Model<Model_Bounded> {
 		return null;
 	}
 
+	@Override
+	public Model_Bounded charAt(int index) { return null;}
+
 }
