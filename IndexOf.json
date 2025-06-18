@@ -6,14 +6,14 @@
   "vertices" : [
     {
       "num" : 0,
-      "actualValue" : "Hello",
+      "actualValue" : "",
       "incomingEdges" :[
       ],
       "sourceConstraints" : [ ],
       "timeStamp" : 1691007827229,
       "type" : 0,
       "id" : 0,
-      "value" : "\"Hello\"!:!<init>"
+      "value" : "r1!:!getStringValue!!"
     },
     {
       "num" : 0,

@@ -942,7 +942,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         String found = findAut.getShortestExample(true);// choose a simple find model, TODO: write max and min length helper methods for acyclic automata
 
         // the simplest solution when find is not found is for result to be the empty string, and find to be anything but the empty string
-        if (includesNotFound && !found.isEmpty()) {
+        if (includesNotFound && !found.isEmpty()) {// TODO: could still make result empty, as long as we adjusted found to not be ...
             indexRange.getInitialState().getTransitions().remove(choice); // remove for possible future use
             return new Model_Acyclic_Inverse(BasicAutomata.makeEmptyString(), this.alphabet, 0);
         }
@@ -957,6 +957,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         Automaton prefix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat(index, index);
         if (index != 0){ // find is at least of length 1, so length of result would be at least index + 1
             findAut.getInitialState().setAccept(false);
+            found = findAut.getShortestExample(true);
         }
         findAut = BasicAutomata.makeString(found);
         find.boundLength = found.length();
