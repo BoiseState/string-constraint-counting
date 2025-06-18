@@ -122,6 +122,26 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 		}
 		return output;
 	}
+
+	public void setOutput(Integer index, T output) {
+		outputSet.put(index, output);
+	}
+
+	public void setOutput(I_Inv_Constraint<T> childConstraint, T output) {
+		int index = -1;
+		if(childConstraint.equals(nextConstraint)) {
+			index = 1;
+		} else if (childConstraint.equals(argConstraint)) {
+			index = 2;
+		} else if (childConstraint.equals(arg2Constraint)) {
+			index = 3;
+		}
+		if (index == -1) {
+			System.err.println("ERROR: setOutput() called with invalid childConstraint");
+			System.exit(1);
+		}
+		outputSet.put(index, output);
+	}
 	
 //	@Override
 //	public boolean fallback() {

@@ -2,6 +2,7 @@ package edu.boisestate.cs.graph;
 
 import dk.brics.automaton.Automaton;
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
 
@@ -37,6 +38,7 @@ public class InvConstraintIndexOf<T extends A_Model_Inverse<T>> extends A_Inv_Co
             // calls the solver_inverse method which calls the model_acyclic method
             T findOriginal = solver.getSymbolicModel(findID);
             T findModel = findOriginal.clone();
+            T inputsOrig = inputs.clone();
             T resModel = solver.inv_indexOf(inputs, findModel, bound);
 
             if (resModel == null) {
@@ -57,7 +59,14 @@ public class InvConstraintIndexOf<T extends A_Model_Inverse<T>> extends A_Inv_Co
                 outputSet.put(2, findModel);
                 Automaton findAutOG = findOriginal.getAutomatonObject();
                 findAutOG = findAutOG.minus(findModel.getAutomatonObject());
-                if (!findAutOG.isEmpty()){
+
+                // similarly we want to check the indexRange/inputs and see if we have exhausted those possibilities.
+                // note i think/hope we shuold have exhausted the specific index search as we don't make choices about hte restul other than based on the find model
+                // however we can't adjust inputs itself for reevaluation, we will need ot grab the prevconstraint output that is responsible
+                inputsOrig.minus(inputs);
+
+                ((A_Inv_Constraint<T>)this.prevConstraint.iterator().next()).setOutput(this,inputs); // this is the prev constraint that is responsible for the inputs
+                if (!findAutOG.isEmpty() || !inputsOrig.isEmpty()) {
                     ret = new Tuple<>(true, false);
                 }
                 //otherwise we've exhausted our search

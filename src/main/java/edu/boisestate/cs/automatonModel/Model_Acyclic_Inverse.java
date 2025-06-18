@@ -912,6 +912,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
                 char c = (char) (i + '0'); // convert to char
                 start.addTransition(new Transition(c, end));
             }
+            // also have possiblity of no match, could check intersection is not equal to original but for now just propagate '-1'
+            start.addTransition(new Transition('\uFFFF', end));
         }
 
         return new Model_Acyclic_Inverse(numRange, this.alphabet, find.boundLength);
@@ -920,20 +922,42 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
     // so this would take an index (in theory a range) and resolve a model that makes sure that is where find is first located.
     public Model_Acyclic_Inverse inv_indexOf(Model_Acyclic_Inverse find, int bound) {
         Automaton indexRange = this.getAutomatonObject();
+        // search for empty possiblity, i.e. no match, i.e. -1 (i.e. 65535 is what we use for that)
+        if (indexRange.isEmpty()) {
+            throw new RuntimeException("Index range is empty in inv_indexOf");
+        }
+        // if find includes the emptyString we can just
+
+        Transition choice = null;
+        boolean includesNotFound = false;
+        for (Transition t : indexRange.getInitialState().getTransitions()) {
+            if (t.getMin() == '\uFFFF') { // i.e. 65535, i guess in theory it could be the max with a range, but thats basicaly impossiblein this frameowkr
+                choice = t;
+                includesNotFound = true;
+                break;
+            }
+        }
+
+        Automaton findAut = find.getAutomatonObject();
+        String found = findAut.getShortestExample(true);// choose a simple find model, TODO: write max and min length helper methods for acyclic automata
+
+        // the simplest solution when find is not found is for result to be the empty string, and find to be anything but the empty string
+        if (includesNotFound && !found.isEmpty()) {
+            indexRange.getInitialState().getTransitions().remove(choice); // remove for possible future use
+            return new Model_Acyclic_Inverse(BasicAutomata.makeEmptyString(), this.alphabet, 0);
+        }
 
         // just create a dummy automaton with find and padding that can be propogated and intersected, we assume it is not a range for now :), otherwise we could iterate and backtrack, yuck
         // TODO: similar to substring/replace algo, needs to allow anystring but a match, and then the findModel, and then anystring at all after.
-        int index = (int) indexRange.getInitialState().getTransitions().iterator().next().getMin();
+        int index = (int) indexRange.getInitialState().getTransitions().iterator().next().getMin();// not sure how this will handle the -1 case tbh.
         index = index - 48; // proper conversion to int from
         if (index < 0 || index >= bound) {// not sure how to get the bound length of solving
             throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for model with bound length " + bound);
         }
         Automaton prefix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat(index, index);
-        Automaton findAut = find.getAutomatonObject();
         if (index != 0){ // find is at least of length 1, so length of result would be at least index + 1
             findAut.getInitialState().setAccept(false);
         }
-        String found = findAut.getShortestExample(true);// choose a simple find model, TODO: write max and min length helper methods for acyclic automata
         findAut = BasicAutomata.makeString(found);
         find.boundLength = found.length();
         // remove find from prefix, as it would otherwise have been found earlier
