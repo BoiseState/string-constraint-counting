@@ -881,7 +881,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         State initialState = new State();
         result.setInitialState(initialState);
         State finalState = new State();
-        initialState.setAccept(false);
+
         finalState.setAccept(true);
 
         for (State state : currentStates) {
@@ -894,19 +894,61 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
     }
 
+    // this will output an index. so i guess we'll just treat it as a string but know that its an int because of it's source.. shuold probably have diff objects but we dont for concrete int args.
+    public Model_Acyclic_Inverse indexOf(Model_Acyclic_Inverse find) {
+        // TODO: actaully find possible index algo, similar to the replace search, look for every possible first match index
+        Automaton numRange = BasicAutomata.makeEmpty();
+        State start = numRange.getInitialState();
+        State end = new State();
+        end.setAccept(true);
+        if (this.automaton.intersection(find.getAutomatonObject()).isEmpty()) {
+            start.addTransition(new Transition('\uFFFF', end));// shuold return not found, i.e. -1 so using 65535
+        } else {
+            // similar to search of substring
+            // one issue im seeing is how we know which is 'first' index, i.e. how we would choose between multiple matches at the same index
+
+            // but for now we will just return the range of 0 to bound length as an automaton...
+            for (int i = 0; i < this.boundLength; i++) {
+                char c = (char) (i + '0'); // convert to char
+                start.addTransition(new Transition(c, end));
+            }
+        }
+
+        return new Model_Acyclic_Inverse(numRange, this.alphabet, find.boundLength);
+    }
+
+    // so this would take an index (in theory a range) and resolve a model that makes sure that is where find is first located.
+    public Model_Acyclic_Inverse inv_indexOf(Model_Acyclic_Inverse find, int bound) {
+        Automaton indexRange = this.getAutomatonObject();
+
+        // just create a dummy automaton with find and padding that can be propogated and intersected, we assume it is not a range for now :), otherwise we could iterate and backtrack, yuck
+        // TODO: similar to substring/replace algo, needs to allow anystring but a match, and then the findModel, and then anystring at all after.
+        int index = (int) indexRange.getInitialState().getTransitions().iterator().next().getMin();
+        index = index - 48; // proper conversion to int from
+        if (index < 0 || index >= bound) {// not sure how to get the bound length of solving
+            throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for model with bound length " + bound);
+        }
+        Automaton prefix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat(index, index);
+        Automaton findAut = find.getAutomatonObject();
+        int findLength = find.boundLength; // this could vary though....
+        Automaton suffix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat(0, bound - index - findLength);
+        Automaton result = prefix.concatenate(findAut).concatenate(suffix);
+        result.minimize();
+        return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
+    }
+
     public Model_Acyclic_Inverse inv_charAt(int index) {
         // take incoming model and return new model that fills bound lengths from index with anyStrings
-        if (this.boundLength <= index) { // chatgpt wanted this so why not
+        if (this.boundLength <= index) { // chatgpt wanted this so why not :P
             throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for model with bound length " + this.boundLength);
         }
         // create two automaton, one from 0 to index, and one from index to bound length
 
         String alphabetCharSet = this.alphabet.getCharSet();
-        Automaton start = Automaton.makeCharSet(alphabetCharSet).repeat(0,index);// maybe off by 1?
-        Automaton end = Automaton.makeCharSet(alphabetCharSet).repeat(index, this.boundLength);
-        // concatenate the two automata with the charSet from incoming model
-        Automaton charSet = this.getAutomatonObject();
-        Automaton result = start.concatenate(charSet).concatenate(end);
+        Automaton start = Automaton.makeCharSet(alphabetCharSet).repeat(index,index);// looks at repeat docs
+        Automaton end = Automaton.makeCharSet(alphabetCharSet).repeat(0, this.boundLength-index);
+        // concatenate the two automata with the incoming model
+        Automaton result = start.concatenate(this.getAutomatonObject()).concatenate(end);
 
         return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
     }

@@ -667,6 +667,16 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
                     }
 
                     break;
+                case INDEX_OF:
+                    args = pc.getArgList();
+                    newConstraint = new InvConstraintIndexOf<T>(ID, invSolver, args);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId() + " " + args);
+                    }
+
+                    break;
                 default:
 
                     if (localDebug) {

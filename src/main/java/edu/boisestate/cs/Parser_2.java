@@ -245,6 +245,8 @@ public class Parser_2<T extends A_Model<T>> {
 			processPropagation(constraint);
 			operationString = String.format("String.%s(<S:%d>)", fName, base);
 
+		}else if (fName.equals("indexOf")){
+			operationString = processIndexOf(constraint);
 		} else {
 
 			// create symbolic string
@@ -253,6 +255,21 @@ public class Parser_2<T extends A_Model<T>> {
 
 		// return op string
 		return operationString;
+	}
+
+	private String processIndexOf(PrintConstraint constraint) {
+		Map<String, Integer> sourceMap = constraint.getSourceMap();
+		int id = constraint.getId();
+		int base = sourceMap.get("t");
+		int arg = sourceMap.get("s1");
+
+		constraint.addArg(arg);
+		constraint.setOp(INDEX_OF);
+
+		solver.indexOf(id, base, arg);
+
+		// return operation string
+		return String.format("<S:%d>.indexOf(%d)", base, arg);
 	}
 
 	private String processCharAt(PrintConstraint constraint) {

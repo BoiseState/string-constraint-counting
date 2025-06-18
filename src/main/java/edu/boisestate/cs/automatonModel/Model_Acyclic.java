@@ -1333,4 +1333,6 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 	}
 	@Override
 	public Model_Acyclic charAt(int index) { return null;}
+	@Override
+	public Model_Acyclic indexOf(Model_Acyclic arg) { return null;}
 }

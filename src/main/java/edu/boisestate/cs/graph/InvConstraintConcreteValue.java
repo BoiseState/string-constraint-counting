@@ -87,7 +87,7 @@ public class InvConstraintConcreteValue<T extends A_Model_Inverse<T>>  extends A
 		Iterator<I_Inv_Constraint<T>> iter = (new ArrayList<>(prevConstraint)).iterator();
 		I_Inv_Constraint<T> prev = iter.next();
 		//System.out.println("prev " + prev);
-		//skip over replaceCC because it isnt formulated to include concrete outputs of its arguments
+		// TODO: we don't use replaceCC anymore, so can almost def remove
 		while (prev.getOp() == Operation.REPLACE_CHAR_CHAR) {
 			prev = iter.next();
 		}

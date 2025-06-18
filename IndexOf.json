@@ -6,14 +6,14 @@
   "vertices" : [
     {
     "num" : 0,
-    "actualValue" : "e",
+    "actualValue" : "el",
     "incomingEdges" :[
     ],
     "sourceConstraints" : [ ],
     "timeStamp" : 1691007827230,
     "type" : 0,
     "id" : 0,
-    "value" : "\"e\"!:!<init>"
+    "value" : "\"el\"!:!<init>"
   },
     {
       "num" : 0,
@@ -43,14 +43,14 @@
           "source" : 3,
           "type" : "t"
         }, {
-          "source" : 4,
+          "source" : 0,
           "type" : "s1"
         }],
       "sourceConstraints" : [ ],
       "timeStamp" : 1691007827231,
       "type" : 0,
       "id" : 2,
-      "value" : "charAt!!I!:!0"
+      "value" :"indexOf!!Ljava/lang/String;!:!0"
     },
 {
       "num" : 0,
@@ -60,7 +60,7 @@
           "source" : 2,
           "type" : "t"
         }, {
-          "source" : 0,
+          "source" : 4,
           "type" : "s1"
         }],
       "sourceConstraints" : [ ],

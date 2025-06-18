@@ -50,7 +50,7 @@ public enum Operation {	CONCAT,						// args:
 						TERMINAL,					// args: 
 						INPUT,					// args: 
 						UNDEFINED,
-						CHAR_AT;					// args:
+						CHAR_AT, INDEX_OF;					// args:
 
 	
 	/**

@@ -78,6 +78,6 @@ public class Model_Acyclic_Inverse_Manager extends A_Model_Manager <Model_Acycli
         // get string length as bound length
         int length = string.length();
         // return model from automaton
-        return new Model_Acyclic_Inverse(stringAutomaton, this.alphabet, length);
+        return new Model_Acyclic_Inverse(stringAutomaton, this.alphabet, length); // changed this for indexOf to use bound length of all models otherwise can cause issues
     }
 }

@@ -890,6 +890,14 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
         this.symbolicStringMap.put(id, baseModel);
     }
 
+    public void indexOf(int id, int base, int find) {
+        T baseModel = this.symbolicStringMap.get(base);
+        T argModel = this.symbolicStringMap.get(find);
+
+        baseModel = baseModel.indexOf(argModel);
+        this.symbolicStringMap.put(id, baseModel);
+    }
+
     private Tuple<Character, Boolean> getCharFromString(String string) {
 
         // initialize result variables

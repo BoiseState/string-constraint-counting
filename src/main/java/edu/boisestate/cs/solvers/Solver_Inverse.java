@@ -458,4 +458,12 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver_Count<T
 	public T inv_charAt(T input, int index) {
 		return input.inv_charAt(index);
 	}
+
+	public T inv_indexOf(T input, T find, int bound) {
+		return input.inv_indexOf(find, bound);
+	}
+
+	public int getBound() {
+		return initialBound;
+	}
 }

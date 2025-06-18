@@ -210,6 +210,8 @@ public abstract class A_Model <T extends A_Model <T>> implements Cloneable, I_Mo
     @Override
     public abstract T charAt(int index);
 
+    public abstract T indexOf(T arg);
+
     @Override
 	public abstract T clone();
 
