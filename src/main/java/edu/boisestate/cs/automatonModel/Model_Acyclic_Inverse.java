@@ -942,8 +942,12 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         String found = findAut.getShortestExample(true);// choose a simple find model, TODO: write max and min length helper methods for acyclic automata
 
         // the simplest solution when find is not found is for result to be the empty string, and find to be anything but the empty string
-        if (includesNotFound && !found.isEmpty()) {// TODO: could still make result empty, as long as we adjusted found to not be ...
+        if (includesNotFound && !found.isEmpty()) {
             indexRange.getInitialState().getTransitions().remove(choice); // remove for possible future use
+            // find can be anyting
+            return new Model_Acyclic_Inverse(BasicAutomata.makeEmptyString(), this.alphabet, 0);
+        }  else if (includesNotFound && found.isEmpty()) { // i.e. find has empty
+            findAut.getInitialState().setAccept(false); //remove empty (will still be kept in InvConstraint for later backtrackin gif necessary
             return new Model_Acyclic_Inverse(BasicAutomata.makeEmptyString(), this.alphabet, 0);
         }
 
@@ -954,6 +958,9 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         if (index < 0 || index >= bound) {// not sure how to get the bound length of solving
             throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for model with bound length " + bound);
         }
+
+        // TODO: need to actaully evaluate pre and suff given index choice and find choice. i.e. or result may be empty
+
         Automaton prefix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat(index, index);
         if (index != 0){ // find is at least of length 1, so length of result would be at least index + 1
             findAut.getInitialState().setAccept(false);
@@ -971,6 +978,10 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
            result = prefix.concatenate(findAut); // maybe should be making prefix the correct size as well...
         }
         result.minimize();
+
+        if (result.isEmpty()) {
+            throw new RuntimeException("Resulting automaton is empty in inv_indexOf");
+        }
 
         return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
     }
