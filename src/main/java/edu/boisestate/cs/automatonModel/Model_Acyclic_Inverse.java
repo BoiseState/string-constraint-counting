@@ -930,10 +930,23 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         }
         Automaton prefix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat(index, index);
         Automaton findAut = find.getAutomatonObject();
-        int findLength = find.boundLength; // this could vary though....
-        Automaton suffix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat(0, bound - index - findLength);
+        if (index != 0){ // find is at least of length 1, so length of result would be at least index + 1
+            findAut.getInitialState().setAccept(false);
+        }
+        String found = findAut.getShortestExample(true);// choose a simple find model, TODO: write max and min length helper methods for acyclic automata
+        findAut = BasicAutomata.makeString(found);
+        find.boundLength = found.length();
+        // remove find from prefix, as it would otherwise have been found earlier
+        // dont think this is proper, i.e. we do really need ot be like enumerating pairs of result/find
+        prefix = prefix.minus(findAut);
+
+        Automaton suffix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat(0, bound - index - find.boundLength);
         Automaton result = prefix.concatenate(findAut).concatenate(suffix);
+        if (suffix.isEmpty()) { // i.e. becasuse find is long, it would make result empty
+           result = prefix.concatenate(findAut); // maybe should be making prefix the correct size as well...
+        }
         result.minimize();
+
         return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
     }
 

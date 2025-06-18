@@ -5,16 +5,16 @@
   },
   "vertices" : [
     {
-    "num" : 0,
-    "actualValue" : "el",
-    "incomingEdges" :[
-    ],
-    "sourceConstraints" : [ ],
-    "timeStamp" : 1691007827230,
-    "type" : 0,
-    "id" : 0,
-    "value" : "\"el\"!:!<init>"
-  },
+      "num" : 0,
+      "actualValue" : "",
+      "incomingEdges" :[
+      ],
+      "sourceConstraints" : [ ],
+      "timeStamp" : 1691007827229,
+      "type" : 0,
+      "id" : 0,
+      "value" : "r1!:!getStringValue!!"
+    },
     {
       "num" : 0,
       "actualValue" : "",
