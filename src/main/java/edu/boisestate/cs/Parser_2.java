@@ -187,7 +187,10 @@ public class Parser_2<T extends A_Model<T>> {
 			// leading white space chars
 			// For some reason it fails when it is any string of any length. This
 			// hack fixes it (woo). Check should be done in strangerlib.
-			// perform trim operation
+			// perform trim operationa
+
+			//nps- 6-19-25 weird how this is partially done but mostly not
+			constraint.setOp(TRIM);
 			solver.trim(id, base);
 			operationString = String.format("<S:%d>.trim()", base);
 

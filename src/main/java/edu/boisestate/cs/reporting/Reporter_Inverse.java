@@ -677,12 +677,19 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
                     }
 
                     break;
+                case TRIM:
+                    newConstraint = new InvConstraintTrim<T>(ID, invSolver);
+                    allInverseConstraints.put(ID, newConstraint);
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
+                    break;
                 default:
 
                     if (localDebug) {
                         System.out.println("WARNING: Unhandled constraint type... " + op.toString() + "  " + pc.getId() + "  " + pc.getValue());
                     }
-                    System.err.println("WARNING: Unhandled constraint type... " + op.toString() + "  " + pc.getId() + "  " + pc.getValue());
+                    System.err.println("WARNING: Unhandled constraint in Reporter_Inverse.buildICG_r3() of type... " + op.toString() + "  " + pc.getId() + "  " + pc.getValue());
 
 
             } // end switch

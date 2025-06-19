@@ -1416,12 +1416,21 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
 	@Override
 	public Model_Acyclic_Inverse inv_trim() {
-		
-		Alphabet padAlphabet = new Alphabet(" ");
-		Model_Acyclic_Inverse_Manager manager = new Model_Acyclic_Inverse_Manager (padAlphabet, maxStringPadding);
-		Model_Acyclic_Inverse padModel = manager.createAnyString();
-		Model_Acyclic_Inverse resultModel = padModel.concatenate(this).concatenate(padModel);
-		return resultModel;
+//
+//		Alphabet padAlphabet = new Alphabet(" ");
+//		Model_Acyclic_Inverse_Manager manager = new Model_Acyclic_Inverse_Manager (padAlphabet, maxStringPadding);
+//		Model_Acyclic_Inverse padModel = manager.createAnyString();
+//		Model_Acyclic_Inverse resultModel = padModel.concatenate(this).concatenate(padModel);
+
+        // above implementation had spaces loops
+        Automaton afterTrim = this.getAutomatonObject();
+        // pad trimmed object with variable length whitespaec to fill out bound length
+        int minSize = afterTrim.getShortestExample(true).length();
+        Automaton pad = Automaton.makeCharSet(" ").repeat(0, this.boundLength - minSize);
+        Automaton result = pad.concatenate(afterTrim.concatenate(pad));
+
+        //note that this technically allows paddign outside of boundLength (again shuold handle all the length stuff, and ideally just with Model_Acyclic_Inverse
+		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength); // fucking lengths
 	}
 	
 	

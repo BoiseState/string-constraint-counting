@@ -9,6 +9,7 @@ import java.util.List;
 
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 import edu.boisestate.cs.solvers.*;
+import edu.boisestate.cs.util.Tuple;
 
 /**
  * @author Marlin Roberts, 2020-2021
@@ -51,7 +52,30 @@ public class InvConstraintTrim<T extends A_Model_Inverse<T>> extends A_Inv_Const
 		this.nextID = base;
 		this.prevIDs = new HashSet<Integer>(); this.prevIDs.add(input);
 	}
-	
+
+	@Override
+	public Tuple<Boolean,Boolean> evaluate(){
+		Tuple<Boolean,Boolean> ret = new Tuple<>(true, true);
+		printDebug("EVALUATE TRIM " + ID + " ...");
+		T inputModel = incoming();
+		printDebug("TRIM INCOMING: " + inputModel.getShortestExampleString());
+		if (inputModel.isEmpty()) {
+			printDebug("TRIM INCOMING SET INCONSISTENT");
+			ret = new Tuple<>(false, true);
+		} else {
+			// calls the solver_inverse method which calls the model_acyclic method
+			T resModel = solver.inv_trim(inputModel);
+
+			if (resModel == null) {
+				System.err.println("INVERSE TRIM FAILED");
+				System.exit(1);
+			} else {
+				outputSet.put(1, resModel);
+				printDebug("TRIM OUTPUT: " + resModel.getShortestExampleString());
+			}
+		}
+		return ret;
+	}
 	
 	@Override
 	public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex) {

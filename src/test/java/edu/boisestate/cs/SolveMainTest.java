@@ -29,6 +29,13 @@ public class SolveMainTest {
     }
 
     @Test
+    public void testTrim() {
+        restoreStreams();
+        String[] args = {"Trim.json", "-s", "inverse", "-v", "2", "-l", "5"};
+        SolveMain.main(args);
+    }
+
+    @Test
     public void testIndexOf() {
         restoreStreams();
         String[] args = {"IndexOf.json", "-s", "inverse", "-v", "2", "-l", "5"};
