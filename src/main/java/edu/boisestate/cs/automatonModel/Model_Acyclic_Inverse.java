@@ -965,13 +965,17 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         if (index != 0){ // find is at least of length 1, so length of result would be at least index + 1
             findAut.getInitialState().setAccept(false);
             found = findAut.getShortestExample(true);
+        } else {
+            prefix = BasicAutomata.makeEmptyString();
         }
         findAut = BasicAutomata.makeString(found);
         find.boundLength = found.length();
         // remove find from prefix, as it would otherwise have been found earlier
         // dont think this is proper, i.e. we do really need ot be like enumerating pairs of result/find
-        prefix = prefix.minus(findAut);
-
+        if (index > 0) prefix = prefix.minus(findAut);
+        // TODO: maybe should be doing length checks on everything and then for example adjusting find if index is high enough and find would go out of bounds....
+        // if (index + find.boundLength > bound) {
+        // we would want ot reomve the whoel findAut from find model because we already tried the shortest example. need ot backtrack on index?
         Automaton suffix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat(0, bound - index - find.boundLength);
         Automaton result = prefix.concatenate(findAut).concatenate(suffix);
         if (suffix.isEmpty()) { // i.e. becasuse find is long, it would make result empty

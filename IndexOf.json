@@ -1,7 +1,7 @@
 {
   "alphabet" : {
     "size" : 7,
-    "declaration" : "0"
+    "declaration" : "H,e,l,o,0"
   },
   "vertices" : [
     {
@@ -54,7 +54,7 @@
     },
 {
       "num" : 0,
-      "actualValue" : "false",
+      "actualValue" : "true",
       "incomingEdges" :[
         {
           "source" : 2,
