@@ -9,6 +9,7 @@ import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.automatonModel.operations.*;
 import edu.boisestate.cs.util.Tuple;
 
+import javax.jws.WebParam;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -1205,7 +1206,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
     /**
      * 
-     * Currently assumes a concrete argument.
+     * Currently assumes a concrete argument. // oh how i wish it were so
      * 
      * OVER-ESTIMATION - None with concrete argument
      * UNDER-ESTIMATION - None with concrete argument
@@ -1215,12 +1216,24 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
      */
 	@Override
 	public Model_Acyclic_Inverse inv_insert(int offset, Model_Acyclic_Inverse argModel) {
-				
-		Model_Acyclic_Inverse result = this.delete(offset, (offset + argModel.getBoundLength()));
-				
-		return result;
+
+        Model_Acyclic_Inverse prefix = this.substring(0, offset);
+        Model_Acyclic_Inverse suffix = this.substring(offset, this.getBoundLength());
+
+        argModel.setAutomaton(argModel.getAutomatonObject().intersection(suffix.getAutomatonObject()));
+//        argModel = argModel.intersect(suffix);
+        // now argModel and the suffix can be any substring pairs of argModel....
+        suffix.minus(argModel);
+        if (suffix.isEmpty()) {
+            // if suffix is empty, we can just return the prefix concatenated with argModel
+            return prefix;
+        }
+		return prefix.concatenate(suffix);
 	}
 
+    private void setAutomaton(Automaton aut) {
+        this.automaton = aut;
+    }
 
 
     /**
@@ -2128,5 +2141,4 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         }
         return new Tuple<Automaton, HashMap<State, State>>(ret, stateMap);
     }
-
 }

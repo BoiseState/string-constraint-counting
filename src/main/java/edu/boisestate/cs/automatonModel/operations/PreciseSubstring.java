@@ -45,6 +45,13 @@ public class PreciseSubstring
             return BasicAutomata.makeEmpty();
         }
 
+        if (automaton.getSingleton() != null) {
+            String thisString = automaton.getSingleton();
+            if (thisString.length() < end) end = thisString.length();
+            String substring = thisString.substring(start, end);
+            return BasicAutomata.makeString(substring);
+        }
+
         PrecisePrefix prefix = new PrecisePrefix(end);
         Automaton prefixAutomaton = prefix.op(automaton);
 

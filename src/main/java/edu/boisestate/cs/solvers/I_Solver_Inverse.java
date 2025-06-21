@@ -27,7 +27,7 @@ public interface I_Solver_Inverse<T extends A_Model_Inverse<T>> {
 
 	T inv_delete(T input, int start, int end);
 
-	T inv_insert(T input, int start, int end);
+	T inv_insert(T input, int start, T arg);
 
 	void inv_insert(int id, int base, int arg, int offset, int start, int end);
 

@@ -6,6 +6,7 @@ import java.util.List;
 
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 import edu.boisestate.cs.solvers.*;
+import edu.boisestate.cs.util.Tuple;
 
 /**
  * @author Marlin Roberts, 2020-2021
@@ -13,7 +14,7 @@ import edu.boisestate.cs.solvers.*;
  */
 public class InvConstraintInsert<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
 	
-	private int start,end;
+	private int start,insertStringID;
 	
 	public InvConstraintInsert (int ID, Solver_Inverse<T> solver, List<Integer> args) {
 		
@@ -26,7 +27,7 @@ public class InvConstraintInsert<T extends A_Model_Inverse<T>> extends A_Inv_Con
 		this.solutionSet = new SolutionSetInternal<T>(ID);
 		this.argString = "0:START 1:END";
 		this.start = argList.get(0);
-		this.end = argList.get(1);
+		this.insertStringID = argList.get(1);
 	}
 	
 	public InvConstraintInsert (int ID, Solver_Inverse<T> solver, List<Integer> args, int base, int input) {
@@ -38,52 +39,86 @@ public class InvConstraintInsert<T extends A_Model_Inverse<T>> extends A_Inv_Con
 		this.op = Operation.INSERT;
 		this.argString = "0:START 1:END";
 		this.start = argList.get(0);
-		this.end = argList.get(1);
+//		this.end = argList.get(1);
 		this.nextID = base;
 		this.nextID = base;
 		this.prevIDs = new HashSet<Integer>(); this.prevIDs.add(input);
 	}
-	
-	
+
 	@Override
-	public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex) {
-		
-		System.out.format("EVALUATE INSERT %d ...\n",ID);
-		
-		T inputModel = inputConstraint.output(sourceIndex);
+	public Tuple<Boolean, Boolean> evaluate() {
+		Tuple<Boolean, Boolean> ret = new Tuple<>(true, true);
+		printDebug("EVALUATE INSERT " + ID + " ...");
 
-		// perform inverse function on output from the input constraint at given index
-		T resModel = solver.inv_insert(inputModel, start, end);
+		T inputModel = incoming();
+		if (inputModel.isEmpty()) {
+			printDebug("INSERT INCOMING SET INCONSISTENT...");
+			ret = new Tuple<>(false, true);
+		}else {
+			// perform inverse function on output from the input constraint
+			T insertStringModel = solver.getSymbolicModel(insertStringID); // currently don't manipulate this
+			T resModel = solver.inv_insert(inputModel, start, insertStringModel);
+			// now have to figure out which arg it chose based on resModel
 
-		// intersect result with forward analysis results from previous constraint
-		resModel = solver.intersect(resModel, nextConstraint.getID());
+			// intersect result with forward analysis results from previous constraint
+			resModel = solver.intersect(resModel, nextConstraint.getID());
 
-
-		if (!resModel.isEmpty()) {
-			solutionSet.setSolution(inputConstraint.getID(), resModel);
-
-			if (solutionSet.isConsistent()) {
-	
-				// store result in this constraints output set at index 1
-				outputSet.put(1, resModel);	
-	
-	
-				// we have values, so continue solving ...
-				return nextConstraint.evaluate(this, 1);
+			if (!resModel.isEmpty()) {
+				//index?
+				outputSet.put(1, resModel);
+				outputSet.put(2, insertStringModel); // also prop insert model though this is never manipulated??
 			} else {
-				System.out.println("INSERT SOLUTION SET INCONSISTENT...");
-				solutionSet.remSolution(inputConstraint.getID());
-				return false;
+				printDebug("INSERT RESULT MODEL EMPTY...");
+				ret = new Tuple<>(false, true);
 			}
-			
-		} else {
-			System.out.println("INSERT RESULT MODEL EMPTY...");
-			// halt solving, fallback
-			return false;
+
 		}
-		
+
+
+		return ret;
 	}
 
+
+	
+//	@Override
+//	public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex) {
+//
+//		System.out.format("EVALUATE INSERT %d ...\n",ID);
+//
+//		T inputModel = inputConstraint.output(sourceIndex);
+//
+//		// perform inverse function on output from the input constraint at given index
+//		T resModel = solver.inv_insert(inputModel, start, end);
+//
+//		// intersect result with forward analysis results from previous constraint
+//		resModel = solver.intersect(resModel, nextConstraint.getID());
+//
+//
+//		if (!resModel.isEmpty()) {
+//			solutionSet.setSolution(inputConstraint.getID(), resModel);
+//
+//			if (solutionSet.isConsistent()) {
+//
+//				// store result in this constraints output set at index 1
+//				outputSet.put(1, resModel);
+//
+//
+//				// we have values, so continue solving ...
+//				return nextConstraint.evaluate(this, 1);
+//			} else {
+//				System.out.println("INSERT SOLUTION SET INCONSISTENT...");
+//				solutionSet.remSolution(inputConstraint.getID());
+//				return false;
+//			}
+//
+//		} else {
+//			System.out.println("INSERT RESULT MODEL EMPTY...");
+//			// halt solving, fallback
+//			return false;
+//		}
+//
+//	}
+//
 
 //	@Override
 //	public void setNext(I_Inv_Constraint constraint) {

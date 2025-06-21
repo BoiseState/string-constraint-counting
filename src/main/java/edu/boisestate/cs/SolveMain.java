@@ -553,7 +553,7 @@ public class SolveMain {
 			// set sourceConstraints for each constraint
 			for (PrintConstraint constraint : sourceConstraintMap.keySet()) {
 				// for each constraint id
-				for (int id : sourceConstraintMap.get(constraint)) {
+				for (int id : sourceConstraintMap.get(constraint)) {//this does nothing? no source constraints yet
 					// get source constraint
 					PrintConstraint sourceConstraint = constraintMap.get(id);
 					// set source constraint as source for current constraints

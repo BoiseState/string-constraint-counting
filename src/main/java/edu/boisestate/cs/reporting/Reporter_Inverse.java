@@ -678,11 +678,22 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
                     break;
                 case TRIM:
-                    newConstraint = new InvConstraintTrim<T>(ID, invSolver);
+                    args = pc.getArgList();
+                    newConstraint = new InvConstraintTrim<T>(ID, invSolver, args);
                     allInverseConstraints.put(ID, newConstraint);
                     if (localDebug) {
                         System.out.println("processed " + op.toString() + "  " + pc.getId());
                     }
+                    break;
+                case INSERT:
+                    args = pc.getArgList();
+                    newConstraint = new InvConstraintInsert<T>(ID, invSolver, args);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId() + " " + args);
+                    }
+
                     break;
                 default:
 
@@ -717,6 +728,8 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
 
                 // MJR some operations only have concrete arguments and the value in args are the actual values and NOT constraint IDs.
+                // nps: this is no longer true, we handle all args symbolically , though integers not fully/properly yet
+                // TODO: revisit this and always handle constraint
                 if (!argList.isEmpty() && pc.getOp() != Operation.SUBSTR_STRT_END &&
                         pc.getOp() != Operation.SUBSTRING_START &&
                         pc.getOp() != Operation.SET_LENGTH &&
@@ -734,7 +747,11 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
 
                         if (invConstraint.getOp()!=Operation.CHAR_AT) {// TODO: nps i should probably revisit this
-                            invConstraint.setArg(allInverseConstraints.get(arg));
+                            if (invConstraint.getOp() == Operation.INSERT) {
+                                invConstraint.setArg(allInverseConstraints.get(argList.get(1)));
+                            } else {
+                                invConstraint.setArg(allInverseConstraints.get(arg));
+                            }
                         }
                     } // end if
                     if (argList.size()==2){ // this shouldnt ever happen anymore as we handle replace first and all symboliclally - nps - 04/16/2025
@@ -755,6 +772,10 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
                 } // end if
 
             } // end if
+            else {
+                System.err.println("WARNING: UNDEFINED constraint in Reporter_Inverse.buildICG_r3() of type... "  + pc.getId() + "  " + pc.getValue());
+                System.exit(1);
+            }
 
         }  // end for each printconstraint
 

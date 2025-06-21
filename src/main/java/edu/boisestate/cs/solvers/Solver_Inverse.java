@@ -150,9 +150,8 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver_Count<T
 	 * 03/18/2021 MJR
 	 */
 	@Override
-	public T inv_insert(T input, int start, int end){
-		T resModel = input.delete(start, end);
-		return resModel;
+	public T inv_insert(T input, int start, T argModel) {
+        return input.inv_insert(start, argModel);
 		
 	}
 

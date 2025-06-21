@@ -688,16 +688,20 @@ public class Parser_2<T extends A_Model<T>> {
 	 */
 	private String processInsert(PrintConstraint constraint) {
 
+		constraint.setOp(INSERT);
+
 		// get constraint info as variables
 		Map<String, Integer> sourceMap = constraint.getSourceMap();
 		String string = constraint.getSplitValue();
 		int id = constraint.getId();
 		int base = sourceMap.get("t");
 
+
+
 		// get offset id
 		// int offset = sourceMap.get("s1"); eas: it is a bug
 		int s1Id = sourceMap.get("s1");
-		String s1String = actualVals.get(s1Id);
+		String s1String = actualVals.get(s1Id); //TODO: implement integers as models (have done some work on this with delete)
 		int offset = Integer.parseInt(s1String);
 
 		// get arg id
@@ -718,14 +722,17 @@ public class Parser_2<T extends A_Model<T>> {
 				|| ((params.equals("I[C") || params.equals("ILjava/lang/CharSequence;")) && sourceMap.size() <= 3)) {
 
 			// create arg symbolic string
-			String argString = actualVals.get(arg);
-			solver.newConcreteString(arg, argString);
+//			String argString = actualVals.get(arg); // but this could be symbolic...
+//			solver.newConcreteString(arg, argString);
 
 			// perform insert
 			solver.insert(id, base, arg, offset);
+//			constraint.addArg(base);
+			constraint.addArg(offset);
+			constraint.addArg(arg); // would imagine these shuold be added in other cases too.
 
 			// set operation
-			operation = String.format("<S:%d>.insert(%d, \"%s\")", base, offset, argString);
+			operation = String.format("<S:%d>.insert(%d, \"%s\")", base, offset, arg);
 
 			// stringBuilder.insert(int index, char[] str, int offset, int len)
 			// stringBuilder.insert(int dstOffset, CharSequence s, int start, int end)
@@ -734,7 +741,7 @@ public class Parser_2<T extends A_Model<T>> {
 			// get start and end indices
 			int s3Id = sourceMap.get("s3");
 			int s4Id = sourceMap.get("s4");
-			String s3String = actualVals.get(s3Id);
+			String s3String = actualVals.get(s3Id);//
 			String s4String = actualVals.get(s4Id);
 			int start = Integer.parseInt(s3String);
 			int end = Integer.parseInt(s4String);
@@ -747,8 +754,9 @@ public class Parser_2<T extends A_Model<T>> {
 
 		} else {
 
+			System.err.println("UNHANDLES INSERT in Parser_2.processInsert: " + string);
 			// perform insert operation
-			solver.insert(id, base, arg, offset);
+//			solver.insert(id, base, arg, offset);
 
 		}
 
