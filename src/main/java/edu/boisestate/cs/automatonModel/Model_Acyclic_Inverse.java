@@ -1,9 +1,6 @@
 package edu.boisestate.cs.automatonModel;
 
-import dk.brics.automaton.Automaton;
-import dk.brics.automaton.BasicAutomata;
-import dk.brics.automaton.State;
-import dk.brics.automaton.Transition;
+import dk.brics.automaton.*;
 import dk.brics.string.stringoperations.*;
 import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.automatonModel.operations.*;
@@ -14,55 +11,52 @@ import java.math.BigInteger;
 import java.util.*;
 
 /**
- * 
  * @author
- *
  */
-public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Inverse> {
-	
-	
-	private Automaton automaton;
+public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse> {
 
-   /**
-    * Constructor 1: Requires *ACYCLIC* automata as argument. <br>
-    * For use within Model_Acyclic_Manager <br>
-    * Has no safeguards against incorrect automata being passed. <br>
-    * 
-    * @param automaton - ACYCLIC Automaton
-    * @param alphabet - Alphabet
-    * @param boundLength - Initial bound, should match Automaton length
-    */
-	protected Model_Acyclic_Inverse(Automaton automaton, Alphabet alphabet, int boundLength) {
-       
-    	super(alphabet, boundLength);
 
-        this.automaton = automaton;
-        
-        this.modelManager = new Model_Acyclic_Inverse_Manager (alphabet, boundLength);
-    }
-	
-	/**
-	 * 
-	 * @param automaton
-	 * @param alphabet
-	 */
-	protected Model_Acyclic_Inverse(Automaton automaton, Alphabet alphabet) {
-        
-		super (alphabet, 0);
+    private Automaton automaton;
+
+    /**
+     * Constructor 1: Requires *ACYCLIC* automata as argument. <br>
+     * For use within Model_Acyclic_Manager <br>
+     * Has no safeguards against incorrect automata being passed. <br>
+     *
+     * @param automaton   - ACYCLIC Automaton
+     * @param alphabet    - Alphabet
+     * @param boundLength - Initial bound, should match Automaton length
+     */
+    protected Model_Acyclic_Inverse(Automaton automaton, Alphabet alphabet, int boundLength) {
+
+        super(alphabet, boundLength);
 
         this.automaton = automaton;
-        
-        this.modelManager = new Model_Acyclic_Inverse_Manager (alphabet, 0);
+
+        this.modelManager = new Model_Acyclic_Inverse_Manager(alphabet, boundLength);
     }
-    
-   	public String getAutomaton(){
-		return automaton.toString();
-	}
+
+    /**
+     * @param automaton
+     * @param alphabet
+     */
+    protected Model_Acyclic_Inverse(Automaton automaton, Alphabet alphabet) {
+
+        super(alphabet, 0);
+
+        this.automaton = automaton;
+
+        this.modelManager = new Model_Acyclic_Inverse_Manager(alphabet, 0);
+    }
+
+    public String getAutomaton() {
+        return automaton.toString();
+    }
 
     private static Automaton getAutomatonFromAcyclicModel(Model_Acyclic_Inverse model) {
         return model.automaton;
     }
-    
+
 
     @Override
     public Model_Acyclic_Inverse assertContainedInOther(Model_Acyclic_Inverse containingModel) {
@@ -80,7 +74,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         Automaton substrings = performUnaryOperation(containing, new Substring(), this.alphabet);
 
         // get resulting automaton
-        Automaton result =  this.automaton.intersection(substrings);
+        Automaton result = this.automaton.intersection(substrings);
 
         // return new model from resulting automaton
         return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
@@ -101,7 +95,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         Automaton x = anyString1.concatenate(contained).concatenate(anyString2);
 
         // get resulting automaton
-        Automaton result =  this.automaton.intersection(x);
+        Automaton result = this.automaton.intersection(x);
         result.minimize();
 
         // return new model from resulting automaton
@@ -133,7 +127,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         Automaton suffixes = performUnaryOperation(containing, new Postfix(), this.alphabet);
 
         // get resulting automaton
-        Automaton result =  this.automaton.intersection(suffixes);
+        Automaton result = this.automaton.intersection(suffixes);
 
         // return new model from resulting automaton
         return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
@@ -153,7 +147,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         Automaton x = anyString.concatenate(end);
 
         // get bounded resulting automaton
-        Automaton result =  this.automaton.intersection(x);
+        Automaton result = this.automaton.intersection(x);
         result.minimize();
 
         // return new model from resulting automaton
@@ -168,7 +162,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         Automaton equal = getAutomatonFromAcyclicModel(equalModel);
 
         // get resulting automaton
-        Automaton result =  this.automaton.intersection(equal);
+        Automaton result = this.automaton.intersection(equal);
 
         // return new model from resulting automaton
         return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
@@ -183,7 +177,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         Automaton equalIgnoreCase = performUnaryOperation(equal, new IgnoreCase(), this.alphabet);
 
         // get resulting automaton
-        Automaton result =  this.automaton.intersection(equalIgnoreCase);
+        Automaton result = this.automaton.intersection(equalIgnoreCase);
 
         // return new model from resulting automaton
         return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
@@ -200,7 +194,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         Automaton minMax = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(min, max);
 
         // get resulting automaton
-        Automaton result =  this.automaton.intersection(minMax);
+        Automaton result = this.automaton.intersection(minMax);
 
         // get new bound length
         int newBoundLength = max;
@@ -232,8 +226,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
             // get all substrings
             Automaton substrings = performUnaryOperation(notContaining,
-                                                         new Substring(),
-                                                         this.alphabet);
+                    new Substring(),
+                    this.alphabet);
 
             // get resulting automaton
             result = this.automaton.minus(substrings);
@@ -268,14 +262,14 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
             // create any string automata
             Automaton anyString1 =
                     BasicAutomata.makeCharSet(this.alphabet.getCharSet())
-                                 .repeat();
+                            .repeat();
             Automaton anyString2 =
                     BasicAutomata.makeCharSet(this.alphabet.getCharSet())
-                                 .repeat();
+                            .repeat();
 
             // concatenate with not contained automaton
             Automaton x = anyString1.concatenate(notContained)
-                                    .concatenate(anyString2);
+                    .concatenate(anyString2);
 
             // get resulting automaton
             result = this.automaton.minus(x);
@@ -314,8 +308,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
             // get all suffixes
             Automaton suffixes = performUnaryOperation(notContaining,
-                                                       new Postfix(),
-                                                       this.alphabet);
+                    new Postfix(),
+                    this.alphabet);
 
             // get resulting automaton
             result = this.automaton.minus(suffixes);
@@ -345,7 +339,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
             // create any string automata
             Automaton anyString =
                     BasicAutomata.makeCharSet(this.alphabet.getCharSet())
-                                 .repeat();
+                            .repeat();
 
             // concatenate with not ending automaton
             Automaton x = anyString.concatenate(notEnding);
@@ -397,8 +391,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         Automaton result = automaton;
         if (notEqual.getFiniteStrings(1) != null) {
             Automaton equalIgnoreCase = performUnaryOperation(notEqual,
-                                                              new IgnoreCase(),
-                                                              this.alphabet);
+                    new IgnoreCase(),
+                    this.alphabet);
 
             // get resulting automaton
             result = this.automaton.minus(equalIgnoreCase);
@@ -428,8 +422,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
             // get all prefixes
             Automaton prefixes = performUnaryOperation(notContaining,
-                                                       new Prefix(),
-                                                       this.alphabet);
+                    new Prefix(),
+                    this.alphabet);
 
             // get resulting automaton
             result = this.automaton.minus(prefixes);
@@ -458,7 +452,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
             // create any string automata
             Automaton anyString =
                     BasicAutomata.makeCharSet(this.alphabet.getCharSet())
-                                 .repeat();
+                            .repeat();
 
             // concatenate with not starts automaton
             Automaton x = notStarting.concatenate(anyString);
@@ -487,7 +481,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         Automaton prefixes = performUnaryOperation(containing, new Prefix(), this.alphabet);
 
         // get resulting automaton
-        Automaton result =  this.automaton.intersection(prefixes);
+        Automaton result = this.automaton.intersection(prefixes);
 
         // return new model from resulting automaton
         return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
@@ -507,7 +501,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         Automaton x = start.concatenate(anyString);
 
         // get resulting automaton
-        Automaton result =  this.automaton.intersection(x);
+        Automaton result = this.automaton.intersection(x);
         result.minimize();
 
         // return new model from resulting automaton
@@ -520,8 +514,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         // create new model from existing automata
         Automaton cloneAutomaton = this.automaton.clone();
         return new Model_Acyclic_Inverse(cloneAutomaton,
-                                         this.alphabet,
-                                         this.boundLength);
+                this.alphabet,
+                this.boundLength);
     }
 
     @Override
@@ -586,11 +580,11 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 //        }
 //
 //        return false;
-        
+
         // MJR casts are no longer needed...
         return this.automaton.equals(arg.automaton);
-        
-        
+
+
     }
 
     @Override
@@ -663,11 +657,11 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
     @Override
     public boolean isEmpty() {
-    	/* eas 10-31-18 why, why is EmptyString() ??? */
+        /* eas 10-31-18 why, why is EmptyString() ??? */
         //return this.automaton.isEmptyString();
-    	//the correct code
+        //the correct code
         return this.automaton.isEmpty();
-      
+
     }
 
     @Override
@@ -677,8 +671,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
         // return if single non-null string in automaton
         return strings != null &&
-               strings.size() == 1 &&
-               strings.iterator().next() != null;
+                strings.size() == 1 &&
+                strings.iterator().next() != null;
     }
 
     @Override
@@ -694,8 +688,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
         // return new model from resulting automaton
         return new Model_Acyclic_Inverse(result,
-                                         this.alphabet,
-                                         this.boundLength);
+                this.alphabet,
+                this.boundLength);
     }
 
     @Override
@@ -721,8 +715,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
         // return new model from resulting automaton
         return new Model_Acyclic_Inverse(result,
-                                         this.alphabet,
-                                         this.boundLength);
+                this.alphabet,
+                this.boundLength);
     }
 
     @Override
@@ -733,8 +727,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
         // return new model from resulting automaton
         return new Model_Acyclic_Inverse(result,
-                                         this.alphabet,
-                                         this.boundLength);
+                this.alphabet,
+                this.boundLength);
     }
 
     @Override
@@ -745,8 +739,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
         // return new model from resulting automaton
         return new Model_Acyclic_Inverse(result,
-                                         this.alphabet,
-                                         this.boundLength);
+                this.alphabet,
+                this.boundLength);
     }
 
     @Override
@@ -789,8 +783,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
         // get resulting automaton
         Automaton result = performUnaryOperation(automaton,
-                                                 new PreciseSetLength(length),
-                                                 newAlphabet);
+                new PreciseSetLength(length),
+                newAlphabet);
 
         // return unbounded model from automaton
         return new Model_Acyclic_Inverse(result, this.alphabet, length);
@@ -830,8 +824,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
         // return new model from resulting automaton
         return new Model_Acyclic_Inverse(result,
-                                         this.alphabet,
-                                         this.boundLength);
+                this.alphabet,
+                this.boundLength);
     }
 
     @Override
@@ -842,8 +836,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
         // return new model from resulting automaton
         return new Model_Acyclic_Inverse(result,
-                                         this.alphabet,
-                                         this.boundLength);
+                this.alphabet,
+                this.boundLength);
     }
 
     @Override
@@ -854,8 +848,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
         // return new model from resulting automaton
         return new Model_Acyclic_Inverse(result,
-                                         this.alphabet,
-                                         this.boundLength);
+                this.alphabet,
+                this.boundLength);
     }
 
     @Override
@@ -869,8 +863,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         currentStates.add(this.getAutomatonObject().getInitialState());
         for (int i = 0; i < index; i++) {
             Set<State> nextStates = new HashSet<>();
-            for (State state : currentStates ) {
-                for (Transition transition : state.getTransitions()){
+            for (State state : currentStates) {
+                for (Transition transition : state.getTransitions()) {
                     nextStates.add(transition.getDest());
                 }
             }
@@ -886,7 +880,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         finalState.setAccept(true);
 
         for (State state : currentStates) {
-            for (Transition transition : state.getTransitions()){
+            for (Transition transition : state.getTransitions()) {
                 Transition newTransition = new Transition(transition.getMin(), transition.getMax(), finalState);
                 initialState.addTransition(newTransition);
             }
@@ -947,7 +941,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
             indexRange.getInitialState().getTransitions().remove(choice); // remove for possible future use
             // find can be anyting
             return new Model_Acyclic_Inverse(BasicAutomata.makeEmptyString(), this.alphabet, 0);
-        }  else if (includesNotFound && found.isEmpty()) { // i.e. find has empty
+        } else if (includesNotFound && found.isEmpty()) { // i.e. find has empty
             findAut.getInitialState().setAccept(false); //remove empty (will still be kept in InvConstraint for later backtrackin gif necessary
             return new Model_Acyclic_Inverse(BasicAutomata.makeEmptyString(), this.alphabet, 0);
         }
@@ -963,7 +957,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         // TODO: need to actaully evaluate pre and suff given index choice and find choice. i.e. or result may be empty
 
         Automaton prefix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat(index, index);
-        if (index != 0){ // find is at least of length 1, so length of result would be at least index + 1
+        if (index != 0) { // find is at least of length 1, so length of result would be at least index + 1
             findAut.getInitialState().setAccept(false);
             found = findAut.getShortestExample(true);
         } else {
@@ -980,7 +974,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         Automaton suffix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat(0, bound - index - find.boundLength);
         Automaton result = prefix.concatenate(findAut).concatenate(suffix);
         if (suffix.isEmpty()) { // i.e. becasuse find is long, it would make result empty
-           result = prefix.concatenate(findAut); // maybe should be making prefix the correct size as well...
+            result = prefix.concatenate(findAut); // maybe should be making prefix the correct size as well...
         }
         result.minimize();
 
@@ -999,192 +993,186 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         // create two automaton, one from 0 to index, and one from index to bound length
 
         String alphabetCharSet = this.alphabet.getCharSet();
-        Automaton start = Automaton.makeCharSet(alphabetCharSet).repeat(index,index);// looks at repeat docs
-        Automaton end = Automaton.makeCharSet(alphabetCharSet).repeat(0, this.boundLength-index);
+        Automaton start = Automaton.makeCharSet(alphabetCharSet).repeat(index, index);// looks at repeat docs
+        Automaton end = Automaton.makeCharSet(alphabetCharSet).repeat(0, this.boundLength - index);
         // concatenate the two automata with the incoming model
         Automaton result = start.concatenate(this.getAutomatonObject()).concatenate(end);
 
         return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
     }
-    
+
 
     /**
-     * 
      * Currently assumes a concrete argument.
-     * 
+     * <p>
      * OVER-ESTIMATION - None with concrete argument, symbolic argument introduces spurious strings.
      * UNDER-ESTIMATION - None with concrete argument
-     * 
+     *
      * @author Marlin Roberts
      * 05/24/2020
      */
-	@Override
-	public Model_Acyclic_Inverse inv_concatenate(Model_Acyclic_Inverse arg) {
-		
-		int argLength = arg.getBoundLength();
-		int bound = this.getBoundLength();
-		int originalLength = bound - argLength;
-		
-		Model_Acyclic_Inverse argModel;
-		
-		Automaton emptyAutomaton = Automaton.makeEmpty();
-		Model_Acyclic_Inverse resModel = new Model_Acyclic_Inverse(emptyAutomaton, this.alphabet, originalLength);
-		
-		
-		// isolate strings of length argLength + 1, + 2, etc.
-		// argLength + 1 strings represent a 1 symbol prefix, so substring them and union to result, etc.
-		for (int i = argLength + 1; i <= bound ; i++) {
-			argModel = this.modelManager.createAnyString(i);
-			argModel = this.intersect(argModel);
-			argModel = argModel.substring(0, i - argLength);
-			resModel = resModel.union(argModel);
-		}
-		
-		return resModel;
-	}
-	
-	
+    @Override
+    public Model_Acyclic_Inverse inv_concatenate(Model_Acyclic_Inverse arg) {
+
+        int argLength = arg.getBoundLength();
+        int bound = this.getBoundLength();
+        int originalLength = bound - argLength;
+
+        Model_Acyclic_Inverse argModel;
+
+        Automaton emptyAutomaton = Automaton.makeEmpty();
+        Model_Acyclic_Inverse resModel = new Model_Acyclic_Inverse(emptyAutomaton, this.alphabet, originalLength);
+
+
+        // isolate strings of length argLength + 1, + 2, etc.
+        // argLength + 1 strings represent a 1 symbol prefix, so substring them and union to result, etc.
+        for (int i = argLength + 1; i <= bound; i++) {
+            argModel = this.modelManager.createAnyString(i);
+            argModel = this.intersect(argModel);
+            argModel = argModel.substring(0, i - argLength);
+            resModel = resModel.union(argModel);
+        }
+
+        return resModel;
+    }
+
+
     /**
-     * 
      * will return a valid prefix of concated base.arg from this model.
-     * 
+     * <p>
      * OVER-ESTIMATION - .
      * UNDER-ESTIMATION - .
-     * 
+     *
      * @author Marlin Roberts
      * 05/24/2020
      */
-	@Override
-	public  Model_Acyclic_Inverse inv_concatenate(Model_Acyclic_Inverse base, Model_Acyclic_Inverse arg) {
-		
-		//int suffixBound = arg.getBoundLength();			// symbolic, could be any length up to bound
-		int resultLength = this.getBoundLength();		// should be a single string, length = bound
-		int prefixBound = base.getBoundLength();		// symbolic, could be any length up to bound
-		
-		printDebug("attempting to split: ");
+    @Override
+    public Model_Acyclic_Inverse inv_concatenate(Model_Acyclic_Inverse base, Model_Acyclic_Inverse arg) {
+
+        //int suffixBound = arg.getBoundLength();			// symbolic, could be any length up to bound
+        int resultLength = this.getBoundLength();        // should be a single string, length = bound
+        int prefixBound = base.getBoundLength();        // symbolic, could be any length up to bound
+
+        printDebug("attempting to split: ");
 //		for (String s : this.getFiniteStrings()) {
 //			System.out.println(s);
 //		}
-		
-		Model_Acyclic_Inverse prefixModel = null;
-		Model_Acyclic_Inverse suffixModel = null;
-						
-		boolean prefixFound = false;
-		boolean noMatch = false;
-		
-		int prefixLength = 1;
-		
-		// slice up this.model looking for a valid combination of prefix/suffix
-		// !! this has no checks for no match !!!
-		while (!prefixFound && !noMatch) {
-			prefixModel = this.substring(0, prefixLength);
-			
+
+        Model_Acyclic_Inverse prefixModel = null;
+        Model_Acyclic_Inverse suffixModel = null;
+
+        boolean prefixFound = false;
+        boolean noMatch = false;
+
+        int prefixLength = 1;
+
+        // slice up this.model looking for a valid combination of prefix/suffix
+        // !! this has no checks for no match !!!
+        while (!prefixFound && !noMatch) {
+            prefixModel = this.substring(0, prefixLength);
+
 //			for (String s : prefixModel.getFiniteStrings()) {
 //				System.out.println("prefixModel: " + s);
 //			}
-			
-			suffixModel = this.substring(prefixLength, resultLength);
-			
+
+            suffixModel = this.substring(prefixLength, resultLength);
+
 //			for (String s : suffixModel.getFiniteStrings()) {
 //				System.out.println("suffixModel: " + s);
 //			}
-			
-			if (!base.intersect(prefixModel).isEmpty() && !arg.intersect(suffixModel).isEmpty()) {
-				prefixFound = true;
-			} else {
-				prefixLength++;
-				if (prefixLength > prefixBound) {
-					noMatch = true;
-					}
-			}
-		}
-		
-		if (noMatch) {
+
+            if (!base.intersect(prefixModel).isEmpty() && !arg.intersect(suffixModel).isEmpty()) {
+                prefixFound = true;
+            } else {
+                prefixLength++;
+                if (prefixLength > prefixBound) {
+                    noMatch = true;
+                }
+            }
+        }
+
+        if (noMatch) {
             System.out.println("ERROR: Could not find a valid prefix, returning last prefix tried...");
-		}
-		
-		return prefixModel;
-	}
-	
-	
+        }
+
+        return prefixModel;
+    }
+
+
     /**
-     * 
      * will return a valid prefix of concated base.arg from this model.
-     * 
+     * <p>
      * OVER-ESTIMATION - .
      * UNDER-ESTIMATION - .
-     * 
+     *
      * @author Marlin Roberts
      * 05/24/2020
      */
-	@Override
-	public  Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse> inv_concatenate_sym (Model_Acyclic_Inverse base, Model_Acyclic_Inverse arg) {
-		
-		//int suffixBound = arg.getBoundLength();			// symbolic, could be any length up to bound
-		int resultLength = this.getBoundLength();		// should be a single string, length = bound
-		int prefixBound = base.getBoundLength();		// symbolic, could be any length up to bound
+    @Override
+    public Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse> inv_concatenate_sym(Model_Acyclic_Inverse base, Model_Acyclic_Inverse arg) {
+
+        //int suffixBound = arg.getBoundLength();			// symbolic, could be any length up to bound
+        int resultLength = this.getBoundLength();        // should be a single string, length = bound
+        int prefixBound = base.getBoundLength();        // symbolic, could be any length up to bound
 
         System.out.println("attempting to split: ");
 //		for (String s : this.getFiniteStrings()) {
 //			System.out.println(s);
 //		}
-		
-		Model_Acyclic_Inverse prefixModel = null;
-		Model_Acyclic_Inverse suffixModel = null;
-						
-		boolean prefixFound = false;
-		boolean noMatch = false;
-		
-		int prefixLength = 1;
-		
-		// slice up this.model looking for a valid combination of prefix/suffix
-		// !! this has no checks for no match !!!
-		while (!prefixFound && !noMatch) {
-			prefixModel = this.substring(0, prefixLength);
-			
+
+        Model_Acyclic_Inverse prefixModel = null;
+        Model_Acyclic_Inverse suffixModel = null;
+
+        boolean prefixFound = false;
+        boolean noMatch = false;
+
+        int prefixLength = 1;
+
+        // slice up this.model looking for a valid combination of prefix/suffix
+        // !! this has no checks for no match !!!
+        while (!prefixFound && !noMatch) {
+            prefixModel = this.substring(0, prefixLength);
+
 //			for (String s : prefixModel.getFiniteStrings()) {
 //				System.out.println("prefixModel: " + s);
 //			}
-			
-			suffixModel = this.substring(prefixLength, resultLength);
-			
+
+            suffixModel = this.substring(prefixLength, resultLength);
+
 //			for (String s : suffixModel.getFiniteStrings()) {
 //				System.out.println("suffixModel: " + s);
 //			}
-			
-			if (!base.intersect(prefixModel).isEmpty() && !arg.intersect(suffixModel).isEmpty()) {
-				prefixFound = true;
-			} else {
-				prefixLength++;
-				if (prefixLength > prefixBound) {
-					noMatch = true;
-					}
-			}
-		}
-		
-		if (noMatch) {
+
+            if (!base.intersect(prefixModel).isEmpty() && !arg.intersect(suffixModel).isEmpty()) {
+                prefixFound = true;
+            } else {
+                prefixLength++;
+                if (prefixLength > prefixBound) {
+                    noMatch = true;
+                }
+            }
+        }
+
+        if (noMatch) {
             System.out.println("ERROR: Could not find a valid prefix, returning last prefix tried...");
-		}
-		
-		return new Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>(prefixModel, suffixModel);
-	}
-	
-	
+        }
+
+        return new Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>(prefixModel, suffixModel);
+    }
 
 
     /**
-     * 
      * OVER-ESTIMATION - Yes, results need to be intersected with previous state.
      * UNDER-ESTIMATION - None.
-     * 
+     *
      * @author Marlin Roberts
      * 05/24/2020
      */
-	@Override
-	public Model_Acyclic_Inverse inv_delete(int start, int end) {
-		
-		Model_Acyclic_Inverse anyString = modelManager.createAnyString(end - start);
-       // set bound to be equal to actual length
+    @Override
+    public Model_Acyclic_Inverse inv_delete(int start, int end) {
+
+        Model_Acyclic_Inverse anyString = modelManager.createAnyString(end - start);
+        // set bound to be equal to actual length
         // make sure no index out of bounds, i.e. mark all states as reject
         anyString.setBoundLength(end - start);
         Set<State> states = anyString.getStatesOrdered();
@@ -1197,238 +1185,304 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
             }
         }
 
-		Model_Acyclic_Inverse result = this.insert(start, anyString);
+        Model_Acyclic_Inverse result = this.insert(start, anyString);
 
-		return result;
-	}
-
-
-
-    /**
-     * 
-     * Currently assumes a concrete argument. // oh how i wish it were so
-     * 
-     * OVER-ESTIMATION - None with concrete argument
-     * UNDER-ESTIMATION - None with concrete argument
-     * 
-     * @author Marlin Roberts
-     * 05/24/2020
-     */
-	@Override
-	public Model_Acyclic_Inverse inv_insert(int offset, Model_Acyclic_Inverse argModel) {
-
-        Model_Acyclic_Inverse prefix = this.substring(0, offset);
-        Model_Acyclic_Inverse suffix = this.substring(offset, this.getBoundLength());
-
-        argModel.setAutomaton(argModel.getAutomatonObject().intersection(suffix.getAutomatonObject()));
-//        argModel = argModel.intersect(suffix);
-        // now argModel and the suffix can be any substring pairs of argModel....
-        suffix.minus(argModel);
-        if (suffix.isEmpty()) {
-            // if suffix is empty, we can just return the prefix concatenated with argModel
-            return prefix;
-        }
-		return prefix.concatenate(suffix);
-	}
-
-    private void setAutomaton(Automaton aut) {
-        this.automaton = aut;
+        return result;
     }
 
 
     /**
-     * 
+     * This inverse insert takes an offset which is the index the insert was performed at,
+     * and an argument model which is the model that was inserted. The 'this' model is the
+     * incoming model from backwards propogation. So we use the forward prop source model,
+     * the offset and the incoming model to determine prefixes and suffixes that give us
+     * what to propogate down to our source (result). And we also need to propogate
+     * the whatever remains between the prefix and suffix after being intersected with
+     * the insertModel so to be propogated down to the arg
+     *
+     * @author Nat Steven
+     * 6-23-25
+     */
+    @Override
+    public Model_Acyclic_Inverse inv_insert(Model_Acyclic_Inverse baseModel, int offset, Model_Acyclic_Inverse insertModel) {
+
+        // figure out prefix/suffix from backModel and index
+        Model_Acyclic_Inverse prefixIn = this.substring(0, offset);
+        Model_Acyclic_Inverse suffixIn = this.substring(offset, this.getBoundLength());
+
+        // do the same but for the forward prop source model
+        Model_Acyclic_Inverse prefixSource = baseModel.substring(0, offset);
+        Model_Acyclic_Inverse suffixSource = baseModel.substring(offset, baseModel.getBoundLength());
+
+        Model_Acyclic_Inverse prefix = prefixIn.intersect(prefixSource); // this should be the start of the return model
+
+        // find common suffixes of Automata
+        Automaton suffIn = suffixIn.getAutomatonObject();
+        Automaton suffSource = suffixSource.getAutomatonObject();
+        HashMap<State, Boolean> prevAccept = new HashMap<>();
+
+        Automaton suffInRev = performUnaryOperation(suffIn, new Reverse(), this.alphabet);
+        Automaton suffSourceRev = performUnaryOperation(suffSource, new Reverse(), this.alphabet);
+
+        for (State state : suffInRev.getStates()) {
+            prevAccept.put(state, state.isAccept());
+            state.setAccept(true);
+        }
+        for (State state : suffSourceRev.getStates()) {
+            prevAccept.put(state, state.isAccept());
+            state.setAccept(true);
+        }
+        Tuple<HashMap<State, Tuple<State,State>>, Automaton> mapAutTuple = intersectWithMap(suffInRev, suffSourceRev);
+        Automaton suffix = mapAutTuple.get2();
+        HashMap<State, Tuple<State, State>> stateMap = mapAutTuple.get1();
+
+        //before reversing back suffix aut we want to construct the remainder aut.
+        Automaton remains = suffInRev.minus(suffix);
+
+
+        for (State state : suffix.getStates()) {
+            Tuple<State, State> inputs = stateMap.get(state);
+            State s1 = inputs.get1();
+            State s2 = inputs.get2();
+            state.setAccept(prevAccept.get(s1) && prevAccept.get(s2));
+        }
+
+        suffix = performUnaryOperation(suffix, new Reverse(), this.alphabet);
+        // output back to base is then the prefix conc suffi model
+        Model_Acyclic_Inverse result = new Model_Acyclic_Inverse(prefix.getAutomatonObject().concatenate(suffix), this.alphabet, this.boundLength);
+
+        // but we still need to propogate the insert/arg model. this will be done by finding the remainder of our suffixIn and suffixSource
+
+//        for (State state : remains.getStates()) {
+//            Tuple<State, State> inputs = stateMap.get(state);
+//            State s1 = inputs.get1();
+//            State s2 = inputs.get2();
+//            state.setAccept(prevAccept.get(s1) && prevAccept.get(s2));
+//        }
+
+        remains = performUnaryOperation(remains, new Reverse(), this.alphabet);
+        insertModel.setAutomaton(insertModel.getAutomatonObject().intersection(remains));
+
+        return result;
+    }
+
+    // this is mostly copied from dk.brics
+public Tuple<HashMap<State, Tuple<State, State>>, Automaton> intersectWithMap(Automaton aut1, Automaton aut2) {
+    Automaton result = new Automaton();
+    HashMap<State, Tuple<State, State>> stateMap = new HashMap<>();
+    HashMap<Tuple<State, State>, State> pairToResult = new HashMap<>();
+    LinkedList<Tuple<State, State>> worklist = new LinkedList<>();
+
+    Tuple<State, State> initialPair = new Tuple<>(aut1.getInitialState(), aut2.getInitialState());
+    State resultInitial = new State();
+    result.setInitialState(resultInitial);
+    stateMap.put(resultInitial, initialPair);
+    pairToResult.put(initialPair, resultInitial);
+    worklist.add(initialPair);
+
+    while (!worklist.isEmpty()) {
+        Tuple<State, State> currentPair = worklist.removeFirst();
+        State s1 = currentPair.get1();
+        State s2 = currentPair.get2();
+        State resultState = pairToResult.get(currentPair);
+
+        resultState.setAccept(s1.isAccept() && s2.isAccept());
+
+        for (Transition t1 : s1.getTransitions()) {
+            for (Transition t2 : s2.getTransitions()) {
+                char min = (char) Math.max(t1.getMin(), t2.getMin());
+                char max = (char) Math.min(t1.getMax(), t2.getMax());
+                if (min <= max) {
+                    State dest1 = t1.getDest();
+                    State dest2 = t2.getDest();
+                    Tuple<State, State> destPair = new Tuple<>(dest1, dest2);
+
+                    State destResultState = pairToResult.get(destPair);
+                    if (destResultState == null) {
+                        destResultState = new State();
+                        pairToResult.put(destPair, destResultState);
+                        stateMap.put(destResultState, destPair);
+                        worklist.add(destPair);
+                    }
+                    resultState.addTransition(new Transition(min, max, destResultState));
+                }
+            }
+        }
+    }
+
+    return new Tuple<>(stateMap, result);
+}
+
+
+    /**
      * OVER-ESTIMATION - Yes, results need to be intersected with previous state.
      * UNDER-ESTIMATION - None.
-     * 
+     *
      * @author Marlin Roberts
      * 05/24/2020
      */
-	@Override
-	public Model_Acyclic_Inverse inv_replace(char find, char replace) {
+    @Override
+    public Model_Acyclic_Inverse inv_replace(char find, char replace) {
         // perform operation
         Automaton result = performUnaryOperation(automaton, new InverseReplaceCC(find, replace), this.alphabet);
 
         // return new model from resulting automaton
         return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
-	}
+    }
 
 
+    @Override
+    public Model_Acyclic_Inverse inv_replace(String find, String replace) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 
-	@Override
-	public Model_Acyclic_Inverse inv_replace(String find, String replace) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Model_Acyclic_Inverse inv_replaceChar() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 
+    @Override
+    public Model_Acyclic_Inverse inv_replaceFindKnown(char find) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 
-	@Override
-	public Model_Acyclic_Inverse inv_replaceChar() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-
-
-	@Override
-	public Model_Acyclic_Inverse inv_replaceFindKnown(char find) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-
-
-	@Override
-	public Model_Acyclic_Inverse inv_replaceReplaceKnown(char replace) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+    @Override
+    public Model_Acyclic_Inverse inv_replaceReplaceKnown(char replace) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 
     /**
-     * 
      * OVER-ESTIMATION - None.
      * UNDER-ESTIMATION - None.
-     * 
+     *
      * @author Marlin Roberts
      * 05/24/2020
      */
-	@Override
-	public Model_Acyclic_Inverse inv_reverse() {
-		
-		Model_Acyclic_Inverse result = this.reverse();
-		
-		return result;
-	}
+    @Override
+    public Model_Acyclic_Inverse inv_reverse() {
 
+        Model_Acyclic_Inverse result = this.reverse();
+
+        return result;
+    }
 
 
     /**
-     * 
      * The string returned from this operation will be the original string with
-     * a new prefix and suffix of lengths start and maxStringPadding. The result should be 
+     * a new prefix and suffix of lengths start and maxStringPadding. The result should be
      * intersected with the previous state to obtain strings with proper length.
-     * 
-     * This can be improved if we examine the previous state and pass this the 
+     * <p>
+     * This can be improved if we examine the previous state and pass this the
      * length as well as the start and end. This would eliminate the possibility of
      * under-estimation.
-     * 
+     * <p>
      * OVER-ESTIMATION - Yes, results need to be intersected with previous state.
      * UNDER-ESTIMATION - Yes, if original had a longer suffix than maxStringPadding
-     * 
+     *
      * @author Marlin Roberts
      * 05/24/2020
      */
-	@Override
-	public Model_Acyclic_Inverse inv_substring(int start, int end) {
-		
-		// we know the length of the prefix, it is equal to start.
-		Model_Acyclic_Inverse prefix = modelManager.createAnyString(start,start);
-		
-		// we do not know the length of the original string, so we do no know the length of the suffix.
-		// if the original had a longer suffix, we will lose string possibilities, under-estimation.
-		Model_Acyclic_Inverse suffix = modelManager.createAnyString(0,maxStringPadding);
-		
-		Model_Acyclic_Inverse result = prefix.concatenate(this);
-		result = result.concatenate(suffix);
-		
-		return result;
-	}
+    @Override
+    public Model_Acyclic_Inverse inv_substring(int start, int end) {
 
-	@Override
-	public Model_Acyclic_Inverse inv_substring(int start) {
-		
-		// we know the length of the prefix, it is equal to start.
-		Model_Acyclic_Inverse prefix = modelManager.createAnyString(start,start);
-		
-		// we do not know the length of the original string, so we do no know the length of the suffix.
-		// if the original had a longer suffix, we will lose string possibilities, under-estimation.
-		//Model_Acyclic_Inverse suffix = modelManager.createAnyString(0,maxStringPadding);
-		
-		Model_Acyclic_Inverse result = prefix.concatenate(this);
-		//result = result.concatenate(suffix);
-		
-		return result;
-	}
+        // we know the length of the prefix, it is equal to start.
+        Model_Acyclic_Inverse prefix = modelManager.createAnyString(start, start);
 
+        // we do not know the length of the original string, so we do no know the length of the suffix.
+        // if the original had a longer suffix, we will lose string possibilities, under-estimation.
+        Model_Acyclic_Inverse suffix = modelManager.createAnyString(0, maxStringPadding);
 
+        Model_Acyclic_Inverse result = prefix.concatenate(this);
+        result = result.concatenate(suffix);
 
-	@Override
-	public Model_Acyclic_Inverse inv_setCharAt(int offset, Model_Acyclic_Inverse argModel) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        return result;
+    }
+
+    @Override
+    public Model_Acyclic_Inverse inv_substring(int start) {
+
+        // we know the length of the prefix, it is equal to start.
+        Model_Acyclic_Inverse prefix = modelManager.createAnyString(start, start);
+
+        // we do not know the length of the original string, so we do no know the length of the suffix.
+        // if the original had a longer suffix, we will lose string possibilities, under-estimation.
+        //Model_Acyclic_Inverse suffix = modelManager.createAnyString(0,maxStringPadding);
+
+        Model_Acyclic_Inverse result = prefix.concatenate(this);
+        //result = result.concatenate(suffix);
+
+        return result;
+    }
 
 
+    @Override
+    public Model_Acyclic_Inverse inv_setCharAt(int offset, Model_Acyclic_Inverse argModel) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 
-	@Override
-	public Model_Acyclic_Inverse inv_setLength(int length) {
-		
-		Model_Acyclic_Inverse suffix = modelManager.createAnyString(0,maxStringPadding);
-		Model_Acyclic_Inverse result = this.concatenate(suffix);
-		
-		return result;
-	}
+    @Override
+    public Model_Acyclic_Inverse inv_setLength(int length) {
+
+        Model_Acyclic_Inverse suffix = modelManager.createAnyString(0, maxStringPadding);
+        Model_Acyclic_Inverse result = this.concatenate(suffix);
+
+        return result;
+    }
 
 
-
-
-	@Override
-	public Model_Acyclic_Inverse inv_suffix(int start) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+    @Override
+    public Model_Acyclic_Inverse inv_suffix(int start) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 
     /**
-     * 
      * OVER-ESTIMATION - Yes, results need to be intersected with previous state.
      * UNDER-ESTIMATION - None.
-     * 
+     *
      * @author Marlin Roberts
      * 05/24/2020
      */
-	@Override
-	public Model_Acyclic_Inverse inv_toLowercase() {
+    @Override
+    public Model_Acyclic_Inverse inv_toLowercase() {
         // perform operation
         Automaton result = performUnaryOperation(automaton, new InverseLowerCase(), this.alphabet);
 
         // return new model from resulting automaton
         return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
-	}
-
+    }
 
 
     /**
-     * 
      * OVER-ESTIMATION - Yes, results need to be intersected with previous state.
      * UNDER-ESTIMATION - None.
-     * 
+     *
      * @author Marlin Roberts
      * 05/24/2020
      */
-	@Override
-	public Model_Acyclic_Inverse inv_toUppercase() {
+    @Override
+    public Model_Acyclic_Inverse inv_toUppercase() {
         // perform operation
         Automaton result = performUnaryOperation(automaton, new InverseUpperCase(), this.alphabet);
 
         // return new model from resulting automaton
         return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
-	}
+    }
 
 
-
-
-	@Override
-	public Model_Acyclic_Inverse inv_trim() {
+    @Override
+    public Model_Acyclic_Inverse inv_trim() {
 //
 //		Alphabet padAlphabet = new Alphabet(" ");
 //		Model_Acyclic_Inverse_Manager manager = new Model_Acyclic_Inverse_Manager (padAlphabet, maxStringPadding);
@@ -1443,29 +1497,29 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         Automaton result = pad.concatenate(afterTrim.concatenate(pad));
 
         //note that this technically allows paddign outside of boundLength (again shuold handle all the length stuff, and ideally just with Model_Acyclic_Inverse
-		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength); // fucking lengths
-	}
-	
-	
-	   @Override
-	   public Automaton getAutomatonObject() {
-		   return this.automaton;
-	   }
-
-	   @Override
-	   public String getShortestExampleString() {
-	        return this.automaton.getShortestExample(true);
-	    }
+        return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength); // fucking lengths
+    }
 
 
-	@Override
-	public Model_Acyclic_Inverse getShortestExampleModel() {
-		return modelManager.createString(this.automaton.getShortestExample(true));
-		
-	}
+    @Override
+    public Automaton getAutomatonObject() {
+        return this.automaton;
+    }
+
+    @Override
+    public String getShortestExampleString() {
+        return this.automaton.getShortestExample(true);
+    }
+
+
+    @Override
+    public Model_Acyclic_Inverse getShortestExampleModel() {
+        return modelManager.createString(this.automaton.getShortestExample(true));
+
+    }
 
 //    private void ensureAcyclicModel(Model_Acyclic_Inverse arg) {
-        // check if automaton model is bounded
+    // check if automaton model is bounded
 //        if (!(arg instanceof Model_Acyclic_Inverse)) {
 //
 //            throw new UnsupportedOperationException(
@@ -1473,199 +1527,200 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 //                    "operations with other Acyclic Automaton Models.");
 //        }
 //    }
-    
-    public Model_Acyclic_Inverse union (Model_Acyclic_Inverse argModel) {
-      	 //ensureAcyclicModel(argModel);
-      	 Automaton arg = getAutomatonFromAcyclicModel(argModel);
-      	 Automaton result = this.automaton.union(arg);
-      	 result.minimize();
-           int boundLength = this.boundLength;
-           if (argModel.boundLength > this.boundLength) {
-               boundLength = argModel.boundLength;
-           }
-           return new Model_Acyclic_Inverse(result, this.alphabet, boundLength);
-      }
 
-	@Override
-	public List<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>> inv_concatenate_sym_set(Model_Acyclic_Inverse base,
-			Model_Acyclic_Inverse arg) {
-		
-		int suffixBound = arg.getBoundLength();			// symbolic, could be any length up to bound
-		int resultLength = this.getBoundLength();		// should be a single string, length = bound
-		int prefixBound = base.getBoundLength();		// symbolic, could be any length up to bound
+    public Model_Acyclic_Inverse union(Model_Acyclic_Inverse argModel) {
+        //ensureAcyclicModel(argModel);
+        Automaton arg = getAutomatonFromAcyclicModel(argModel);
+        Automaton result = this.automaton.union(arg);
+        result.minimize();
+        int boundLength = this.boundLength;
+        if (argModel.boundLength > this.boundLength) {
+            boundLength = argModel.boundLength;
+        }
+        return new Model_Acyclic_Inverse(result, this.alphabet, boundLength);
+    }
+
+    @Override
+    public List<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>> inv_concatenate_sym_set(Model_Acyclic_Inverse base,
+                                                                                             Model_Acyclic_Inverse arg) {
+
+        int suffixBound = arg.getBoundLength();            // symbolic, could be any length up to bound
+        int resultLength = this.getBoundLength();        // should be a single string, length = bound
+        int prefixBound = base.getBoundLength();        // symbolic, could be any length up to bound
 
         System.out.println("Bounds: S " + suffixBound + " P " + prefixBound + " RL " + resultLength);
 //		System.out.format("Bounds: S %s P %s RL %s \n", suffixBound, prefixBound, resultLength);
-		
-		
-		List<Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse>> results = new ArrayList<Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse>>();
-		
-		Model_Acyclic_Inverse prefixModel = null;
-		Model_Acyclic_Inverse suffixModel = null;
-						
-		boolean noMatch = true;
-		
-		int prefixLength = 0;
-		
-		while (prefixLength <= prefixBound) {
-			
-			prefixModel = this.substring(0, prefixLength);
-			
-			suffixModel = this.substring(prefixLength, resultLength);
+
+
+        List<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>> results = new ArrayList<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>>();
+
+        Model_Acyclic_Inverse prefixModel = null;
+        Model_Acyclic_Inverse suffixModel = null;
+
+        boolean noMatch = true;
+
+        int prefixLength = 0;
+
+        while (prefixLength <= prefixBound) {
+
+            prefixModel = this.substring(0, prefixLength);
+
+            suffixModel = this.substring(prefixLength, resultLength);
 
             System.out.println("SPLIT: P " + prefixModel.getShortestExampleString() + " S " + suffixModel.getShortestExampleString());
 //			System.out.format("SPLIT: P %4s  S %6s ", prefixModel.getShortestExampleString(), suffixModel.getShortestExampleString());
-			
-			if (!base.intersect(prefixModel).isEmpty() && !arg.intersect(suffixModel).isEmpty()) {
-				results.add(new Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>(prefixModel, suffixModel));
-				noMatch = false;
+
+            if (!base.intersect(prefixModel).isEmpty() && !arg.intersect(suffixModel).isEmpty()) {
+                results.add(new Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>(prefixModel, suffixModel));
+                noMatch = false;
                 System.out.println("Accepted");
-			} else {
+            } else {
                 System.out.println(" Intersection of prfx or sffx empty - Rejected");
 //				System.out.println(" base count: " + base.modelCount() + " arg count: " + arg.modelCount());
-			}
-			
-			prefixLength++;
-			
-		}
-		
-		if (noMatch) {
+            }
+
+            prefixLength++;
+
+        }
+
+        if (noMatch) {
             System.out.println("ERROR: Could not find a valid prefix / suffix ...");
-		}
-		
-		return results;
-	}
+        }
 
-	@Override
-	public List<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>> inv_concatenate_sym_all(Model_Acyclic_Inverse base,
-			Model_Acyclic_Inverse arg) {
-		List<Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse>> results = new ArrayList<Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse>>();
-		
-		Model_Acyclic_Inverse prefixModelInit = this.clone();
-		//clear all final states in the prefix model
-		Set<State> accepting = prefixModelInit.automaton.getAcceptStates();
-		for(State s : accepting) {
-			s.setAccept(false);
-		}
-		Model_Acyclic_Inverse suffixModelInit = this.clone();
-		
-		//System.out.println("prefixModelInit " + prefixModelInit.getAutomaton());
-		//System.out.println("suffixModelInit " + suffixModelInit.getAutomaton());
-						
-		boolean noMatch = true;
-		//iterate over each state of this automata
-		int indx = 0;
-		for(State s: suffixModelInit.getStatesOrdered()) {
-			indx++;
-			//find the same states in both models
-			Model_Acyclic_Inverse prefixModel = prefixModelInit.clone();
-			//System.out.println("prefixCurrent " + prefixModel.getAutomaton());
-			
-			//System.out.println("current state " + s);
-			
-			//in brics states are put into an ordered linkedlist set
-			//the order is from the start state based on the transition id
-			//so the same indx of the iteration would get the same state
-			
-			//make the state s(ps) the final states, i.e.,
-			//where prefix would end
-			int pindx = 1;
-			for(State ps : prefixModel.getStatesOrdered()) {
-				if(indx == pindx) {
-					ps.setAccept(true);
-					//System.out.println("prefix state " + ps);
-					break;
-				}
-				pindx++;
-			}
-			
-			//update and check if this split works with base
-			prefixModel = base.intersect(prefixModel);
-			if (prefixModel.isEmpty()) {
+        return results;
+    }
+
+    @Override
+    public List<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>> inv_concatenate_sym_all(Model_Acyclic_Inverse base,
+                                                                                             Model_Acyclic_Inverse arg) {
+        List<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>> results = new ArrayList<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>>();
+
+        Model_Acyclic_Inverse prefixModelInit = this.clone();
+        //clear all final states in the prefix model
+        Set<State> accepting = prefixModelInit.automaton.getAcceptStates();
+        for (State s : accepting) {
+            s.setAccept(false);
+        }
+        Model_Acyclic_Inverse suffixModelInit = this.clone();
+
+        //System.out.println("prefixModelInit " + prefixModelInit.getAutomaton());
+        //System.out.println("suffixModelInit " + suffixModelInit.getAutomaton());
+
+        boolean noMatch = true;
+        //iterate over each state of this automata
+        int indx = 0;
+        for (State s : suffixModelInit.getStatesOrdered()) {
+            indx++;
+            //find the same states in both models
+            Model_Acyclic_Inverse prefixModel = prefixModelInit.clone();
+            //System.out.println("prefixCurrent " + prefixModel.getAutomaton());
+
+            //System.out.println("current state " + s);
+
+            //in brics states are put into an ordered linkedlist set
+            //the order is from the start state based on the transition id
+            //so the same indx of the iteration would get the same state
+
+            //make the state s(ps) the final states, i.e.,
+            //where prefix would end
+            int pindx = 1;
+            for (State ps : prefixModel.getStatesOrdered()) {
+                if (indx == pindx) {
+                    ps.setAccept(true);
+                    //System.out.println("prefix state " + ps);
+                    break;
+                }
+                pindx++;
+            }
+
+            //update and check if this split works with base
+            prefixModel = base.intersect(prefixModel);
+            if (prefixModel.isEmpty()) {
                 printDebug("Going to the next split, prefix failed");
-				//does not work, go to the next split
-				continue;
-			}
-			
-			Model_Acyclic_Inverse suffixModel = suffixModelInit.clone();
-			//make the state s(ss) the start state, i.e.,
-			//where the prefix ends this suffix should start
-			int sindx=1;
-			for(State ss : suffixModel.getStatesOrdered()) {
-				if(indx == sindx) {//need try compare also
-					//System.out.println("sufix state " + ss);
-					suffixModel.automaton.setInitialState(ss);
-					break;
-				}
-				sindx++;
-			}
-			
-			//update and check if this split worked for suffix
-			suffixModel = arg.intersect(suffixModel);
-			if(suffixModel.isEmpty()) {
+                //does not work, go to the next split
+                continue;
+            }
+
+            Model_Acyclic_Inverse suffixModel = suffixModelInit.clone();
+            //make the state s(ss) the start state, i.e.,
+            //where the prefix ends this suffix should start
+            int sindx = 1;
+            for (State ss : suffixModel.getStatesOrdered()) {
+                if (indx == sindx) {//need try compare also
+                    //System.out.println("sufix state " + ss);
+                    suffixModel.automaton.setInitialState(ss);
+                    break;
+                }
+                sindx++;
+            }
+
+            //update and check if this split worked for suffix
+            suffixModel = arg.intersect(suffixModel);
+            if (suffixModel.isEmpty()) {
                 printDebug("Going to the next split, suffix failed");
-				continue;
-			}
-			
-			//eas since we just changing state attributes, there should be
-			//no need for minimization? I think we need for the 
-			//second/suffix one where we change the start state since
-			//some states might become unreachable
-			//in the first/prefix one we just change what accepting states
-			//are, which can also change how equivalent states can be collapsed.
-			//So both of them needs to be minimized before adding the example set
-			prefixModel.automaton.minimize();
-			suffixModel.automaton.minimize();
-			//if the split on state s is feasible for both base and arg then
-			//add them into the list
-			results.add(new Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>(prefixModel, suffixModel));
-			noMatch = false;
-			//System.out.println(" Accepted on state s " + s);
-			
-		}
-		
-		if(noMatch) {
+                continue;
+            }
+
+            //eas since we just changing state attributes, there should be
+            //no need for minimization? I think we need for the
+            //second/suffix one where we change the start state since
+            //some states might become unreachable
+            //in the first/prefix one we just change what accepting states
+            //are, which can also change how equivalent states can be collapsed.
+            //So both of them needs to be minimized before adding the example set
+            prefixModel.automaton.minimize();
+            suffixModel.automaton.minimize();
+            //if the split on state s is feasible for both base and arg then
+            //add them into the list
+            results.add(new Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>(prefixModel, suffixModel));
+            noMatch = false;
+            //System.out.println(" Accepted on state s " + s);
+
+        }
+
+        if (noMatch) {
             printDebug("No match found, returning empty set of tuples");
-		}
-		
-		return results;
-	}
-	
-	
-	/** 
-	 * Returns the set of states that are reachable from the initial state.
-	 * @return set of {@link State} objects
-	 */
-	public Set<State> getStatesOrdered() {
-		Set<State> visited = new LinkedHashSet<State>();
+        }
 
-		LinkedList<State> worklist = new LinkedList<State>();
-		State initial = automaton.getInitialState();
-		worklist.add(initial);
-		visited.add(initial);
-		while (worklist.size() > 0) {
-			State s = worklist.removeFirst();
-			Collection<Transition> tr = s.getSortedTransitions(false);
-			for (Transition t : tr)
-				if (!visited.contains(t.getDest())) {
-					visited.add(t.getDest());
-					worklist.add(t.getDest());
-				}
-		}
-		return visited;
-	}
-	
-	
-	/**
-	 * Removes strings from argument mode from this model.
-	 */
-	@Override
-	public void minus(Model_Acyclic_Inverse model) {
-		
-		Automaton remove = model.getAutomatonObject();
-		automaton = automaton.minus(remove);
+        return results;
+    }
 
-	}
+
+    /**
+     * Returns the set of states that are reachable from the initial state.
+     *
+     * @return set of {@link State} objects
+     */
+    public Set<State> getStatesOrdered() {
+        Set<State> visited = new LinkedHashSet<State>();
+
+        LinkedList<State> worklist = new LinkedList<State>();
+        State initial = automaton.getInitialState();
+        worklist.add(initial);
+        visited.add(initial);
+        while (worklist.size() > 0) {
+            State s = worklist.removeFirst();
+            Collection<Transition> tr = s.getSortedTransitions(false);
+            for (Transition t : tr)
+                if (!visited.contains(t.getDest())) {
+                    visited.add(t.getDest());
+                    worklist.add(t.getDest());
+                }
+        }
+        return visited;
+    }
+
+
+    /**
+     * Removes strings from argument mode from this model.
+     */
+    @Override
+    public void minus(Model_Acyclic_Inverse model) {
+
+        Automaton remove = model.getAutomatonObject();
+        automaton = automaton.minus(remove);
+
+    }
 
     // helper method for replaceFirst to determine correctness
     // enumerates all possible strings in model to perform operation
@@ -1686,7 +1741,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
                 }
             }
         }
-        if (this.containsString("")){
+        if (this.containsString("")) {
             // if the model contains the empty string, we need to add it to the result
             result = result.union(new Model_Acyclic_Inverse(Automaton.makeEmptyString(), this.alphabet, 0));
         }
@@ -1727,20 +1782,21 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
     }
     // Note that we do not use an operations class as we need visiblity of the solver instance
     //
+
     /**
      * Replaces the first occurrence of a substring matching the regex with the replacement string.
      *
-     * @param regexString the regex to match and replace
+     * @param regexString       the regex to match and replace
      * @param replacementString the string to replace with
      * @return a new Model_Acyclic_Inverse with the replaced string
      */
 //	@Override
-	public Model_Acyclic_Inverse replaceFirst(Model_Acyclic_Inverse regexString, Model_Acyclic_Inverse replacementString) {
-		// wrote this algorithm when arguments were a regexString and replacement string, now they are themselves models
+    public Model_Acyclic_Inverse replaceFirst(Model_Acyclic_Inverse regexString, Model_Acyclic_Inverse replacementString) {
+        // wrote this algorithm when arguments were a regexString and replacement string, now they are themselves models
         // potentially its extra work to convert them to automata :shrug:
 //        Automaton regexAut = new RegExp(regexString).toAutomaton();
         Model_Acyclic_Inverse bruteModel = null;
-        if(debug) {
+        if (debug) {
             bruteModel = this.replaceFirstBruteForce(regexString, replacementString);
             printDebug("This: " + this.automaton.getFiniteStrings());
             printDebug("Find: " + regexString.automaton.getFiniteStrings());
@@ -1749,27 +1805,27 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         }
 
         Automaton regexAut = regexString.automaton;
-		Automaton origAut = Automaton.minimize(automaton.clone());
+        Automaton origAut = Automaton.minimize(automaton.clone());
         // nps 5.13.25 - Need to manually concatenate bounds as repeat uses loops
         int repeat = boundLength - regexString.getBoundLength();
         // to account for all possibilities add to front and back
         String charSet = this.alphabet.getCharSet();
-        Automaton padding = Automaton.makeCharSet(charSet).repeat(0,repeat);
+        Automaton padding = Automaton.makeCharSet(charSet).repeat(0, repeat);
         Automaton anyPrefixAndSuffix = padding.concatenate(regexAut).concatenate(padding);
 
 //        Automaton anyPrefixAndSuffix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat().concatenate(regexAut)
 //                .concatenate(Automaton.makeCharSet(this.alphabet.getCharSet()).repeat());
-		// Automaton containing all Strings in the originalAutomaton's language which
-		// contain a substring which satisfies the regex
-		Automaton intersection = Automaton.minimize(origAut.intersection(anyPrefixAndSuffix));
-		// if there are no matches to operate on, return the originalAutomaton
-		if (intersection.isEmpty()) {
+        // Automaton containing all Strings in the originalAutomaton's language which
+        // contain a substring which satisfies the regex
+        Automaton intersection = Automaton.minimize(origAut.intersection(anyPrefixAndSuffix));
+        // if there are no matches to operate on, return the originalAutomaton
+        if (intersection.isEmpty()) {
             printDebug("No pattern to match, returning same model");
             return new Model_Acyclic_Inverse(automaton, this.alphabet, this.boundLength);
-		}
+        }
 
-		//separate out the unchanged by replaceFirst portion of the original automaton
-		origAut = origAut.minus(anyPrefixAndSuffix);
+        //separate out the unchanged by replaceFirst portion of the original automaton
+        origAut = origAut.minus(anyPrefixAndSuffix);
         origAut.minimize();
 
 
@@ -1797,7 +1853,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
 
                 // set all states to final to check for pattern existence at newStart
                 Automaton newStartFinal = newStart.clone();
-                for (State state: newStartFinal.getStates()) {
+                for (State state : newStartFinal.getStates()) {
                     state.setAccept(true);
                 }
                 // intersection with current state as the initial state mathcing a pattern
@@ -1842,7 +1898,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         Set<Automaton> results = new HashSet<>();
         for (State sufStart : suffixMap.keySet()) {
 //            Automaton patternSuffix = suffixMap.get(sufStart).clone();
-            Tuple<Automaton, HashMap<State,State>> tuple = cloneAndGetStateMap(suffixMap.get(sufStart));
+            Tuple<Automaton, HashMap<State, State>> tuple = cloneAndGetStateMap(suffixMap.get(sufStart));
             Automaton patternSuffix = tuple.get1();
             HashMap<State, State> ogToPsStateMap = tuple.get2();
             printDebug("---Searching for suffixes in " + patternSuffix.getFiniteStrings());
@@ -1932,19 +1988,20 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         }
         res = res.union(origAut); // add back original without any patterns
         Model_Acyclic_Inverse result = new Model_Acyclic_Inverse(res, this.alphabet, this.boundLength);
-        if(debug){
-        if (bruteModel.equals(result)) {
-            printDebug("Brute force and result match");
-        } else {
-            System.err.println("Brute force and result do not match");
-            System.err.println("Brute force: " + bruteModel.getFiniteStrings());
-            System.err.println("    model: " + bruteModel.automaton);
-            System.err.println("Result: " + result.getFiniteStrings());
-            System.err.println("    model: " + result.automaton);
-            System.exit(1);
-        }}
+        if (debug) {
+            if (bruteModel.equals(result)) {
+                printDebug("Brute force and result match");
+            } else {
+                System.err.println("Brute force and result do not match");
+                System.err.println("Brute force: " + bruteModel.getFiniteStrings());
+                System.err.println("    model: " + bruteModel.automaton);
+                System.err.println("Result: " + result.getFiniteStrings());
+                System.err.println("    model: " + result.automaton);
+                System.exit(1);
+            }
+        }
         return result;
-	}
+    }
 
     @Override
     public Model_Acyclic_Inverse inv_replaceFirst(Model_Acyclic_Inverse find, Model_Acyclic_Inverse replace) {
@@ -1982,17 +2039,17 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         return result;
     }
 
-	@Override
-	public Model_Acyclic_Inverse inv_replaceAll(Model_Acyclic_Inverse find, Model_Acyclic_Inverse replace) {
+    @Override
+    public Model_Acyclic_Inverse inv_replaceAll(Model_Acyclic_Inverse find, Model_Acyclic_Inverse replace) {
         // union of replaceAll with find/replace swtiched and original
         Model_Acyclic_Inverse result = this.replaceAll(replace, find);
         return result.union(this);
 //        return null;
-	}
+    }
 
 
     // create automaton from stack that represents specific prefix path
-    public static Automaton automatonFromStack(Stack<State> stack){
+    public static Automaton automatonFromStack(Stack<State> stack) {
         Automaton automaton = new Automaton();
         State myStart = new State();
         automaton.setInitialState(myStart);
@@ -2126,7 +2183,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         // hashmap needed for transitions
         HashMap<State, State> stateMap = new HashMap<>();
         for (State s : a.getStates()) {
-            stateMap.put(s,new State());
+            stateMap.put(s, new State());
         }
         for (State s : a.getStates()) {
             State newState = stateMap.get(s);
@@ -2141,4 +2198,9 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse <Model_Acyclic_Invers
         }
         return new Tuple<Automaton, HashMap<State, State>>(ret, stateMap);
     }
+
+    public void setAutomaton(Automaton a) {
+        this.automaton = a;
+    }
+
 }

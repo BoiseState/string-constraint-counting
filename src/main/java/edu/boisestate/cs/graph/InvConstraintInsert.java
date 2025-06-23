@@ -40,7 +40,7 @@ public class InvConstraintInsert<T extends A_Model_Inverse<T>> extends A_Inv_Con
 		this.argString = "0:START 1:END";
 		this.start = argList.get(0);
 //		this.end = argList.get(1);
-		this.nextID = base;
+//		this.nextID = base;
 		this.nextID = base;
 		this.prevIDs = new HashSet<Integer>(); this.prevIDs.add(input);
 	}
@@ -55,12 +55,16 @@ public class InvConstraintInsert<T extends A_Model_Inverse<T>> extends A_Inv_Con
 			printDebug("INSERT INCOMING SET INCONSISTENT...");
 			ret = new Tuple<>(false, true);
 		}else {
-			// perform inverse function on output from the input constraint
-			T insertStringModel = solver.getSymbolicModel(insertStringID); // currently don't manipulate this
-			T resModel = solver.inv_insert(inputModel, start, insertStringModel);
+			T insertStringModel = solver.getSymbolicModel(insertStringID);
+			T sourceModel = solver.getSymbolicModel(nextID); // model of source from forward analysis
+
+			// inv_insert needs to take both forward and backward models, do necessary analysis, intersections,
+			// as well as change stored models and set up backtracking as necessary
+			T resModel = solver.inv_insert(inputModel, sourceModel, start, insertStringModel);
 			// now have to figure out which arg it chose based on resModel
 
 			// intersect result with forward analysis results from previous constraint
+			T nextModel = solver.getSymbolicModel(nextID);
 			resModel = solver.intersect(resModel, nextConstraint.getID());
 
 			if (!resModel.isEmpty()) {

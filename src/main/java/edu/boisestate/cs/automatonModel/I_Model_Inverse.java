@@ -13,7 +13,7 @@ public interface I_Model_Inverse<T extends I_Model_Inverse<T>> {
 
 	T inv_delete(int start, int end);
 
-	T inv_insert(int offset, T argModel);
+	T inv_insert(T baseModel, int offset, T argModel);
 
 	T inv_replace(char find, char replace);
 
