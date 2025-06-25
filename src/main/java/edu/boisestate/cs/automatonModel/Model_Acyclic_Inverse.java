@@ -17,6 +17,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 
     private Automaton automaton;
+    private static int maxBoundLength = 32;
 
     /**
      * Constructor 1: Requires *ACYCLIC* automata as argument. <br>
@@ -615,20 +616,36 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
     @Override
     public Model_Acyclic_Inverse insert(int offset, Model_Acyclic_Inverse argModel) {
-        //ensureAcyclicModel(argModel);
 
-        // get automata for operations
+        PreciseInsert insert = new PreciseInsert(offset);
         Automaton arg = getAutomatonFromAcyclicModel(argModel);
 
+        // calculate new bound length
+        if (argModel.boundLength + this.boundLength > maxBoundLength) {
+            // if new bound length exceeds max bound length
+            Model_Acyclic_Inverse any = new Model_Acyclic_Inverse(BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(0, maxBoundLength), this.alphabet, maxBoundLength);
+            if (argModel.equals(any)) {
+                arg = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(0, maxBoundLength - this.boundLength);
+                argModel = new Model_Acyclic_Inverse(arg, this.alphabet, maxBoundLength - this.boundLength);
+            } else if (this.equals(any)) {
+                // if this model is any, return arg model
+                Automaton result = insert.op(BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(0, maxBoundLength - argModel.boundLength), arg);
+                result.minimize();
+                return new Model_Acyclic_Inverse(result, this.alphabet, maxBoundLength);
+            } else {
+                System.err.println("WARNING: Model_Acyclic_Inverse.insert() exceeds max bound");
+                System.exit(1);
+            }
+        }
+
+        // get automata for operations
+
         // get resulting automaton
-        PreciseInsert insert = new PreciseInsert(offset);
         Automaton result = insert.op(automaton, arg);
         result.minimize();
 
-        // calculate new bound length
         int newBoundLength = this.boundLength + argModel.boundLength;
 
-        // return unbounded model from automaton
         return new Model_Acyclic_Inverse(result, this.alphabet, newBoundLength);
     }
 
@@ -1200,13 +1217,19 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
      * the whatever remains between the prefix and suffix after being intersected with
      * the insertModel so to be propogated down to the arg
      *
+     * @param baseModel forward model from source
+     * @param offset index of insert
+     * @param insertModel forward model for insert
+     *
      * @author Nat Steven
      * 6-23-25
      */
     @Override
     public Model_Acyclic_Inverse inv_insert(Model_Acyclic_Inverse baseModel, int offset, Model_Acyclic_Inverse insertModel) {
+        //TODO: bound length stuff.
 
         // figure out prefix/suffix from backModel and index
+        // note substring forces strings of the length specified
         Model_Acyclic_Inverse prefixIn = this.substring(0, offset);
         Model_Acyclic_Inverse suffixIn = this.substring(offset, this.getBoundLength());
 
@@ -1223,7 +1246,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
         Automaton suffInRev = performUnaryOperation(suffIn, new Reverse(), this.alphabet);
         Automaton suffSourceRev = performUnaryOperation(suffSource, new Reverse(), this.alphabet);
-
+        // note we remember the Reverse states
         for (State state : suffInRev.getStates()) {
             prevAccept.put(state, state.isAccept());
             state.setAccept(true);
@@ -1233,35 +1256,36 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
             state.setAccept(true);
         }
         Tuple<HashMap<State, Tuple<State,State>>, Automaton> mapAutTuple = intersectWithMap(suffInRev, suffSourceRev);
-        Automaton suffix = mapAutTuple.get2();
+        Automaton suffixRev = mapAutTuple.get2();
         HashMap<State, Tuple<State, State>> stateMap = mapAutTuple.get1();
 
-        //before reversing back suffix aut we want to construct the remainder aut.
-        Automaton remains = suffInRev.minus(suffix);
 
-
-        for (State state : suffix.getStates()) {
+        // now need to make sure our suffix has the correct accept states.
+        for (State state : suffixRev.getStates()) {
             Tuple<State, State> inputs = stateMap.get(state);
             State s1 = inputs.get1();
             State s2 = inputs.get2();
             state.setAccept(prevAccept.get(s1) && prevAccept.get(s2));
+            //epsilon transitions to accept? i.e. throuhg the remains
+            if (state.getTransitions().isEmpty()){
+                state.setAccept(true);
+            }
+        }
+        for (State state : suffInRev.getStates()) {
+            state.setAccept(prevAccept.get(state));
         }
 
-        suffix = performUnaryOperation(suffix, new Reverse(), this.alphabet);
-        // output back to base is then the prefix conc suffi model
+        //before reversing back suffix aut we want to construct the remainder aut.
+        // we do this by removing (replacing with "") the suffix we found
+        Model_Acyclic_Inverse suffixRevModel = new Model_Acyclic_Inverse(suffixRev, this.alphabet, calculateBoundLength(suffixRev));
+        Model_Acyclic_Inverse suffixInRevModel = new Model_Acyclic_Inverse(suffInRev, this.alphabet, this.boundLength-offset);
+        Model_Acyclic_Inverse remains = suffixInRevModel.replaceFirst(suffixRevModel, new Model_Acyclic_Inverse(BasicAutomata.makeEmptyString(), this.alphabet, 0));
+
+        Automaton suffix = performUnaryOperation(suffixRev, new Reverse(), this.alphabet);
+        // output back to base is then the prefix conc suffix model
         Model_Acyclic_Inverse result = new Model_Acyclic_Inverse(prefix.getAutomatonObject().concatenate(suffix), this.alphabet, this.boundLength);
 
-        // but we still need to propogate the insert/arg model. this will be done by finding the remainder of our suffixIn and suffixSource
-
-//        for (State state : remains.getStates()) {
-//            Tuple<State, State> inputs = stateMap.get(state);
-//            State s1 = inputs.get1();
-//            State s2 = inputs.get2();
-//            state.setAccept(prevAccept.get(s1) && prevAccept.get(s2));
-//        }
-
-        remains = performUnaryOperation(remains, new Reverse(), this.alphabet);
-        insertModel.setAutomaton(insertModel.getAutomatonObject().intersection(remains));
+        insertModel.setAutomaton(performUnaryOperation(remains.getAutomatonObject(), new Reverse(), this.alphabet));
 
         return result;
     }
@@ -2199,8 +2223,31 @@ public Tuple<HashMap<State, Tuple<State, State>>, Automaton> intersectWithMap(Au
         return new Tuple<Automaton, HashMap<State, State>>(ret, stateMap);
     }
 
+    // finds largest possilbe string length in acyclic automaton
+    public int calculateBoundLength(Automaton a) {
+        int bound = -1;
+        State init = a.getInitialState();
+        Set<State> next = new HashSet<>();
+        next.add(init);
+        while(!next.isEmpty()) {
+            Set<State> nextNext = new HashSet<>();
+            for (State s : next) {
+                for (Transition t : s.getTransitions()) {
+                    nextNext.add(t.getDest());
+                }
+            }
+            next = nextNext;
+            bound++;
+        }
+        return bound;
+    }
+
     public void setAutomaton(Automaton a) {
         this.automaton = a;
+    }
+
+    public static void setMaxBoundLength(int length) {
+        maxBoundLength = length;
     }
 
 }
