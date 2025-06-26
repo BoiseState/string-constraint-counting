@@ -81,16 +81,28 @@ public class PreciseInsert
                 // add transitions to copied states
                 for (Transition transition : originalState.getTransitions()) {
                     // create a copy of the destination state and add to map
-                    State destination = new State();
-                    stateMap.put(destination, transition.getDest());
+                    // nps - 6/26/25: no need to create a whoel new state for every transition.... this leads to length^|sigma|
+                    State origDest = transition.getDest();
+                    State newDest = null;
+                    if (stateMap.containsValue(origDest)){ // get the key of the already created new state
+                        for (Map.Entry<State, State> entry : stateMap.entrySet()) {
+                            if (entry.getValue().equals(origDest)) {
+                                newDest = entry.getKey();
+                                break;
+                            }
+                        }
+                    } else {
+                        newDest = new State();
+                        stateMap.put(newDest, origDest);
+                    }
 
                     // add destination state as next state
-                    nextStates.add(destination);
+                    nextStates.add(newDest);
 
                     // create a transition from the previous state copy
                     state.addTransition(new Transition(transition.getMin(),
                                                        transition.getMax(),
-                                                       destination));
+                                                       newDest));
                 }
             }
 
@@ -118,7 +130,7 @@ public class PreciseInsert
 
     @Override
     public String toString() {
-        return "PreciseDelete";
+        return "PreciseInsert";
     }
 
 }

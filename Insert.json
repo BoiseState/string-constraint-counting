@@ -1,19 +1,19 @@
 {
   "alphabet" : {
     "size" : 7,
-    "declaration" : "H,e,l,o,0"
+    "declaration" : "H,e,l,o,0,W,r,d"
   },
   "vertices" : [
     {
     "num" : 0,
-    "actualValue" : "Helo",
+    "actualValue" : "World",
     "incomingEdges" :[
     ],
     "sourceConstraints" : [ ],
     "timeStamp" : 1691007827230,
     "type" : 0,
     "id" : 3,
-    "value" : "\"Helo\"!:!<init>"
+    "value" : "\"World\"!:!<init>"
   },
     {
       "num" : 0,
@@ -27,26 +27,26 @@
       "value" : "r3!:!getStringValue!!"
     },{
       "num" : 0,
-      "actualValue" : "2",
+      "actualValue" : "5",
       "incomingEdges" :[
       ],
       "sourceConstraints" : [ ],
       "timeStamp" : 1691007827230,
       "type" : 0,
       "id" : 4,
-      "value" : "\"2\"!:!<init>"
+      "value" : "\"5\"!:!<init>"
     },{
       "num" : 0,
       "actualValue" : "true",
       "incomingEdges" : [
         {
-          "source" : 3,
+          "source" : 0,
           "type" : "t"
         }, {
           "source" : 4,
           "type" : "s1"
         },{
-            "source" : 0,
+            "source" : 3,
             "type" : "s2"
         }
       ],
@@ -74,13 +74,23 @@
           "source" : 2,
           "type" : "t"
         }, {
-          "source" : 6,
+          "source" : 8,
           "type" : "s1"
         }],
       "sourceConstraints" : [ ],
       "timeStamp" : 1691007827231,
       "type" : 0,
-      "id" : 1,
+      "id" : 9,
       "value" : "equals!!Ljava/lang/Object;!:!0"
+    },{
+      "num" : 0,
+      "actualValue" : "HelloWorld",
+      "incomingEdges" :[
+        ],
+      "sourceConstraints" : [ ],
+      "timeStamp" : 1691007827231,
+      "type" : 0,
+      "id" : 8,
+      "value" : "\"HelloWorld\"!:!<init>"
     }
   ] }

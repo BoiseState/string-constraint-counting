@@ -17,7 +17,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 
     private Automaton automaton;
-    private static int maxBoundLength = 32;
+    private static int maxBoundLength = 32;// actaulyl unecessary? may be useful to have a static initBoundLength though?
 
     /**
      * Constructor 1: Requires *ACYCLIC* automata as argument. <br>
@@ -621,22 +621,25 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
         Automaton arg = getAutomatonFromAcyclicModel(argModel);
 
         // calculate new bound length
-        if (argModel.boundLength + this.boundLength > maxBoundLength) {
-            // if new bound length exceeds max bound length
-            Model_Acyclic_Inverse any = new Model_Acyclic_Inverse(BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(0, maxBoundLength), this.alphabet, maxBoundLength);
-            if (argModel.equals(any)) {
-                arg = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(0, maxBoundLength - this.boundLength);
-                argModel = new Model_Acyclic_Inverse(arg, this.alphabet, maxBoundLength - this.boundLength);
-            } else if (this.equals(any)) {
-                // if this model is any, return arg model
-                Automaton result = insert.op(BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(0, maxBoundLength - argModel.boundLength), arg);
-                result.minimize();
-                return new Model_Acyclic_Inverse(result, this.alphabet, maxBoundLength);
-            } else {
-                System.err.println("WARNING: Model_Acyclic_Inverse.insert() exceeds max bound");
-                System.exit(1);
-            }
-        }
+        // note this is rudimentary and also underapproximates the possibilities
+        // could/should be analyzing the combinations of the two models and their lengths that are possible.
+        // i guess that would be concatenating them and then limiting the length (need new method)
+//        if (argModel.boundLength + this.boundLength > maxBoundLength) {
+//            // if new bound length exceeds max bound length
+//            Model_Acyclic_Inverse any = new Model_Acyclic_Inverse(BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(0, maxBoundLength), this.alphabet, maxBoundLength);
+//            if (argModel.equals(any)) {
+//                arg = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(0, maxBoundLength - this.boundLength);
+//                argModel = new Model_Acyclic_Inverse(arg, this.alphabet, maxBoundLength - this.boundLength);
+//            } else if (this.equals(any)) {
+//                // if this model is any, return arg model
+//                Automaton result = insert.op(BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(0, maxBoundLength - argModel.boundLength), arg);
+//                result.minimize();
+//                return new Model_Acyclic_Inverse(result, this.alphabet, maxBoundLength);
+//            } else {
+//                System.err.println("WARNING: Model_Acyclic_Inverse.insert() exceeds max bound");
+//                System.exit(1);
+//            }
+//        }
 
         // get automata for operations
 

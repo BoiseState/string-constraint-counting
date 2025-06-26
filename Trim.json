@@ -26,14 +26,14 @@
       "value" : "\"Hi\"!:!<init>"
     },{
       "num" : 0,
-      "actualValue" : "Hi",
+      "actualValue" : " ",
       "incomingEdges" :[
       ],
       "sourceConstraints" : [ ],
       "timeStamp" : 1691007827230,
       "type" : 0,
       "id" : 5,
-      "value" : "\"Hi\"!:!<init>"
+      "value" : "\" \"!:!<init>"
     },{
       "num" : 0,
       "actualValue" : "true",
@@ -66,7 +66,7 @@
       "value" : "equals!!Ljava/lang/Object;!:!0"},
     {
       "num" : 0,
-      "actualValue" : "false",
+      "actualValue" : "true",
       "incomingEdges" :[
         {
           "source" : 0,
@@ -79,5 +79,5 @@
       "timeStamp" : 1691007827231,
       "type" : 0,
       "id" : 9,
-      "value" : "equals!!Ljava/lang/Object;!:!0"}
+      "value" : "contains!!Ljava/lang/Object;!:!0"}
   ] }
