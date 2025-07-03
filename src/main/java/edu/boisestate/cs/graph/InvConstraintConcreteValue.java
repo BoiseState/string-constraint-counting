@@ -88,6 +88,7 @@ public class InvConstraintConcreteValue<T extends A_Model_Inverse<T>>  extends A
 		I_Inv_Constraint<T> prev = iter.next();
 		//System.out.println("prev " + prev);
 		// TODO: we don't use replaceCC anymore, so can almost def remove
+		// this was def to fix a specific bug, hopefully not relevant anymore
 		while (prev.getOp() == Operation.REPLACE_CHAR_CHAR) {
 			prev = iter.next();
 		}
@@ -116,7 +117,7 @@ public class InvConstraintConcreteValue<T extends A_Model_Inverse<T>>  extends A
 		if (!inputs.containsString(test)) {
 			System.err.println("ERROR IN EVALUATE CONCRETE VALUE " + ID + "...");
 			System.out.println("inputs model: " + inputs);
-			System.out.println("input strings: " + inputs.getFiniteStrings());
+			System.out.println("input strings: " + inputs.getFiniteStrings(100));
 			System.out.println("concrete value: " + test);
 			System.exit(1);
 		}

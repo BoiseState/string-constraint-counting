@@ -84,7 +84,7 @@ public class PrecisePrefix
 
     @Override
     public String toString() {
-        return "PreciseSuffix";
+        return "PrecisePrefix";
     }
 
 }

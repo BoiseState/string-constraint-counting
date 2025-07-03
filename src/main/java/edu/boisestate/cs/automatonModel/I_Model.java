@@ -16,6 +16,8 @@ public interface I_Model<T extends I_Model<T>> {
 
 	Set<String> getFiniteStrings();
 
+	Set<String> getFiniteStrings(int limit);
+
 	boolean isEmpty();
 
 	boolean isSingleton();

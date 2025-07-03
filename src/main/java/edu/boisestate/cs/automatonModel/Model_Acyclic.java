@@ -10,6 +10,7 @@ import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.automatonModel.operations.*;
 
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.Set;
 import java.util.Stack;
 
@@ -560,6 +561,11 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 
 		// return finite strings from automaton
 		return automaton.getFiniteStrings();
+	}
+
+	@Override
+	public Set<String> getFiniteStrings(int limit) {
+		return null;
 	}
 
 	@Override

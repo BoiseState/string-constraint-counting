@@ -1,11 +1,8 @@
 package edu.boisestate.cs.automatonModel;
 
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.commons.math3.fraction.Fraction;
 
@@ -42,6 +39,11 @@ public class Model_Acyclic_Weighted extends A_Model<Model_Acyclic_Weighted>{
 	@Override
 	public Set<String> getFiniteStrings() {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<String> getFiniteStrings(int limit) {
 		return null;
 	}
 

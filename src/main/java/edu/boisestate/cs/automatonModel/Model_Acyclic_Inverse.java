@@ -6,7 +6,6 @@ import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.automatonModel.operations.*;
 import edu.boisestate.cs.util.Tuple;
 
-import javax.jws.WebParam;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -166,7 +165,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
         Automaton result = this.automaton.intersection(equal);
 
         // return new model from resulting automaton
-        return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
+        return new Model_Acyclic_Inverse(result, this.alphabet, Math.min(this.boundLength, equalModel.boundLength));
     }
 
     @Override
@@ -365,12 +364,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
             return new Model_Acyclic_Inverse(BasicAutomata.makeEmpty(), alphabet, 0);
         }
 
-        // if not equal automaton is a singleton
-        Automaton result = automaton;
-        if (notEqual.getFiniteStrings(1) != null) {
-            // get resulting automaton
-            result = this.automaton.minus(notEqual);
-        }
+        Automaton result = automaton.minus(notEqual);
 
         // return new model from resulting automaton
         return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
@@ -595,9 +589,14 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
     @Override
     public Set<String> getFiniteStrings() {
-
         // return finite strings from automaton
+        System.out.println("WARNING: calling getFiniteStrings()");
         return automaton.getFiniteStrings();
+    }
+
+    public Set<String> getFiniteStrings(int limit) {
+        // return finite strings from automaton
+        return automaton.getFiniteStrings(limit);
     }
 
     @Override
@@ -1007,9 +1006,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
     public Model_Acyclic_Inverse inv_charAt(int index) {
         // take incoming model and return new model that fills bound lengths from index with anyStrings
-        if (this.boundLength <= index) { // chatgpt wanted this so why not :P
-            throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for model with bound length " + this.boundLength);
-        }
         // create two automaton, one from 0 to index, and one from index to bound length
 
         String alphabetCharSet = this.alphabet.getCharSet();
@@ -1215,30 +1211,31 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
      * This inverse insert takes an offset which is the index the insert was performed at,
      * and an argument model which is the model that was inserted. The 'this' model is the
      * incoming model from backwards propogation. So we use the forward prop source model,
-     * the offset and the incoming model to determine prefixes and suffixes that give us
-     * what to propogate down to our source (result). And we also need to propogate
-     * the whatever remains between the prefix and suffix after being intersected with
-     * the insertModel so to be propogated down to the arg
+     * the offset and the incoming model to determine prefixes, suffixes, and what remains, that give us
+     * what to propogate down to our source (result), and insertModel. So our suffix is what
+     * we are calling the model inserted, then we concatenate the prefix and remains models
+     * to get our result
      *
-     * @param baseModel forward model from source
-     * @param offset index of insert
+     * @param baseModel   forward model from source
+     * @param offset      index of insert
      * @param insertModel forward model for insert
-     *
      * @author Nat Steven
      * 6-23-25
      */
     @Override
     public Model_Acyclic_Inverse inv_insert(Model_Acyclic_Inverse baseModel, int offset, Model_Acyclic_Inverse insertModel) {
-        //TODO: bound length stuff.
+        //TODO: bound length stuff?
+        this.minimize();
 
         // figure out prefix/suffix from backModel and index
         // note substring forces strings of the length specified
+        // also it uses prefix and suffix so may not be precise enough, definitley not for the suffix
         Model_Acyclic_Inverse prefixIn = this.substring(0, offset);
-        Model_Acyclic_Inverse suffixIn = this.substring(offset, this.getBoundLength());
+        Model_Acyclic_Inverse suffixIn = this.anySuffix(offset);
 
         // do the same but for the forward prop source model
         Model_Acyclic_Inverse prefixSource = baseModel.substring(0, offset);
-        Model_Acyclic_Inverse suffixSource = baseModel.substring(offset, baseModel.getBoundLength());
+        Model_Acyclic_Inverse suffixSource = baseModel.anySuffix(offset);
 
         Model_Acyclic_Inverse prefix = prefixIn.intersect(prefixSource); // this should be the start of the return model
 
@@ -1258,9 +1255,14 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
             prevAccept.put(state, state.isAccept());
             state.setAccept(true);
         }
-        Tuple<HashMap<State, Tuple<State,State>>, Automaton> mapAutTuple = intersectWithMap(suffInRev, suffSourceRev);
+        Automaton intersection = suffInRev.intersection(suffSourceRev);
+        Tuple<HashMap<State, Tuple<State, State>>, Automaton> mapAutTuple = intersectWithMap(suffInRev, suffSourceRev);
         Automaton suffixRev = mapAutTuple.get2();
         HashMap<State, Tuple<State, State>> stateMap = mapAutTuple.get1();
+        if (!intersection.minus(suffixRev).isEmpty()){
+            System.err.println("WARNING: intersection check failed");
+            System.exit(1);
+        }
 
 
         // now need to make sure our suffix has the correct accept states.
@@ -1270,7 +1272,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
             State s2 = inputs.get2();
             state.setAccept(prevAccept.get(s1) && prevAccept.get(s2));
             //epsilon transitions to accept? i.e. throuhg the remains
-            if (state.getTransitions().isEmpty()){
+            if (state.getTransitions().isEmpty()) {
                 state.setAccept(true);
             }
         }
@@ -1278,67 +1280,107 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
             state.setAccept(prevAccept.get(state));
         }
 
+        suffixRev.minimize();
+        suffInRev.minimize();
         //before reversing back suffix aut we want to construct the remainder aut.
         // we do this by removing (replacing with "") the suffix we found
         Model_Acyclic_Inverse suffixRevModel = new Model_Acyclic_Inverse(suffixRev, this.alphabet, calculateBoundLength(suffixRev));
-        Model_Acyclic_Inverse suffixInRevModel = new Model_Acyclic_Inverse(suffInRev, this.alphabet, this.boundLength-offset);
-        Model_Acyclic_Inverse remains = suffixInRevModel.replaceFirst(suffixRevModel, new Model_Acyclic_Inverse(BasicAutomata.makeEmptyString(), this.alphabet, 0));
-
-        Automaton suffix = performUnaryOperation(suffixRev, new Reverse(), this.alphabet);
+        Model_Acyclic_Inverse suffixInRevModel = new Model_Acyclic_Inverse(suffInRev, this.alphabet, this.boundLength - offset);
+        Model_Acyclic_Inverse remainSuffix = suffixInRevModel.replaceFirst(suffixRevModel, new Model_Acyclic_Inverse(BasicAutomata.makeEmptyString(), this.alphabet, 0));
+        Automaton remains = performUnaryOperation(remainSuffix.getAutomatonObject(), new Reverse(), this.alphabet);
         // output back to base is then the prefix conc suffix model
-        Model_Acyclic_Inverse result = new Model_Acyclic_Inverse(prefix.getAutomatonObject().concatenate(suffix), this.alphabet, this.boundLength);
+        Model_Acyclic_Inverse result = new Model_Acyclic_Inverse(prefix.getAutomatonObject().concatenate(remains), this.alphabet, this.boundLength);
 
-        insertModel.setAutomaton(performUnaryOperation(remains.getAutomatonObject(), new Reverse(), this.alphabet));
+
+        Automaton insert = performUnaryOperation(suffixRev, new Reverse(), this.alphabet);
+        insertModel.setAutomaton(insert);
 
         return result;
     }
 
+    public Model_Acyclic_Inverse anySuffix(int start) {
+        if (start < 0 || start > this.boundLength) {
+            throw new IndexOutOfBoundsException("Start index " + start + " is out of bounds for model with bound length " + this.boundLength);
+        }
+        return new Model_Acyclic_Inverse(anySuffix(this.automaton, start), this.alphabet, this.boundLength - start);
+    }
+
+    // constructs automata starting at start, without changing any accept states.
+    public Automaton anySuffix(Automaton a, int start) {
+        if (a.isEmpty() || start <0) {
+            // warn?
+            return BasicAutomata.makeEmpty();
+        }
+        Automaton result = a.clone();
+        HashSet<State> states = new HashSet<>();
+        states.add(result.getInitialState());
+        for (int i = 0; i < start; i++) {
+            HashSet<State> nextStates = new HashSet<>();
+            for (State state : states) {
+                for (Transition transition : state.getTransitions()) {
+                    nextStates.add(transition.getDest());
+                }
+            }
+            states = nextStates;
+        }
+        // now we have all reachable states after start and will create new start the epsilons to those states
+        State newStart = new State();
+        result.setInitialState(newStart);
+        Set<StatePair> epsilons = new HashSet<>();
+        for (State state: states) {
+            epsilons.add(new StatePair(newStart, state));
+        }
+        result.addEpsilons(epsilons);
+        result.minimize();
+        return result;
+    }
+
     // this is mostly copied from dk.brics
-public Tuple<HashMap<State, Tuple<State, State>>, Automaton> intersectWithMap(Automaton aut1, Automaton aut2) {
-    Automaton result = new Automaton();
-    HashMap<State, Tuple<State, State>> stateMap = new HashMap<>();
-    HashMap<Tuple<State, State>, State> pairToResult = new HashMap<>();
-    LinkedList<Tuple<State, State>> worklist = new LinkedList<>();
+    public Tuple<HashMap<State, Tuple<State, State>>, Automaton> intersectWithMap(Automaton aut1, Automaton aut2) {
+        Automaton result = new Automaton();
+        HashMap<State, Tuple<State, State>> stateMap = new HashMap<>();
+        HashMap<Tuple<State, State>, State> pairToResult = new HashMap<>();
+        LinkedList<Tuple<State, State>> worklist = new LinkedList<>();
 
-    Tuple<State, State> initialPair = new Tuple<>(aut1.getInitialState(), aut2.getInitialState());
-    State resultInitial = new State();
-    result.setInitialState(resultInitial);
-    stateMap.put(resultInitial, initialPair);
-    pairToResult.put(initialPair, resultInitial);
-    worklist.add(initialPair);
+        Tuple<State, State> initialPair = new Tuple<>(aut1.getInitialState(), aut2.getInitialState());
+        State resultInitial = new State();
+        result.setInitialState(resultInitial);
+        stateMap.put(resultInitial, initialPair);
+        pairToResult.put(initialPair, resultInitial);
+        worklist.add(initialPair);
 
-    while (!worklist.isEmpty()) {
-        Tuple<State, State> currentPair = worklist.removeFirst();
-        State s1 = currentPair.get1();
-        State s2 = currentPair.get2();
-        State resultState = pairToResult.get(currentPair);
+        while (!worklist.isEmpty()) {
+            Tuple<State, State> currentPair = worklist.removeFirst();
+            State s1 = currentPair.get1();
+            State s2 = currentPair.get2();
+            State resultState = pairToResult.get(currentPair);
 
-        resultState.setAccept(s1.isAccept() && s2.isAccept());
+            resultState.setAccept(s1.isAccept() && s2.isAccept());
 
-        for (Transition t1 : s1.getTransitions()) {
-            for (Transition t2 : s2.getTransitions()) {
-                char min = (char) Math.max(t1.getMin(), t2.getMin());
-                char max = (char) Math.min(t1.getMax(), t2.getMax());
-                if (min <= max) {
-                    State dest1 = t1.getDest();
-                    State dest2 = t2.getDest();
-                    Tuple<State, State> destPair = new Tuple<>(dest1, dest2);
+            for (Transition t1 : s1.getTransitions()) {
+                for (Transition t2 : s2.getTransitions()) {
+                    char min = (char) Math.max(t1.getMin(), t2.getMin());
+                    char max = (char) Math.min(t1.getMax(), t2.getMax());
+                    if (min <= max) {
+                        State dest1 = t1.getDest();
+                        State dest2 = t2.getDest();
+                        Tuple<State, State> destPair = new Tuple<>(dest1, dest2);
 
-                    State destResultState = pairToResult.get(destPair);
-                    if (destResultState == null) {
-                        destResultState = new State();
-                        pairToResult.put(destPair, destResultState);
-                        stateMap.put(destResultState, destPair);
-                        worklist.add(destPair);
+                        State destResultState = pairToResult.get(destPair);
+                        if (destResultState == null) {
+                            destResultState = new State();
+                            pairToResult.put(destPair, destResultState);
+                            stateMap.put(destResultState, destPair);
+                            worklist.add(destPair);
+                        }
+                        resultState.addTransition(new Transition(min, max, destResultState));
                     }
-                    resultState.addTransition(new Transition(min, max, destResultState));
                 }
             }
         }
-    }
 
-    return new Tuple<>(stateMap, result);
-}
+        return new Tuple<>(stateMap, result);
+    }
 
 
     /**
@@ -1890,7 +1932,7 @@ public Tuple<HashMap<State, Tuple<State, State>>, Automaton> intersectWithMap(Au
                 //push children of start state, prefix not yet found
                 if (!temp.isEmpty()) { // pattern found!
                     Stack<State> stackCopy = (Stack<State>) stack.clone();
-                    Automaton prefix = automatonFromStack(stackCopy);
+                    Automaton prefix = alsoAutomatonFromStack(stackCopy);
                     prefix.minimize();
                     prefixMap.put(start, prefix);
                     suffixMap.put(start, suffix);
@@ -1909,14 +1951,16 @@ public Tuple<HashMap<State, Tuple<State, State>>, Automaton> intersectWithMap(Au
                 }
             }
         }
-        printDebug("This: " + this.automaton.getFiniteStrings());
-        printDebug("Without regex: " + origAut.getFiniteStrings());
-        printDebug("Find: " + regexString.automaton.getFiniteStrings());
-        printDebug("Replace: " + replacementString.automaton.getFiniteStrings());
-        printDebug("Splits: ");
-        for (State s : prefixMap.keySet()) {
-            printDebug("    Prefix: " + prefixMap.get(s).getFiniteStrings());
-            printDebug("    PatternSuffix: " + suffixMap.get(s).getFiniteStrings());
+        if (debug) {
+            printDebug("This: " + this.automaton.getFiniteStrings());
+            printDebug("Without regex: " + origAut.getFiniteStrings());
+            printDebug("Find: " + regexString.automaton.getFiniteStrings());
+            printDebug("Replace: " + replacementString.automaton.getFiniteStrings());
+            printDebug("Splits: ");
+            for (State s : prefixMap.keySet()) {
+                printDebug("    Prefix: " + prefixMap.get(s).getFiniteStrings());
+                printDebug("    PatternSuffix: " + suffixMap.get(s).getFiniteStrings());
+            }
         }
 
         // SUFFIX ENUMERATING:
@@ -1928,10 +1972,12 @@ public Tuple<HashMap<State, Tuple<State, State>>, Automaton> intersectWithMap(Au
             Tuple<Automaton, HashMap<State, State>> tuple = cloneAndGetStateMap(suffixMap.get(sufStart));
             Automaton patternSuffix = tuple.get1();
             HashMap<State, State> ogToPsStateMap = tuple.get2();
-            printDebug("---Searching for suffixes in " + patternSuffix.getFiniteStrings());
+            if (debug) {
+                printDebug("---Searching for suffixes in " + patternSuffix.getFiniteStrings());
+            }
             // find unique suffix patterns
             Automaton anySuffix = regexAut.concatenate(padding);
-            while (!patternSuffix.intersection(anySuffix).isEmpty()) { // paths to find
+            while (!patternSuffix.isEmpty()) { // paths to find
                 Stack<State> stack = new Stack<>();
                 stack.push(patternSuffix.getInitialState()); // maybe need to clone as we manipulate the pivot.
                 while (!stack.isEmpty()) {
@@ -1944,8 +1990,10 @@ public Tuple<HashMap<State, Tuple<State, State>>, Automaton> intersectWithMap(Au
                     }
                     pivot.setAccept(true);
 
-                    printDebug("Find: " + regexAut.getFiniteStrings());
-                    printDebug("PatternSuffix with new pivot: " + patternSuffix.getFiniteStrings());
+                    if (debug) {
+                        printDebug("Find: " + regexAut.getFiniteStrings());
+                        printDebug("PatternSuffix with new pivot: " + patternSuffix.getFiniteStrings());
+                    }
 
                     Automaton inter = patternSuffix.intersection(anySuffix);
 
@@ -1963,7 +2011,7 @@ public Tuple<HashMap<State, Tuple<State, State>>, Automaton> intersectWithMap(Au
                         // save this pattern suffix pair and remove from search
                         //pivot.setAccept(pivotAccept);
                         Stack<State> stackCopy = (Stack<State>) stack.clone();
-                        Automaton pattern = automatonFromStack(stackCopy);
+                        Automaton pattern = alsoAutomatonFromStack(stackCopy);
                         Automaton prefix = prefixMap.get(sufStart);
                         // get original patternsuffix and use pivot to construct suffix
                         Automaton suffix = suffixMap.get(sufStart);
@@ -1977,20 +2025,26 @@ public Tuple<HashMap<State, Tuple<State, State>>, Automaton> intersectWithMap(Au
                         suffix.minimize();
 //                        suffixPrefixMap.put(suffix, prefix);
                         // adding result to the set of results
+                        if (debug){
                         printDebug("Found a match, intersection: " + inter.getFiniteStrings());
                         printDebug("    Prefix: " + prefix.getFiniteStrings());
                         printDebug("    Pattern: " + pattern.getFiniteStrings());
                         printDebug("    Suffix: " + suffix.getFiniteStrings());
+                            }
                         Automaton result = prefix.concatenate(replacementString.automaton.concatenate(suffix));
                         result.minimize();
-                        printDebug("    Result: " + result.getFiniteStrings());
+                        if (debug) {
+                            printDebug("    Result: " + result.getFiniteStrings());
+                        }
                         results.add(result);
                         // set minus of what was removed from patternSuffix to continue searching
                         // have to get original patternsuffix so acceptin gstates are correct
-                        printDebug("Prefix: " + prefix + "Pattern: " + pattern + " Suffix: " + suffix + " -> " + pattern.concatenate(suffix));
-                        printDebug("    Removing found pattern-Suffix: " + pattern.concatenate(suffix).getFiniteStrings());
-                        printDebug("    From patternSuffix: " + patternSuffix.getFiniteStrings());
-                        printDebug("    Original pattern-suffix?:" + suffixMap.get(sufStart).getFiniteStrings());
+                        if (debug) {
+                            printDebug("Prefix: " + prefix + "Pattern: " + pattern + " Suffix: " + suffix + " -> " + pattern.concatenate(suffix));
+                            printDebug("    Removing found pattern-Suffix: " + pattern.concatenate(suffix).getFiniteStrings());
+                            printDebug("    From patternSuffix: " + patternSuffix.getFiniteStrings());
+                            printDebug("    Original pattern-suffix?:" + suffixMap.get(sufStart).getFiniteStrings());
+                        }
 
                         patternSuffix = patternSuffix.minus(pattern.concatenate(suffix));
                         patternSuffix.minimize();
@@ -2094,6 +2148,36 @@ public Tuple<HashMap<State, Tuple<State, State>>, Automaton> intersectWithMap(Au
                     break;
                 }
             }
+        }
+
+        // Set the last state in the path as the final state
+        current.setAccept(true);
+        automaton.minimize(); // jic
+        return automaton;
+    }
+
+    public static Automaton alsoAutomatonFromStack(Stack<State> stack){
+        Automaton automaton = new Automaton();
+        HashMap<State,State> stateMap = new HashMap<>();
+        for (State s : stack) {
+            stateMap.put(s, new State());
+        }
+
+        // Set the initial state
+        State current = stateMap.get(stack.get(0));
+        automaton.setInitialState(current);
+
+        while (!stack.isEmpty()) {
+            State originalState = stack.remove(0);
+            current = stateMap.get(originalState);
+
+            for (Transition t : originalState.getTransitions()) {
+                if (stack.contains(t.getDest())) {
+                    State destState = stateMap.get(t.getDest());
+                    current.addTransition(new Transition(t.getMin(), t.getMax(), destState));
+                }
+            }
+
         }
 
         // Set the last state in the path as the final state
@@ -2232,7 +2316,7 @@ public Tuple<HashMap<State, Tuple<State, State>>, Automaton> intersectWithMap(Au
         State init = a.getInitialState();
         Set<State> next = new HashSet<>();
         next.add(init);
-        while(!next.isEmpty()) {
+        while (!next.isEmpty()) {
             Set<State> nextNext = new HashSet<>();
             for (State s : next) {
                 for (Transition t : s.getTransitions()) {
@@ -2251,6 +2335,10 @@ public Tuple<HashMap<State, Tuple<State, State>>, Automaton> intersectWithMap(Au
 
     public static void setMaxBoundLength(int length) {
         maxBoundLength = length;
+    }
+
+    public void minimize() {
+        this.automaton.minimize();
     }
 
 }

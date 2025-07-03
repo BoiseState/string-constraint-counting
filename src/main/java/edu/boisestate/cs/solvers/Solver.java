@@ -220,11 +220,20 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
             // start timer
             BasicTimer.start();
 
+            T tempModel;
             // get satisfying base model as temp
-            T tempModel = baseModel.assertNotEquals(argModel);
+            if (!baseModel.isSingleton()){
+                // leave model alone if singleton, but need to do something?
+                tempModel = baseModel.assertNotEquals(argModel);
+            } else {
+                tempModel = baseModel.clone();
+            }
 
             // get satisfying arg model
-            argModel = argModel.assertNotEquals(baseModel);
+            if (!argModel.isSingleton()){
+                //leave model alone if singleton
+                argModel = argModel.assertNotEquals(baseModel);
+            }
 
             // set base model from temp
             baseModel = tempModel;

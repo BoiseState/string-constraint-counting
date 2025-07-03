@@ -1,6 +1,7 @@
 package edu.boisestate.cs.automatonModel;
 
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,6 +37,11 @@ public class Model_Concrete_Singleton extends A_Model<Model_Concrete_Singleton >
 		Set<String> ret = new HashSet<String>();
 		ret.add(singleton);
 		return ret;
+	}
+
+	@Override
+	public Set<String> getFiniteStrings(int limit) {
+		return null;
 	}
 
 	@Override

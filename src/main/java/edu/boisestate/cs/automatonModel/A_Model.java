@@ -50,6 +50,9 @@ public abstract class A_Model <T extends A_Model <T>> implements Cloneable, I_Mo
     @Override
 	public abstract Set<String> getFiniteStrings();
 
+//    @Override
+//    public abstract Set<String> getFiniteStrings(int limit);
+
     @Override
 	public abstract boolean isEmpty();
 

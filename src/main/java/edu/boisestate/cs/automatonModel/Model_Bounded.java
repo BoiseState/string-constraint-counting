@@ -1,6 +1,7 @@
 package edu.boisestate.cs.automatonModel;
 
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.Set;
 
 import dk.brics.automaton.Automaton;
@@ -550,6 +551,11 @@ public class Model_Bounded extends A_Model<Model_Bounded> {
 
 		// return finite strings from bounded automaton
 		return bounded.getFiniteStrings();
+	}
+
+	@Override
+	public Set<String> getFiniteStrings(int limit) {
+		return null;
 	}
 
 	@Override

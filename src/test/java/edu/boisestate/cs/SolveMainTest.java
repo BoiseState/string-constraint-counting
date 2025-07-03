@@ -31,7 +31,7 @@ public class SolveMainTest {
     @Test
     public void testInsert() {
         restoreStreams();
-        String[] args = {"Insert.json", "-s", "inverse", "-v", "2", "-l", "5"};
+        String[] args = {"Insert.json", "-s", "inverse", "-v", "2", "-l", "11"};
         SolveMain.main(args);
     }
 
