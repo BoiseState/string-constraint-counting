@@ -16,6 +16,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 
     private Automaton automaton;
+    private int minBound = 0; // length of first accepting string
     private static int maxBoundLength = 32;// actaulyl unecessary? may be useful to have a static initBoundLength though?
 
     /**
@@ -1259,7 +1260,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
         Tuple<HashMap<State, Tuple<State, State>>, Automaton> mapAutTuple = intersectWithMap(suffInRev, suffSourceRev);
         Automaton suffixRev = mapAutTuple.get2();
         HashMap<State, Tuple<State, State>> stateMap = mapAutTuple.get1();
-        if (!intersection.minus(suffixRev).isEmpty()){
+        if (!intersection.minus(suffixRev).isEmpty() || !suffixRev.minus(intersection).isEmpty()) {
             System.err.println("WARNING: intersection check failed");
             System.exit(1);
         }
@@ -1355,7 +1356,9 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
             State s2 = currentPair.get2();
             State resultState = pairToResult.get(currentPair);
 
+            // this is irrelevant for our case cause the intersections don't have the right accepts
             resultState.setAccept(s1.isAccept() && s2.isAccept());
+            // but we keep it in so it can be used properly if necessary
 
             for (Transition t1 : s1.getTransitions()) {
                 for (Transition t2 : s2.getTransitions()) {
@@ -1378,7 +1381,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
                 }
             }
         }
-
         return new Tuple<>(stateMap, result);
     }
 
@@ -2329,6 +2331,28 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
         return bound;
     }
 
+    public void calculateMinBoundLength() {
+        State init = this.automaton.getInitialState();
+        Set<State> curr = new HashSet<>();
+        curr.add(init);
+        int bound = 0;
+        while (!curr.isEmpty()) {
+            Set<State> next = new HashSet<>();
+            for (State s : curr) {
+                if (s.isAccept()) {
+                    this.minBound = bound;
+                    return; // found an accepting state, set bound and return
+                }
+                for (Transition t : s.getTransitions()) {
+                    next.add(t.getDest());
+                }
+            }
+            curr = next;
+            bound++;
+        }
+    }
+    // could do a calculate both but in theory automaton arent ever too complex
+
     public void setAutomaton(Automaton a) {
         this.automaton = a;
     }
@@ -2340,5 +2364,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
     public void minimize() {
         this.automaton.minimize();
     }
+
+
+
 
 }
