@@ -4,6 +4,7 @@ import dk.brics.automaton.*;
 import dk.brics.string.stringoperations.*;
 import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.automatonModel.operations.*;
+import edu.boisestate.cs.util.Triple;
 import edu.boisestate.cs.util.Tuple;
 
 import java.math.BigInteger;
@@ -1224,79 +1225,115 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
      * 6-23-25
      */
     @Override
-    public Model_Acyclic_Inverse inv_insert(Model_Acyclic_Inverse baseModel, int offset, Model_Acyclic_Inverse insertModel) {
+    public Model_Acyclic_Inverse inv_insert(Model_Acyclic_Inverse baseModel, int offset, Model_Acyclic_Inverse insertModel, Triple backtrack) {
         //TODO: bound length stuff?
         this.minimize();
+
+
 
         // figure out prefix/suffix from backModel and index
         // note substring forces strings of the length specified
         // also it uses prefix and suffix so may not be precise enough, definitley not for the suffix
-        Model_Acyclic_Inverse prefixIn = this.substring(0, offset);
-        Model_Acyclic_Inverse suffixIn = this.anySuffix(offset);
+        // nps 8-15-25: this is unsound as its possible some subset of prefix concat with a subset of suffix is not in incoming/this.
+        // need to ensure prefix and suffix have same pivot/path, then remove this from future searches like in pseudocode
+//        Model_Acyclic_Inverse prefixIn = this.substring(0, offset);
+//        Model_Acyclic_Inverse suffixIn = this.anySuffix(offset);
+//
+//        // do the same but for the forward prop source model
+//        Model_Acyclic_Inverse prefixSource = baseModel.substring(0, offset);
+//        Model_Acyclic_Inverse suffixSource = baseModel.anySuffix(offset);
+//
+//        Model_Acyclic_Inverse prefix = prefixIn.intersect(prefixSource); // this should be the start of the return model
+//
+//        // find common suffixes of Automata
+//        Automaton suffIn = suffixIn.getAutomatonObject();
+//        Automaton suffSource = suffixSource.getAutomatonObject();
+//        HashMap<State, Boolean> prevAccept = new HashMap<>();
+//
+//        Automaton suffInRev = performUnaryOperation(suffIn, new Reverse(), this.alphabet);
+//        Automaton suffSourceRev = performUnaryOperation(suffSource, new Reverse(), this.alphabet);
+//        // note we remember the Reverse states
+//        for (State state : suffInRev.getStates()) {
+//            prevAccept.put(state, state.isAccept());
+//            state.setAccept(true);
+//        }
+//        for (State state : suffSourceRev.getStates()) {
+//            prevAccept.put(state, state.isAccept());
+//            state.setAccept(true);
+//        }
+//        Automaton intersection = suffInRev.intersection(suffSourceRev);
+//        Tuple<HashMap<State, Tuple<State, State>>, Automaton> mapAutTuple = intersectWithMap(suffInRev, suffSourceRev);
+//        Automaton suffixRev = mapAutTuple.get2();
+//        HashMap<State, Tuple<State, State>> stateMap = mapAutTuple.get1();
+//        if (!intersection.minus(suffixRev).isEmpty() || !suffixRev.minus(intersection).isEmpty()) {
+//            System.err.println("WARNING: intersection check failed");
+//            System.exit(1);
+//        }
+//
+//
+//        // now need to make sure our suffix has the correct accept states.
+//        for (State state : suffixRev.getStates()) {
+//            Tuple<State, State> inputs = stateMap.get(state);
+//            State s1 = inputs.get1();
+//            State s2 = inputs.get2();
+//            state.setAccept(prevAccept.get(s1) && prevAccept.get(s2));
+//            //epsilon transitions to accept? i.e. throuhg the remains
+//            if (state.getTransitions().isEmpty()) {
+//                state.setAccept(true);
+//            }
+//        }
+//        for (State state : suffInRev.getStates()) {
+//            state.setAccept(prevAccept.get(state));
+//        }
+//
+//        suffixRev.minimize();
+//        suffInRev.minimize();
+//        //before reversing back suffix aut we want to construct the remainder aut.
+//        // we do this by removing (replacing with "") the suffix we found
+//        Model_Acyclic_Inverse suffixRevModel = new Model_Acyclic_Inverse(suffixRev, this.alphabet, calculateBoundLength(suffixRev));
+//        Model_Acyclic_Inverse suffixInRevModel = new Model_Acyclic_Inverse(suffInRev, this.alphabet, this.boundLength - offset);
+//        Model_Acyclic_Inverse remainSuffix = suffixInRevModel.replaceFirst(suffixRevModel, new Model_Acyclic_Inverse(BasicAutomata.makeEmptyString(), this.alphabet, 0));
+//        Automaton remains = performUnaryOperation(remainSuffix.getAutomatonObject(), new Reverse(), this.alphabet);
+//        // output back to base is then the prefix conc suffix model
+//        Model_Acyclic_Inverse result = new Model_Acyclic_Inverse(prefix.getAutomatonObject().concatenate(remains), this.alphabet, this.boundLength);
+//
+//
+//        Automaton insert = performUnaryOperation(suffixRev, new Reverse(), this.alphabet);
+//        insertModel.setAutomaton(insert);
 
-        // do the same but for the forward prop source model
-        Model_Acyclic_Inverse prefixSource = baseModel.substring(0, offset);
-        Model_Acyclic_Inverse suffixSource = baseModel.anySuffix(offset);
+        return null;
+    }
 
-        Model_Acyclic_Inverse prefix = prefixIn.intersect(prefixSource); // this should be the start of the return model
-
-        // find common suffixes of Automata
-        Automaton suffIn = suffixIn.getAutomatonObject();
-        Automaton suffSource = suffixSource.getAutomatonObject();
-        HashMap<State, Boolean> prevAccept = new HashMap<>();
-
-        Automaton suffInRev = performUnaryOperation(suffIn, new Reverse(), this.alphabet);
-        Automaton suffSourceRev = performUnaryOperation(suffSource, new Reverse(), this.alphabet);
-        // note we remember the Reverse states
-        for (State state : suffInRev.getStates()) {
-            prevAccept.put(state, state.isAccept());
-            state.setAccept(true);
+    /**
+     * Finds a pair of path-consistent prefix and suffix models at index i.
+     * This could be extended to find every path of length i that reaches that state to construct the prefix and corresonding suffix
+     * curretnly it just finds one path.
+     * @param a
+     * @param i
+     * @return
+     */
+    public Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse> getPathConsistentPair(Automaton a, int i){
+        Automaton suffix = a.clone();
+        Automaton prefix = new Automaton();
+        int index = 0;
+        State current = suffix.getInitialState();
+        State currPref = new State();
+        prefix.setInitialState(currPref);
+        while (index < i) {
+            Transition t = current.getTransitions().iterator().next();
+            State next = new State();
+            currPref.addTransition(new Transition(t.getMin(), t.getMax(), next));
+            currPref = next;
+            current = t.getDest();
+            index++;
         }
-        for (State state : suffSourceRev.getStates()) {
-            prevAccept.put(state, state.isAccept());
-            state.setAccept(true);
-        }
-        Automaton intersection = suffInRev.intersection(suffSourceRev);
-        Tuple<HashMap<State, Tuple<State, State>>, Automaton> mapAutTuple = intersectWithMap(suffInRev, suffSourceRev);
-        Automaton suffixRev = mapAutTuple.get2();
-        HashMap<State, Tuple<State, State>> stateMap = mapAutTuple.get1();
-        if (!intersection.minus(suffixRev).isEmpty() || !suffixRev.minus(intersection).isEmpty()) {
-            System.err.println("WARNING: intersection check failed");
-            System.exit(1);
-        }
+        // now we have a prefix and the state to pivot at
+        suffix.setInitialState(current); // this shuold leave us with only suffixes from this pivot
+        suffix.minimize();
+        Model_Acyclic_Inverse prefixModel = new Model_Acyclic_Inverse(prefix, this.alphabet, i);
+        Model_Acyclic_Inverse suffixModel = new Model_Acyclic_Inverse(suffix, this.alphabet, calculateBoundLength(suffix));
 
-
-        // now need to make sure our suffix has the correct accept states.
-        for (State state : suffixRev.getStates()) {
-            Tuple<State, State> inputs = stateMap.get(state);
-            State s1 = inputs.get1();
-            State s2 = inputs.get2();
-            state.setAccept(prevAccept.get(s1) && prevAccept.get(s2));
-            //epsilon transitions to accept? i.e. throuhg the remains
-            if (state.getTransitions().isEmpty()) {
-                state.setAccept(true);
-            }
-        }
-        for (State state : suffInRev.getStates()) {
-            state.setAccept(prevAccept.get(state));
-        }
-
-        suffixRev.minimize();
-        suffInRev.minimize();
-        //before reversing back suffix aut we want to construct the remainder aut.
-        // we do this by removing (replacing with "") the suffix we found
-        Model_Acyclic_Inverse suffixRevModel = new Model_Acyclic_Inverse(suffixRev, this.alphabet, calculateBoundLength(suffixRev));
-        Model_Acyclic_Inverse suffixInRevModel = new Model_Acyclic_Inverse(suffInRev, this.alphabet, this.boundLength - offset);
-        Model_Acyclic_Inverse remainSuffix = suffixInRevModel.replaceFirst(suffixRevModel, new Model_Acyclic_Inverse(BasicAutomata.makeEmptyString(), this.alphabet, 0));
-        Automaton remains = performUnaryOperation(remainSuffix.getAutomatonObject(), new Reverse(), this.alphabet);
-        // output back to base is then the prefix conc suffix model
-        Model_Acyclic_Inverse result = new Model_Acyclic_Inverse(prefix.getAutomatonObject().concatenate(remains), this.alphabet, this.boundLength);
-
-
-        Automaton insert = performUnaryOperation(suffixRev, new Reverse(), this.alphabet);
-        insertModel.setAutomaton(insert);
-
-        return result;
+        return new Tuple<>(prefixModel, suffixModel);
     }
 
     public Model_Acyclic_Inverse anySuffix(int start) {
@@ -1383,7 +1420,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
         }
         return new Tuple<>(stateMap, result);
     }
-
 
     /**
      * OVER-ESTIMATION - Yes, results need to be intersected with previous state.
