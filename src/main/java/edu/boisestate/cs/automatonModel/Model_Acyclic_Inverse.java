@@ -838,6 +838,22 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
     }
 
     @Override
+    public Model_Acyclic_Inverse prefix(int end) {
+
+        // perform operation
+        Automaton result = performUnaryOperation(automaton, new PrecisePrefix(end), this.alphabet);
+
+        // determine new bound length
+        int newBoundLength = end;
+        if (this.boundLength < end) {
+            newBoundLength = this.boundLength;
+        }
+
+        // return new model from resulting automaton
+        return new Model_Acyclic_Inverse(result, this.alphabet, newBoundLength);
+    }
+
+    @Override
     public Model_Acyclic_Inverse toLowercase() {
 
         // perform operation
@@ -1225,11 +1241,49 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
      * 6-23-25
      */
     @Override
-    public Model_Acyclic_Inverse inv_insert(Model_Acyclic_Inverse baseModel, int offset, Model_Acyclic_Inverse insertModel, Triple backtrack) {
+    public Model_Acyclic_Inverse inv_insert(Model_Acyclic_Inverse baseModel, int offset, Model_Acyclic_Inverse insertModel) {
         //TODO: bound length stuff?
         this.minimize();
 
+        // get prefix and suffix pair for some pivot, and remove from this model
+        Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse> preSuffPair = this.getPathConsistentPair(offset);
+        Model_Acyclic_Inverse prefix = preSuffPair.get1();
+        Model_Acyclic_Inverse suffixIn = preSuffPair.get2();
 
+        if (!this.isEmpty()) {
+            System.out.println("MORE THAN ONE PATH FOUND IN INV_INSERT, ADD TO BACKTRACK");
+        }
+
+        //check prefix makes sense with baseModel
+
+        Model_Acyclic_Inverse prefixTarg = baseModel.prefix(offset);
+        prefix = prefix.intersect(prefixTarg); // TODO: intersects are expensive, check they are all necessary
+        if (prefix.isEmpty()) {
+            System.err.println("PREFIX INTERSECTION FAILED IN INV_INSERT, BACKTRACKING"); //shouldn't happen?
+            return null;
+        }
+
+        Model_Acyclic_Inverse suffixTarg = baseModel.suffix(offset);
+
+        Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse> insertCandidates = suffixIn.getPathConsistentPair(insertModel.getAutomatonObject(), suffixTarg.getAutomatonObject());
+
+        if (insertCandidates == null) {
+            System.err.println("NO CANDIDATES FOUND, given the prefix used, BACKTRACKING");
+            return null;
+        }
+
+        Model_Acyclic_Inverse insert = insertCandidates.get1();
+        Model_Acyclic_Inverse suffix = insertCandidates.get2();
+
+        // so here we need to back propagate our candidates but also subtract this search from future searches
+
+
+//        Automaton nextSuffixes = commonSuffixes(suffixIn.getAutomatonObject(), suffixTarg.getAutomatonObject());
+//
+//        if (nextSuffixes.isEmpty()) {
+//            System.err.println("SUFFIX INTERSECTION FAILED IN INV_INSERT, BACKTRACKING"); //shouldn't happen?
+//            return null;
+//        }
 
         // figure out prefix/suffix from backModel and index
         // note substring forces strings of the length specified
@@ -1308,12 +1362,13 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
      * Finds a pair of path-consistent prefix and suffix models at index i.
      * This could be extended to find every path of length i that reaches that state to construct the prefix and corresonding suffix
      * curretnly it just finds one path.
-     * @param a
-     * @param i
-     * @return
+     *
+     * @param i index to pivot at
+     * @return tuple of prefix and suffix models, note also removes this pair from the underlying model/automaton
      */
-    public Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse> getPathConsistentPair(Automaton a, int i){
-        Automaton suffix = a.clone();
+    public Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse> getPathConsistentPair(int i) {
+        Automaton original = this.getAutomatonObject();
+        Automaton suffix = original.clone();
         Automaton prefix = new Automaton();
         int index = 0;
         State current = suffix.getInitialState();
@@ -1332,48 +1387,171 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
         suffix.minimize();
         Model_Acyclic_Inverse prefixModel = new Model_Acyclic_Inverse(prefix, this.alphabet, i);
         Model_Acyclic_Inverse suffixModel = new Model_Acyclic_Inverse(suffix, this.alphabet, calculateBoundLength(suffix));
+        this.setAutomaton(original.minus(prefix.concatenate(suffix)));
 
         return new Tuple<>(prefixModel, suffixModel);
     }
 
-    public Model_Acyclic_Inverse anySuffix(int start) {
-        if (start < 0 || start > this.boundLength) {
-            throw new IndexOutOfBoundsException("Start index " + start + " is out of bounds for model with bound length " + this.boundLength);
+    /**
+     * Returns a pair of path consistent automata representing a possible prefix and suffix pair
+     * of the original automaton that are subsets of the provided insert and suffix automata respectively.
+     * TODO: find all possible paths to pivot state
+     *
+     * @param aut1
+     * @param aut2
+     * @return tuple of prefix and suffix models
+     */
+    public Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse> getPathConsistentPair(Automaton aut1, Automaton aut2) {
+        Automaton original = this.getAutomatonObject();
+        Tuple<Automaton, HashMap<State, State>> cloneMap = this.cloneWithMap();
+        Automaton prefix = cloneMap.get1();
+        HashMap<State,State> preMap = cloneMap.get2();
+        Tuple<Automaton, HashMap<State, State>> cloneMap2 = this.cloneWithMap();
+        Automaton suffix = cloneMap2.get1();
+        HashMap<State,State> suffMap = cloneMap2.get2();
+
+        for (State state : prefix.getStates()) {
+            state.setAccept(false);
         }
-        return new Model_Acyclic_Inverse(anySuffix(this.automaton, start), this.alphabet, this.boundLength - start);
+
+        State current = original.getInitialState();
+        ArrayList<State> search = new ArrayList<>();
+        Set<State> visited = new HashSet<>();
+        search.add(current);
+        while (!search.isEmpty()) {
+           current = search.remove(0);
+           State preCurrent = preMap.get(current);
+           preCurrent.setAccept(true);
+           Automaton temp1 = prefix.clone();
+           temp1.minimize();
+
+           if (!temp1.intersection(aut1).isEmpty()) {
+               // good prefix so far
+                State suffCurrent = suffMap.get(current);
+                suffix.setInitialState(suffCurrent);
+                Automaton temp2 = suffix.clone();
+                temp2.minimize();
+                if (!temp2.intersection(aut2).isEmpty()) {
+                    // found a valid pair
+                    prefix.minimize();
+                    suffix.minimize();
+                    Model_Acyclic_Inverse prefixModel = new Model_Acyclic_Inverse(prefix, this.alphabet, calculateBoundLength(prefix));
+                    Model_Acyclic_Inverse suffixModel = new Model_Acyclic_Inverse(suffix, this.alphabet, calculateBoundLength(suffix));
+                    this.setAutomaton(original.minus(prefix.concatenate(suffix)));
+                    return new Tuple<>(prefixModel, suffixModel);
+                }
+                // no need to set back initial as we will just continue searching
+           } else {
+               preCurrent.setAccept(false);
+           }
+
+           visited.add(current);
+           for (Transition t : current.getTransitions()) {
+               State dest = t.getDest();
+               if (!visited.contains(dest)) {
+                   search.add(dest);
+               }
+           }
+
+
+        }
+        // TODO: only search within bounds corresponding to aut1 and aut2
+
+        System.out.println("NO CONSISTENT PAIR FOUND IN inv_insert");
+        return null;
     }
 
-    // constructs automata starting at start, without changing any accept states.
-    public Automaton anySuffix(Automaton a, int start) {
-        if (a.isEmpty() || start <0) {
-            // warn?
-            return BasicAutomata.makeEmpty();
+    /**
+     * Clone with map from original states to new states
+     * @return cloned automaton and map
+     */
+    Tuple<Automaton, HashMap<State, State>> cloneWithMap() {
+        Automaton clone = new Automaton();
+        HashMap<State, State> stateMap = new HashMap<>();
+        for (State state : this.getAutomatonObject().getStates()) {
+            State newState = new State();
+            newState.setAccept(state.isAccept());
+            stateMap.put(state, newState);
         }
-        Automaton result = a.clone();
-        HashSet<State> states = new HashSet<>();
-        states.add(result.getInitialState());
-        for (int i = 0; i < start; i++) {
-            HashSet<State> nextStates = new HashSet<>();
-            for (State state : states) {
-                for (Transition transition : state.getTransitions()) {
-                    nextStates.add(transition.getDest());
-                }
-            }
-            states = nextStates;
-        }
-        // now we have all reachable states after start and will create new start the epsilons to those states
-        State newStart = new State();
-        result.setInitialState(newStart);
-        Set<StatePair> epsilons = new HashSet<>();
-        for (State state: states) {
-            epsilons.add(new StatePair(newStart, state));
-        }
-        result.addEpsilons(epsilons);
-        result.minimize();
-        return result;
+        State init = this.getAutomatonObject().getInitialState();
+        clone.setInitialState(stateMap.get(init));
+
+        return new Tuple<>(clone, stateMap);
     }
+
+//    /**
+//     * Finds common suffixes between two automata, i.e. suffixes that are in both automata
+//     * This is done by reversing both automata, intersecting them, and then reversing the result.
+//     * need reference to underlying model to get alphabet
+//     * @param a1 first automaton
+//     * @param a2 second automaton
+//     * @return automaton representing common suffixes
+//     */
+//    public Automaton commonSuffixes(Automaton a1, Automaton a2) {
+//        HashMap<State, Boolean> prevAccept = new HashMap<>();
+//
+//        Automaton a1Rev = performUnaryOperation(a1, new Reverse(), this.alphabet);
+//        Automaton a2Rev = performUnaryOperation(a2, new Reverse(), this.alphabet);
+//
+//        for (State state : a1Rev.getStates()) {
+//            prevAccept.put(state, state.isAccept());
+//            state.setAccept(true);
+//        }
+//        for (State state : a2Rev.getStates()) {
+//            prevAccept.put(state, state.isAccept());
+//            state.setAccept(true);
+//        }
+//
+//        Tuple<HashMap<State,Tuple<State,State>>, Automaton> mapAutTuple = intersectWithMap(a1Rev, a2Rev);
+//        Automaton intersection = a1Rev.intersection(a2Rev);
+//        Automaton commonSuffixes = mapAutTuple.get2();
+//        HashMap<State, Tuple<State, State>> stateMap = mapAutTuple.get1();
+//        // sanity check TODO: remove, intersection take tiiime
+//        if (!intersection.minus(commonSuffixes).isEmpty() || !commonSuffixes.minus(intersection).isEmpty()) {
+//            System.err.println("WARNING: intersection check failed in inv_insert commonSuffixes");
+//            System.exit(1);
+//        }
+//        for (State state : commonSuffixes.getStates()) {
+//            Tuple<State, State> inputs = stateMap.get(state);
+//            State s1 = inputs.get1();
+//            State s2 = inputs.get2();
+//            state.setAccept(prevAccept.get(s1) && prevAccept.get(s2));
+//            //epsilon transitions to accept? i.e. throuhg the remains
+//            if (state.getTransitions().isEmpty()) {
+//                state.setAccept(true);
+//            }
+//        }
+//        commonSuffixes = performUnaryOperation(commonSuffixes, new Reverse(), this.alphabet);
+//        commonSuffixes.minimize();
+//
+//        return commonSuffixes;
+//    }
+
+//    /**
+//     * Given a sub-automaton, an insert automaton, and the super-automaton (this), finds potential prefix suff pairs
+//     * that are consistent with the insert and sub automata, pre concat suff = super
+//     * where pre is a subset of insert and suff is a subset of sub
+//     * Also removes the first instance found from the base/original automata (sup) for future search.
+//     * @param sub sub-automaton to 'remove' from sup
+//     * @return tuple of remaining prefix automaton and the corresponding suffix (potential insert, and targets suffix)
+//     */
+//    public Tuple<Automaton, Automaton> remainingPrefix(Automaton sub, Automaton insert) {
+//        Automaton sup = this.getAutomatonObject().clone();
+//
+//        // one way to do this is iterate through our sup, and check if the prefix is in insert, and suffix is in sub?
+//        // for now i will just check all but shuld be able to use insert bounds to limit search
+//        // we will build our prefix as we go and then shuold be able to build the suffix after we find an insert match
+//        LinkedList<State> stateSearch = new LinkedList<>();
+//        stateSearch.add(sup.getInitialState());
+//        while (!stateSearch.isEmpty()) {
+//            State current = stateSearch.removeFirst();
+//        }
+//
+//    }
 
     // this is mostly copied from dk.brics
+// just adds the state map so we can track which states in the result correspond to which pairs of states in the inputs
+// this is useful for setting the correct accept states
     public Tuple<HashMap<State, Tuple<State, State>>, Automaton> intersectWithMap(Automaton aut1, Automaton aut2) {
         Automaton result = new Automaton();
         HashMap<State, Tuple<State, State>> stateMap = new HashMap<>();
@@ -1626,7 +1804,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
     }
 
 //    private void ensureAcyclicModel(Model_Acyclic_Inverse arg) {
-    // check if automaton model is bounded
+// check if automaton model is bounded
 //        if (!(arg instanceof Model_Acyclic_Inverse)) {
 //
 //            throw new UnsupportedOperationException(
@@ -1830,7 +2008,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
     }
 
     // helper method for replaceFirst to determine correctness
-    // enumerates all possible strings in model to perform operation
+// enumerates all possible strings in model to perform operation
     public Model_Acyclic_Inverse replaceFirstBruteForce(Model_Acyclic_Inverse find, Model_Acyclic_Inverse replace) {
         Model_Acyclic_Inverse result = new Model_Acyclic_Inverse(Automaton.makeEmpty(), this.alphabet, this.boundLength);
         // get all strings in model
@@ -1856,7 +2034,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
     }
 
     // helper method for replaceAll to determine correctness
-    // enumerates all possible strings in model to perform operation
+// enumerates all possible strings in model to perform operation
     public Model_Acyclic_Inverse replaceAllBruteForce(Model_Acyclic_Inverse find, Model_Acyclic_Inverse replace) {
         Model_Acyclic_Inverse result = new Model_Acyclic_Inverse(Automaton.makeEmpty(), this.alphabet, this.boundLength);
         // get all strings in model
@@ -1887,8 +2065,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
         System.exit(1);
         return null;
     }
-    // Note that we do not use an operations class as we need visiblity of the solver instance
-    //
+// Note that we do not use an operations class as we need visiblity of the solver instance
+//
 
     /**
      * Replaces the first occurrence of a substring matching the regex with the replacement string.
@@ -2063,12 +2241,12 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
                         suffix.minimize();
 //                        suffixPrefixMap.put(suffix, prefix);
                         // adding result to the set of results
-                        if (debug){
-                        printDebug("Found a match, intersection: " + inter.getFiniteStrings());
-                        printDebug("    Prefix: " + prefix.getFiniteStrings());
-                        printDebug("    Pattern: " + pattern.getFiniteStrings());
-                        printDebug("    Suffix: " + suffix.getFiniteStrings());
-                            }
+                        if (debug) {
+                            printDebug("Found a match, intersection: " + inter.getFiniteStrings());
+                            printDebug("    Prefix: " + prefix.getFiniteStrings());
+                            printDebug("    Pattern: " + pattern.getFiniteStrings());
+                            printDebug("    Suffix: " + suffix.getFiniteStrings());
+                        }
                         Automaton result = prefix.concatenate(replacementString.automaton.concatenate(suffix));
                         result.minimize();
                         if (debug) {
@@ -2194,9 +2372,9 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
         return automaton;
     }
 
-    public static Automaton alsoAutomatonFromStack(Stack<State> stack){
+    public static Automaton alsoAutomatonFromStack(Stack<State> stack) {
         Automaton automaton = new Automaton();
-        HashMap<State,State> stateMap = new HashMap<>();
+        HashMap<State, State> stateMap = new HashMap<>();
         for (State s : stack) {
             stateMap.put(s, new State());
         }
@@ -2387,7 +2565,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
             bound++;
         }
     }
-    // could do a calculate both but in theory automaton arent ever too complex
+// could do a calculate both but in theory automaton arent ever too complex
 
     public void setAutomaton(Automaton a) {
         this.automaton = a;
@@ -2400,8 +2578,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
     public void minimize() {
         this.automaton.minimize();
     }
-
-
 
 
 }

@@ -85,7 +85,7 @@ public class InvConstraintInsert<T extends A_Model_Inverse<T>> extends A_Inv_Con
             // the insert constraint should also have its own backtracking list specifically for the suffix search.
             // so we should first check if backtracks exists for this constraint and try a new suffix.
             // otherwise start a new prefix search, same as if we had backtracked.
-            T resModel = solver.inv_insert(inputModel, sourceModel, start, insertStringModel, backtrack);
+            T resModel = solver.inv_insert(inputModel, sourceModel, start, insertStringModel);
 
             if (!resModel.isEmpty()) {
                 //index?
@@ -100,19 +100,6 @@ public class InvConstraintInsert<T extends A_Model_Inverse<T>> extends A_Inv_Con
 
 
         return ret;
-    }
-
-    private class Thruple {
-        private final T prefix;
-        private final T suffixes;
-        private final T inputSuffixes;
-
-        private Thruple(T prefix, T suffixes, T inputSuffixes) {
-            this.prefix = prefix;
-            this.suffixes = suffixes;
-            this.inputSuffixes = inputSuffixes;
-        }
-
     }
 
 //	@Override
