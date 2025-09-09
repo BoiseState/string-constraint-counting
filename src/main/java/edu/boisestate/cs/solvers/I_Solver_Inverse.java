@@ -4,6 +4,7 @@ import java.util.List;
 
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 //import edu.boisestate.cs.graph.I_Inv_Constraint;
+import edu.boisestate.cs.util.Quadruple;
 import edu.boisestate.cs.util.Tuple;
 
 public interface I_Solver_Inverse<T extends A_Model_Inverse<T>> {
@@ -27,7 +28,7 @@ public interface I_Solver_Inverse<T extends A_Model_Inverse<T>> {
 
 	T inv_delete(T input, int start, int end);
 
-	T inv_insert(T input, T base, int start, T arg);
+	Quadruple<T,T,T,T> inv_insert(T input, T base, T arg, int start);
 
 	void inv_insert(int id, int base, int arg, int offset, int start, int end);
 

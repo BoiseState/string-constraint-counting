@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
-import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.solvers.*;
+import edu.boisestate.cs.util.Quadruple;
 import edu.boisestate.cs.util.Triple;
 import edu.boisestate.cs.util.Tuple;
 
@@ -18,10 +18,13 @@ import edu.boisestate.cs.util.Tuple;
 public class InvConstraintInsert<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
 
     private int start, insertStringID;
-    private T inputs = null;
-    private Triple<T,T,T> backtrack = null; // current backtrack state: (currentPrefixSearch, (suffixesToSearch, inputModelSuffixes))
-    private ArrayList<Tuple<T, T>> outputs = new ArrayList<>();
-    private HashMap<T, List<Tuple<T, T>>> mapInOut = new HashMap<>();
+//    private T inputs = null;
+//    private Triple<T,T,T> backtrack = null; // current backtrack state: (currentPrefixSearch, (suffixesToSearch, inputModelSuffixes))
+//    private ArrayList<Tuple<T, T>> outputs = new ArrayList<>();
+//    private HashMap<T, List<Tuple<T, T>>> mapInOut = new HashMap<>();
+    private T IN = null;
+    private HashMap<T,T> prefSuffMap = new HashMap<>();
+    private Tuple<T,T> remaining = null;
 
     public InvConstraintInsert(int ID, Solver_Inverse<T> solver, List<Integer> args) {
 
@@ -58,43 +61,88 @@ public class InvConstraintInsert<T extends A_Model_Inverse<T>> extends A_Inv_Con
         Tuple<Boolean, Boolean> ret = new Tuple<>(true, true);
         printDebug("EVALUATE INSERT " + ID + " ...");
 
-        // check if there are any insert_backtracks for this constraint to explore
-        if (backtrack != null) {
-            // backtrack specific method for only search suffixes
-            // however it does need to manipulate the insert model as well...
-            // unfortunately i think we will implement this here even though Model_Acyclic_Inverse does the same work
-            Model_Acyclic_Inverse prefix = (Model_Acyclic_Inverse) backtrack.get1();
-            Model_Acyclic_Inverse suffixesToSearch = (Model_Acyclic_Inverse) backtrack.get2();
-            Model_Acyclic_Inverse inputSuffix = (Model_Acyclic_Inverse) backtrack.get3();
-        }
+//        // check if there are any insert_backtracks for this constraint to explore
+//        if (backtrack != null) {
+//            // backtrack specific method for only search suffixes
+//            // however it does need to manipulate the insert model as well...
+//            // unfortunately i think we will implement this here even though Model_Acyclic_Inverse does the same work
+//            Model_Acyclic_Inverse prefix = (Model_Acyclic_Inverse) backtrack.get1();
+//            Model_Acyclic_Inverse suffixesToSearch = (Model_Acyclic_Inverse) backtrack.get2();
+//            Model_Acyclic_Inverse inputSuffix = (Model_Acyclic_Inverse) backtrack.get3();
+//        }
+        if (remaining!=null){
+            // we have found a prefix already and there are remaining suffixes to try
+            ret = new Tuple<>(true, false);// continue but add to backtrack as may still be prefixes ot try
+            T insertStringModel = solver.getSymbolicModel(insertStringID);
+            T sourceModel = solver.getSymbolicModel(nextID); // model of source/target from forward analysis
+            T prefix = remaining.get1();
+            T suffix = remaining.get2(); // the suffix to search for a new split
 
-        T inputModel = incoming();
-        if (inputModel.isEmpty()) {
+            Tuple<T,T> candidate = suffix.getPathConsistentPair(insertStringModel,sourceModel);
+            if (candidate == null) { //no consistent pair found
+                printDebug("INSERT RESULT MODEL EMPTY...");
+                ret = new Tuple<>(false, false);// don't continue but add to backtrack?
+                remaining = null;
+                return ret;
+            }
+            T insert = candidate.get1();
+            T suff = candidate.get2();
+            if (!suffix.isEmpty()){
+                remaining = new Tuple<>(prefix, suffix); //yet more suffixes to try
+            } else {
+                remaining = null; // used up all suffixes for this prefix
+            }
+            T resModel = prefix.concatenate(suff);
+            outputSet.put(1, resModel);
+            outputSet.put(2, insert);
+            return ret;
+
+        }
+        if (IN == null) { // first time or after clear
+            printDebug("input is null");
+            IN = incoming();
+        }
+        if (IN.isEmpty()) {
             printDebug("INSERT INCOMING SET INCONSISTENT...");
             ret = new Tuple<>(false, true);
         } else {
             T insertStringModel = solver.getSymbolicModel(insertStringID);
             T sourceModel = solver.getSymbolicModel(nextID); // model of source/target from forward analysis
 
-
-            // inv_insert needs to take both forward and backward models, do necessary analysis, intersections,
-            // as well as change stored models and set up backtracking as necessary
-            // nps - 9-4-25 : method returns a model of the target, i.e. what was the original string before insertion
-            // it also needs to modify the insertStringModel to reflect what was actually inserted
-            // additionally we need to add it to backtracking if there are remaining choices for prefixes
-            // the insert constraint should also have its own backtracking list specifically for the suffix search.
-            // so we should first check if backtracks exists for this constraint and try a new suffix.
-            // otherwise start a new prefix search, same as if we had backtracked.
-            T resModel = solver.inv_insert(inputModel, sourceModel, start, insertStringModel);
-
-            if (!resModel.isEmpty()) {
-                //index?
-                outputSet.put(1, resModel);
-                outputSet.put(2, insertStringModel); // also prop insert model though this is never manipulated??
-            } else {
+            // this will manipulate IN and pass back candidates for the target and insert
+            // will also need to pass back the specific prefix it used?
+            Quadruple<T,T,T,T> candidate = IN.inv_insert(sourceModel, insertStringModel, start);
+            if (candidate == null) { // i return null if no candidates found, this isnt exhaustive though
                 printDebug("INSERT RESULT MODEL EMPTY...");
-                ret = new Tuple<>(false, true);
+                if (!IN.isEmpty()) {
+                    ret = new Tuple<>(false, false); // more prefixes to find: dont continue but add ot backtrack
+                } else {
+                    ret = new Tuple<>(false, true);
+                }
+                return ret;
             }
+            if (!IN.isEmpty()) {
+                // more prefixes to try
+                ret = new Tuple<>(true, false); // continue but add to backtrack
+            }
+            if (candidate.get4() != null) {
+                // we have remaining suffixes to try with the same prefix
+                remaining = new Tuple<>(candidate.get1(), candidate.get4());
+            } else {
+                remaining = null;
+            }
+            // check propagation?
+            outputSet.put(1, candidate.get1().concatenate(candidate.get3()));
+            outputSet.put(2, candidate.get2());
+
+//            if (!resModel.isEmpty()) {
+//                //index?
+//                outputSet.put(1, resModel);
+//                outputSet.put(2, insertStringModel); // also prop insert model though this is never manipulated??
+//            } else {
+//                printDebug("INSERT RESULT MODEL EMPTY...");
+//                ret = new Tuple<>(false, true);
+//            }
 
         }
 

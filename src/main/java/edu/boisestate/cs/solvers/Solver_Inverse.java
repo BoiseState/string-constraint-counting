@@ -9,6 +9,7 @@ import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 import edu.boisestate.cs.automatonModel.A_Model_Manager;
 //import edu.boisestate.cs.graph.I_Inv_Constraint;
 //import edu.boisestate.cs.graph.I_Inv_Constraint;
+import edu.boisestate.cs.util.Quadruple;
 import edu.boisestate.cs.util.Tuple;
 
 
@@ -144,15 +145,15 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver_Count<T
 	}
 
 	/**
-	 * R3 Version 
+	 * R3 Version
 	 * Returns result T
-	 * 
+	 *
 	 * 03/18/2021 MJR
 	 */
 	@Override
-	public T inv_insert(T input, T baseModel, int start, T argModel) {
-        return input.inv_insert(baseModel, start, argModel);
-		
+	public Quadruple<T,T,T,T> inv_insert(T input, T baseModel, T argModel, int start) {
+        return input.inv_insert(baseModel, argModel, start);
+
 	}
 
 	@Override 

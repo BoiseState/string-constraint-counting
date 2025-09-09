@@ -4,6 +4,7 @@ import dk.brics.automaton.*;
 import dk.brics.string.stringoperations.*;
 import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.automatonModel.operations.*;
+import edu.boisestate.cs.util.Quadruple;
 import edu.boisestate.cs.util.Triple;
 import edu.boisestate.cs.util.Tuple;
 
@@ -837,7 +838,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
         return new Model_Acyclic_Inverse(result, this.alphabet, newBoundLength);
     }
 
-    @Override
     public Model_Acyclic_Inverse prefix(int end) {
 
         // perform operation
@@ -1237,11 +1237,11 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
      * @param baseModel   forward model from source
      * @param offset      index of insert
      * @param insertModel forward model for insert
+     * @return Quadruple of prefix, insert, suffix, and remains models for propagation and backtracking for remains
      * @author Nat Steven
      * 6-23-25
      */
-    @Override
-    public Model_Acyclic_Inverse inv_insert(Model_Acyclic_Inverse baseModel, int offset, Model_Acyclic_Inverse insertModel) {
+    public Quadruple<Model_Acyclic_Inverse,Model_Acyclic_Inverse,Model_Acyclic_Inverse,Model_Acyclic_Inverse> inv_insert(Model_Acyclic_Inverse baseModel, Model_Acyclic_Inverse insertModel, int offset) {
         //TODO: bound length stuff?
         this.minimize();
 
@@ -1251,7 +1251,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
         Model_Acyclic_Inverse suffixIn = preSuffPair.get2();
 
         if (!this.isEmpty()) {
-            System.out.println("MORE THAN ONE PATH FOUND IN INV_INSERT, ADD TO BACKTRACK");
+            System.out.println("MORE THAN ONE PATH FOUND IN INV_INSERT, CAN BACKTRACK");
         }
 
         //check prefix makes sense with baseModel
@@ -1265,7 +1265,9 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
         Model_Acyclic_Inverse suffixTarg = baseModel.suffix(offset);
 
-        Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse> insertCandidates = suffixIn.getPathConsistentPair(insertModel.getAutomatonObject(), suffixTarg.getAutomatonObject());
+        // so technically could do below as it performs same opp but it is indeed exhaustive for the original model, really should also adjust this to be greedy
+//        List<Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse>> insertCandidates = suffixIn.inv_concatenate_sym_all(insertModel, suffixTarg);
+        Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse> insertCandidates = suffixIn.getPathConsistentPair(insertModel, suffixTarg);
 
         if (insertCandidates == null) {
             System.err.println("NO CANDIDATES FOUND, given the prefix used, BACKTRACKING");
@@ -1274,6 +1276,16 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
         Model_Acyclic_Inverse insert = insertCandidates.get1();
         Model_Acyclic_Inverse suffix = insertCandidates.get2();
+
+        suffixIn.minus(insert.concatenate(suffix)); // check there are other insert/suffix optinos to search
+       // i guess a quad cause we do need the prefix that for later as well for suffixIn)
+       Quadruple<Model_Acyclic_Inverse,Model_Acyclic_Inverse,Model_Acyclic_Inverse,Model_Acyclic_Inverse> ret
+               = new Quadruple<>(prefix, insert, suffix, suffixIn);
+
+         return ret;
+        // so now we return a triple? if we watn to continue searching a prefix we need to return what ahsnt been searched
+        // and the Constraint object will need to check if that already exists or not and perform a modified search using getPathConsistentPair(aut, aut)
+
 
         // so here we need to back propagate our candidates but also subtract this search from future searches
 
@@ -1354,14 +1366,12 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 //
 //        Automaton insert = performUnaryOperation(suffixRev, new Reverse(), this.alphabet);
 //        insertModel.setAutomaton(insert);
-
-        return null;
     }
 
     /**
      * Finds a pair of path-consistent prefix and suffix models at index i.
      * This could be extended to find every path of length i that reaches that state to construct the prefix and corresonding suffix
-     * curretnly it just finds one path.
+     * curretnly it just finds one path though in theory there could be multiple of the same length to the same state
      *
      * @param i index to pivot at
      * @return tuple of prefix and suffix models, note also removes this pair from the underlying model/automaton
@@ -1395,13 +1405,16 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
     /**
      * Returns a pair of path consistent automata representing a possible prefix and suffix pair
      * of the original automaton that are subsets of the provided insert and suffix automata respectively.
-     * TODO: find all possible paths to pivot state
+     * this is identical to inv_concatenate_sym_all but only returns one pair and removes it from the underlying model
      *
      * @param aut1
      * @param aut2
-     * @return tuple of prefix and suffix models
+     * @return tuple of prefix and suffix models (note it removes this pair from the underlying model)
      */
-    public Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse> getPathConsistentPair(Automaton aut1, Automaton aut2) {
+    @Override /// i use this from InvConstraintInsert (also is a greedy inv_concatenate_sym_all)
+    public Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse> getPathConsistentPair(Model_Acyclic_Inverse m1, Model_Acyclic_Inverse m2) {
+        Automaton aut1 = m1.getAutomatonObject();
+        Automaton aut2 = m2.getAutomatonObject();
         Automaton original = this.getAutomatonObject();
         Tuple<Automaton, HashMap<State, State>> cloneMap = this.cloneWithMap();
         Automaton prefix = cloneMap.get1();
@@ -1437,7 +1450,9 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
                     suffix.minimize();
                     Model_Acyclic_Inverse prefixModel = new Model_Acyclic_Inverse(prefix, this.alphabet, calculateBoundLength(prefix));
                     Model_Acyclic_Inverse suffixModel = new Model_Acyclic_Inverse(suffix, this.alphabet, calculateBoundLength(suffix));
+                    // setting underlying ot remove found pair
                     this.setAutomaton(original.minus(prefix.concatenate(suffix)));
+                    //return found pair
                     return new Tuple<>(prefixModel, suffixModel);
                 }
                 // no need to set back initial as we will just continue searching
