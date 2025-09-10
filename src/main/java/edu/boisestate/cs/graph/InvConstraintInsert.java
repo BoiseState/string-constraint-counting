@@ -113,7 +113,7 @@ public class InvConstraintInsert<T extends A_Model_Inverse<T>> extends A_Inv_Con
             // will also need to pass back the specific prefix it used?
             Quadruple<T,T,T,T> candidate = IN.inv_insert(sourceModel, insertStringModel, start);
             if (candidate == null) { // i return null if no candidates found, this isnt exhaustive though
-                printDebug("INSERT RESULT MODEL EMPTY...");
+                printDebug("NO CANDIDATES...");
                 if (!IN.isEmpty()) {
                     ret = new Tuple<>(false, false); // more prefixes to find: dont continue but add ot backtrack
                 } else {
@@ -125,7 +125,7 @@ public class InvConstraintInsert<T extends A_Model_Inverse<T>> extends A_Inv_Con
                 // more prefixes to try
                 ret = new Tuple<>(true, false); // continue but add to backtrack
             }
-            if (candidate.get4() != null) {
+            if (!candidate.get4().isEmpty()) {
                 // we have remaining suffixes to try with the same prefix
                 remaining = new Tuple<>(candidate.get1(), candidate.get4());
             } else {
