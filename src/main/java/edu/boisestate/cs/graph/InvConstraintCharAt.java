@@ -31,8 +31,10 @@ public class InvConstraintCharAt<T extends A_Model_Inverse<T>> extends A_Inv_Con
             printDebug("CHAR AT INCOMING SET INCONSISTENT");
             ret = new Tuple<>(false, true);
         } else {
+			// need to know how big to expand the model based on incoming bound size
+			int bound = solver.getSymbolicModel(this.nextID).getBoundLength();
             // calls the solver_inverse method which calls the model_acyclic method
-            T resModel = solver.inv_charAt(inputs, index);
+            T resModel = solver.inv_charAt(inputs, index, bound);
 
             if (resModel == null) {
                 System.err.println("INVERSE CHAR AT FAILED");

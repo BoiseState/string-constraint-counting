@@ -28,7 +28,7 @@ public interface I_Solver_Inverse<T extends A_Model_Inverse<T>> {
 
 	T inv_delete(T input, int start, int end);
 
-	Quadruple<T,T,T,T> inv_insert(T input, T base, T arg, int start);
+//	Quadruple<T,T,T,T> inv_insert(T input, T base, T arg, int start);
 
 	void inv_insert(int id, int base, int arg, int offset, int start, int end);
 

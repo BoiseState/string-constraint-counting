@@ -2,12 +2,9 @@ package edu.boisestate.cs.solvers;
 
 import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.BasicTimer;
-import edu.boisestate.cs.automatonModel.A_Model;
-import edu.boisestate.cs.automatonModel.A_Model_Manager;
-import edu.boisestate.cs.automatonModel.Model_Acyclic_Manager;
+import edu.boisestate.cs.automatonModel.*;
 import edu.boisestate.cs.graph.PrintConstraint;
 import edu.boisestate.cs.util.Tuple;
-import edu.boisestate.cs.automatonModel.Model_Acyclic;
 
 public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implements I_Solver<T> {
 
@@ -27,6 +24,11 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
         // initialize factory from parameter
         this.modelManager = modelManager;
     }
+
+	@Override
+	public T getModel(int id) {
+		return this.symbolicStringMap.get(id);
+	}
 
     @Override
     public void append(int id, int base, int arg, int start, int end) {
@@ -104,15 +106,32 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 
             // start timer
             BasicTimer.start();
-
+			// by default we know arg cannot have ""
+			if (argModel.containsString("")){
+				argModel.removeEmptyString();
+			}
             // get satisfying base model as temp
-           T tempModel = baseModel.assertNotContainsOther(argModel);
+           T tempBaseModel = baseModel.isSingleton() ? baseModel : baseModel.assertNotContainsOther(argModel);
 
             // get satisfying arg model
-            argModel = argModel.assertNotContainedInOther(baseModel);
+            T tempArgModel = argModel.isSingleton() ? argModel : argModel.assertNotContainedInOther(tempBaseModel);
 
+			// potential issue with two symbolics...:
+			if (tempBaseModel.isEmpty()) {// basically shuoldnt happen?
+				System.err.println("Warning, Solver.contains(): base model is empty");
+				System.exit(1);
+				if (tempArgModel.isEmpty()){
+				}
+			} else if (tempArgModel.isEmpty()){
+				System.err.println("Warning, Solver.contains(): arg model is empty");
+				tempBaseModel = baseModel.resolveNotContains(argModel);
+				tempArgModel = argModel.assertNotContainedInOther(tempBaseModel);
+//				System.exit(1);
+//				tempArgModel = argModel.assertNotContainsOther(tempBaseModel);
+			}
             // set base model from temp
-            baseModel = tempModel;
+            baseModel = tempBaseModel;
+			argModel = tempArgModel;
             //System.exit(2);
             // stop timer
             BasicTimer.stop();
@@ -174,16 +193,30 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 
             // start timer
             BasicTimer.start();
-
             // get satisfying base model as temp
-            T tempModel = baseModel.assertNotEndsWith(argModel);
+            T tempBaseModel = baseModel.isSingleton() ? baseModel : baseModel.assertNotEndsWith(argModel);
 
             // get satisfying arg model
-            argModel = argModel.assertNotEndsOther(baseModel);
+            T tempArgModel = argModel.isSingleton() ? argModel : argModel.assertNotEndsOther(baseModel);
 
-            // set base model from temp
-            baseModel = tempModel;
+			if (tempBaseModel.isEmpty()) {
+				System.err.println("Warning, Solver.endsWith(): base model is empty");
+				if (tempArgModel.isEmpty()) {
+					// likely both anyString
+					System.err.println("and arg model is empty");
+				}
+			} else if (tempArgModel.isEmpty()){
+//				System.err.println("Warning, Solver.endsWith(): argModel is empty");
+				// likely they are equivalent symbolic strings?
+				// both models empty so equivalent and need (ideally evenly split) disjunct models
+				tempBaseModel = baseModel.clone();
+				// this will manipulate the tempBaseModel and return its disjunct pair
+				tempArgModel = tempBaseModel.createDisjunct();
 
+			}
+
+			baseModel = tempBaseModel;
+			argModel = tempArgModel;
             // stop timer
             BasicTimer.stop();
         }
@@ -220,23 +253,28 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
             // start timer
             BasicTimer.start();
 
-            T tempModel;
-            // get satisfying base model as temp
-            if (!baseModel.isSingleton()){
-                // leave model alone if singleton, but need to do something?
-                tempModel = baseModel.assertNotEquals(argModel);
-            } else {
-                tempModel = baseModel.clone();
-            }
+            T tempBaseModel = baseModel.isSingleton() ? baseModel.clone() : baseModel.assertNotEquals(argModel);
+            T tempArgModel = argModel.isSingleton() ? argModel.clone() : argModel.assertNotEquals(baseModel);
 
-            // get satisfying arg model
-            if (!argModel.isSingleton()){
-                //leave model alone if singleton
-                argModel = argModel.assertNotEquals(baseModel);
+            // if either model is anyString we'll have an empty language
+            // or if one is a subset of the other
+            // also if the language are equivalent we'll have two empty languages....
+            // need to enforce disjunct languages
+            // for languages that are subsets we can just change the order
+            if (tempBaseModel.isEmpty()) {
+                if (tempArgModel.isEmpty()) {
+                    // both models empty so equivalent and need (ideally evenly split) disjunct models
+                    tempBaseModel = baseModel.clone();
+                    // this will manipulate the tempBaseModel and return its disjunct pair
+                    tempArgModel = tempBaseModel.createDisjunct();
+                } else {
+                    tempBaseModel = baseModel.clone();
+                }
+            } else if (tempArgModel.isEmpty()) {
+                tempArgModel = argModel.clone();
             }
-
-            // set base model from temp
-            baseModel = tempModel;
+            baseModel = tempBaseModel;
+            argModel = tempArgModel;
 
             // stop timer
             BasicTimer.stop();
@@ -781,10 +819,10 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
             BasicTimer.start();
 
             // get satisfying base model as temp
-            T tempModel = baseModel.assertNotStartsWith(argModel);
+            T tempModel = baseModel.isSingleton() ? baseModel : baseModel.assertNotStartsWith(argModel);
 
             // get satisfying arg model
-            argModel = argModel.assertNotStartsOther(baseModel);
+            argModel = argModel.isSingleton() ? argModel : argModel.assertNotStartsOther(baseModel);
 
             // set base model from temp
             baseModel = tempModel;

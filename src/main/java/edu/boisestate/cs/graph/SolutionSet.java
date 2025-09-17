@@ -50,6 +50,10 @@ public class SolutionSet<T extends A_Model<T>> {
 		this.numInputs = numInputs;
 	}
 
+	public void setSAT(boolean sat) {
+		this.SAT = sat;
+	}
+
 	public void add(int id, T solution) {
 		Solution sol = new Solution(id, solution.getAcceptedStringExample(), solution);
 		for (Solution s : solutions) {

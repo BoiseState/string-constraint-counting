@@ -7,6 +7,7 @@ import dk.brics.automaton.Transition;
 import dk.brics.string.stringoperations.UnaryOperation;
 import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.MinMaxPair;
+import edu.boisestate.cs.util.Tuple;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -215,6 +216,12 @@ public abstract class A_Model <T extends A_Model <T>> implements Cloneable, I_Mo
 
     public abstract T indexOf(T arg);
 
+    public abstract T createDisjunct();
+
+	public abstract void removeEmptyString();
+
+	public abstract T resolveNotContains(T arg);
+
     @Override
 	public abstract T clone();
 
@@ -326,4 +333,5 @@ public abstract class A_Model <T extends A_Model <T>> implements Cloneable, I_Mo
 
     @Override
     public abstract T replaceAll(T find, T replace);
+
 }

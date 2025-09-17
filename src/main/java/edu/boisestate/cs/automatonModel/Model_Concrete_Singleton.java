@@ -317,4 +317,11 @@ public class Model_Concrete_Singleton extends A_Model<Model_Concrete_Singleton >
 
 	@Override
 	public Model_Concrete_Singleton indexOf(Model_Concrete_Singleton arg) { return null;}
+
+    @Override
+    public Model_Concrete_Singleton createDisjunct() { return new Model_Concrete_Singleton(null);}
+	@Override
+	public void removeEmptyString(){};
+	@Override
+	public Model_Concrete_Singleton resolveNotContains(Model_Concrete_Singleton arg){ return null;}
 }

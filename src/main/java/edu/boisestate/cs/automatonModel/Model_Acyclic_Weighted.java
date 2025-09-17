@@ -976,4 +976,10 @@ public class Model_Acyclic_Weighted extends A_Model<Model_Acyclic_Weighted>{
 	public Model_Acyclic_Weighted charAt(int index) { return null;}
 	@Override
 	public Model_Acyclic_Weighted indexOf(Model_Acyclic_Weighted arg) {return null;	}
+    @Override
+    public Model_Acyclic_Weighted createDisjunct() { return null;}
+	@Override
+	public void removeEmptyString(){};
+	@Override
+	public Model_Acyclic_Weighted resolveNotContains(Model_Acyclic_Weighted arg) { return null;}
 }

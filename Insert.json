@@ -1,7 +1,7 @@
 {
   "alphabet" : {
     "size" : 7,
-    "declaration" : "A-Z,a-z"
+    "declaration" : "H,e,l,o,W,r,d,0"
   },
   "vertices" : [
     {
@@ -17,24 +17,24 @@
     },
     {
       "num" : 0,
-      "actualValue" : "",
+      "actualValue" : "World",
       "incomingEdges" :[
       ],
       "sourceConstraints" : [ ],
       "timeStamp" : 1691007827229,
       "type" : 0,
       "id" : 3,
-      "value" : "r2!:!getStringValue!!"
+      "value" : "\"World\"!:!<init>"
     },{
       "num" : 0,
-      "actualValue" : "2",
+      "actualValue" : "5",
       "incomingEdges" :[
       ],
       "sourceConstraints" : [ ],
       "timeStamp" : 1691007827230,
       "type" : 0,
       "id" : 2,
-      "value" : "\"2\"!:!<init>"
+      "value" : "\"5\"!:!<init>"
     },{
       "num" : 0,
       "actualValue" : "true",
@@ -58,17 +58,17 @@
     },
     {
       "num" : 0,
-      "actualValue" : "Held",
+      "actualValue" : "Hello",
       "incomingEdges" :[
       ],
       "sourceConstraints" : [ ],
       "timeStamp" : 1691007827230,
       "type" : 0,
       "id" : 4,
-      "value" : "\"Held\"!:!<init>"
+      "value" : "\"Hello\"!:!<init>"
     },{
       "num" : 0,
-      "actualValue" : "true",
+      "actualValue" : "false",
       "incomingEdges" :[
         {
           "source" : 5,

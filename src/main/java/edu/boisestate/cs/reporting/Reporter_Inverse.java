@@ -694,6 +694,15 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
                     }
 
                     break;
+                case REVERSE:
+                    newConstraint = new InvConstraintReverse<T>(ID, invSolver);
+                    allInverseConstraints.put(ID, newConstraint);
+
+                    if (localDebug) {
+                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+                    }
+
+                    break;
                 default:
 
                     if (localDebug) {

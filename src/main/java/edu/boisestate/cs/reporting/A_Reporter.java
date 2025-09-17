@@ -69,6 +69,7 @@ abstract public class A_Reporter <T extends A_Model<T>> {
         Map<PrintConstraint, Set<PrintConstraint>> unfinishedInEdges = new HashMap<>();
 
         int maxId = 0;
+		boolean forwardPropagation = true;
 
         // populate root and end sets
         for (PrintConstraint constraint : graph.vertexSet()) {
@@ -116,7 +117,7 @@ abstract public class A_Reporter <T extends A_Model<T>> {
         TopologicalOrderIterator<PrintConstraint, SymbolicEdge> iterator = new TopologicalOrderIterator<>(this.graph, queue);
 
         // while processing constraints in topological order
-        while (iterator.hasNext()) {
+        while (forwardPropagation && iterator.hasNext()) {
 
             // get constraint
             PrintConstraint constraint = iterator.next();
@@ -174,7 +175,7 @@ abstract public class A_Reporter <T extends A_Model<T>> {
                 boolean isBoolFunc = parser.addEnd(constraint);//parses the constraints
 
                 if (isBoolFunc) {
-                    parser.assertBooleanConstraint(constraint.getActualVal().equals("true"), constraint); //else equals false
+                    forwardPropagation = parser.assertBooleanConstraint(constraint.getActualVal().equals("true"), constraint); //else equals false
 //                    this.calculateStats(constraint); //invokes prints and stats computations, also sat checks
                 }
 
@@ -242,7 +243,11 @@ abstract public class A_Reporter <T extends A_Model<T>> {
 //        processIt = toProcess.iterator();
         // this is basically just cause we check if toProcess is empty to determine if we are done solving
 
-        calculateStats(null);
+        if (forwardPropagation) {
+			calculateStats(null);
+		} else {
+			System.out.println("unsat");
+		}
         //solveInputs();
         
         // shut down solver

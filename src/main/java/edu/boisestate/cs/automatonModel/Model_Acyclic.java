@@ -1341,4 +1341,10 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 	public Model_Acyclic charAt(int index) { return null;}
 	@Override
 	public Model_Acyclic indexOf(Model_Acyclic arg) { return null;}
+    @Override
+    public Model_Acyclic createDisjunct() {return null;}
+	@Override
+	public void removeEmptyString(){};
+	@Override
+	public Model_Acyclic resolveNotContains(Model_Acyclic arg) { return null;}
 }

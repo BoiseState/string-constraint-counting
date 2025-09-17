@@ -73,4 +73,6 @@ public interface I_Solver<T extends A_Model<T>> {
 	void toUpperCase(int id, int base);
 
 	void trim(int id, int base);
+
+	T getModel(int id);
 }

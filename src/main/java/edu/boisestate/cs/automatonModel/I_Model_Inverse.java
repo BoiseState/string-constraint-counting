@@ -15,6 +15,8 @@ public interface I_Model_Inverse<T extends I_Model_Inverse<T>> {
 
 	T inv_delete(int start, int end);
 
+    T createDisjunct();
+
 	Quadruple<T,T,T,T> inv_insert(T baseModel, T argModel, int offset);
 	Tuple<T,T> getPathConsistentPair(T pref, T suff);
 	T inv_replace(char find, char replace);
@@ -49,7 +51,7 @@ public interface I_Model_Inverse<T extends I_Model_Inverse<T>> {
 	
 	T inv_replaceAll(T find, T replace);
 
-	T inv_charAt(int index);
+	T inv_charAt(int index, int initialBound);
 
 	T inv_indexOf(T find, int bound);
 	/**

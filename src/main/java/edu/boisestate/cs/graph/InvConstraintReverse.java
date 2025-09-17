@@ -9,6 +9,7 @@ import java.util.List;
 
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 import edu.boisestate.cs.solvers.*;
+import edu.boisestate.cs.util.Tuple;
 
 /**
  * @author Marlin Roberts, 2020-2021
@@ -51,51 +52,75 @@ public class InvConstraintReverse<T extends A_Model_Inverse<T>> extends A_Inv_Co
 		this.nextID = base;
 		this.prevIDs = new HashSet<Integer>(); this.prevIDs.add(input);
 	}
-	
-	
-	@Override
-	public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex) {
-
-		System.out.format("EVALUATE REVERSE %d ...\n",ID);
-		
-		T inputModel = inputConstraint.output(sourceIndex);
-
-		// perform inverse function on output from the input constraint at given index
-		T resModel = solver.inv_reverse(inputModel);
-
-		// intersect result with forward analysis results from previous constraint
-		resModel = solver.intersect(resModel, nextConstraint.getID());
 
 
-		if (!resModel.isEmpty()) {
-			solutionSet.setSolution(inputConstraint.getID(), resModel);
-
-			if (solutionSet.isConsistent()) {
-	
-				// store result in this constraints output set at index 1
-				outputSet.put(1, resModel);	
-	
-	
-				// we have values, so continue solving ...
-				return nextConstraint.evaluate(this, 1);
-			} else {
-				System.out.println("REVERSE SOLUTION SET INCONSISTENT...");
-				solutionSet.remSolution(inputConstraint.getID());
-				return false;
-			}
-			
-		} else {
-			System.out.println("REVERSE RESULT MODEL EMPTY...");
-			// halt solving, fallback
-			return false;
-		}
-
-
+    public Tuple<Boolean,Boolean> evaluate() {
+        Tuple<Boolean, Boolean> ret = new Tuple<Boolean, Boolean>(true, true);
+        printDebug("EVALUATE REVERSE " + ID + " ...");
+        T inputModel = incoming();
+        printDebug("REVERSE INCOMING: " + inputModel.getShortestExampleString());
+        if (inputModel.isEmpty()) {
+            printDebug("REVERSE INCOMING SET INCONSISTENT...");
+            ret = new Tuple<>(false, true);
+        } else {
+            // now starting to not call solver as intermediary
+            // just call inv_reverse directly
+            T resModel = inputModel.inv_reverse(); // just calls reverse
+            if (resModel == null) {
+                System.err.println("INVERSE REVERSE FAILED");
+                System.exit(1);
+            } else {
+                outputSet.put(1, resModel);
+                printDebug("REVERSE OUTPUT: " + resModel.getShortestExampleString());
+            }
+        }
+        return ret;
+    }
 
 
-
-
-	}
+//	@Override
+//	public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex) {
+//
+//		System.out.format("EVALUATE REVERSE %d ...\n",ID);
+//
+//		T inputModel = inputConstraint.output(sourceIndex);
+//
+//		// perform inverse function on output from the input constraint at given index
+//		T resModel = solver.inv_reverse(inputModel);
+//
+//		// intersect result with forward analysis results from previous constraint
+//		resModel = solver.intersect(resModel, nextConstraint.getID());
+//
+//
+//		if (!resModel.isEmpty()) {
+//			solutionSet.setSolution(inputConstraint.getID(), resModel);
+//
+//			if (solutionSet.isConsistent()) {
+//
+//				// store result in this constraints output set at index 1
+//				outputSet.put(1, resModel);
+//
+//
+//				// we have values, so continue solving ...
+//				return nextConstraint.evaluate(this, 1);
+//			} else {
+//				System.out.println("REVERSE SOLUTION SET INCONSISTENT...");
+//				solutionSet.remSolution(inputConstraint.getID());
+//				return false;
+//			}
+//
+//		} else {
+//			System.out.println("REVERSE RESULT MODEL EMPTY...");
+//			// halt solving, fallback
+//			return false;
+//		}
+//
+//
+//
+//
+//
+//
+//	}
 
 
 }

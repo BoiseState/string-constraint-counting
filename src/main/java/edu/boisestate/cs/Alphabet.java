@@ -255,4 +255,8 @@ public class Alphabet {
 	public char randomChar() {
 		return new ArrayList<Character>(this.symbolSet).get(Math.abs(random.nextInt()) % this.symbolSet.size());
 	}
+
+    public String toString() {
+        return this.getCharSet();
+    }
 }

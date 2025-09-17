@@ -4,8 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -28,6 +27,42 @@ public class SolveMainTest {
         System.setOut(originalOut);
     }
 
+	@Test
+    public void smtQueryPlaygroundTest(){
+        restoreStreams();
+        try {
+//			File file = new File("src/test/java/edu/boisestate/cs");
+//			String javaPath = "/usr/lib/jvm/java-21-openjdk-amd64/bin/java";
+//            ProcessBuilder pb = new ProcessBuilder(
+//					javaPath, "-cp",
+//					"/home/nat/Repos/SMT-parser-generator/target/GenJSONs-1.0-SNAPSHOT-jar-with-dependencies.jar",
+//					"edu.boisestate.cs.MainJSON",
+//					file.getAbsolutePath()
+//			);
+//			pb.redirectErrorStream(true);
+//            Process process = pb.start();
+
+			String[] args = {"output_cs/smt-input.smt2.json", "-s", "inverse", "-v", "2", "-l", "8"};
+			SolveMain.main(args);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+	@Test
+	public void testIsEmpty() {
+		restoreStreams();
+		String[] args = {"isEmpty.json", "-s", "inverse", "-v", "2", "-l", "5"};
+		SolveMain.main(args);
+	}
+
+    @Test
+    public void testReverse() {
+        restoreStreams();
+        String[] args = {"src/test/resources/in/Reverse.json", "-s", "inverse", "-v", "2", "-l", "9"};
+        SolveMain.main(args);
+    }
     @Test
     public void testInsert() {
         restoreStreams();
@@ -77,26 +112,7 @@ public class SolveMainTest {
 //        assertEquals(expectedOutput, outContent.toString());
     }
 
-//    @Test
-//    public void smtQueryPlaygroundTest(){
-//        restoreStreams();
-//        String query = "(declare-fun s () String)\n" +
-//                "(assert (not (str.contains \"HelloWorld\" s)))\n" +
-//                "(check-sat)\n" +
-//                "(get-model)";
-//        String tempFile = inPath + "query/smtQueryPlayground.smt2";
-//        try {
-//            Files.createDirectories(Paths.get(inPath + "query"));
-//            Files.write(Paths.get(tempFile), query.getBytes());
-//            ProcessBuilder pb = new ProcessBuilder("java", "-cp","~/Repos/SMT-parser-generator/target/GenJSONs-1.0-SNAPSHOT-jar-with-dependencies", "edu.boisestate.cs.MainJSON", inPath+"query");
-//
-//            System.out.println(pb.command());
-//            pb.start();
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
+
 
     @Test
     public void testConcat() {

@@ -55,13 +55,17 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver_Count<T
 	}
 
 	@Override
+	public T getModel(int id) {
+		return symbolicStringMap.get(id);
+	}
+
 	public void outputSymbolicStrings() {
 		for (Integer i : invStringMap.keySet()) {
 			System.out.println("SS ID: " + i + "  " + invStringMap.get(i));
 		}
 		
 	}
-	
+
 	public T getSymbolicModel (int id) {
 		return invStringMap.get(id);
 	}
@@ -144,17 +148,17 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver_Count<T
 		
 	}
 
-	/**
-	 * R3 Version
-	 * Returns result T
-	 *
-	 * 03/18/2021 MJR
-	 */
-	@Override
-	public Quadruple<T,T,T,T> inv_insert(T input, T baseModel, T argModel, int start) {
-        return input.inv_insert(baseModel, argModel, start);
-
-	}
+//	/**
+//	 * R3 Version
+//	 * Returns result T
+//	 *
+//	 * 03/18/2021 MJR
+//	 */
+//	@Override
+//	public Quadruple<T,T,T,T> inv_insert(T input, T baseModel, T argModel, int start) {
+//        return input.inv_insert(baseModel, argModel, start);
+//
+//	}
 
 	@Override 
 	public void inv_insert(int id, int base, int arg, int offset, int start, int end) {
@@ -455,8 +459,8 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver_Count<T
 		return resModel;
 	}
 
-	public T inv_charAt(T input, int index) {
-		return input.inv_charAt(index);
+	public T inv_charAt(T input, int index, int bound) {
+		return input.inv_charAt(index, bound);
 	}
 
 	public T inv_indexOf(T input, T find, int bound) {
