@@ -1274,6 +1274,8 @@ public class Parser_2<T extends A_Model<T>> {
 
 		constraint.setOp(PREDICATE);
 
+
+
 		// get constraint info as variables
 		String string = constraint.getSplitValue();
 		String fName = string.split("!!")[0];
@@ -1281,7 +1283,17 @@ public class Parser_2<T extends A_Model<T>> {
 		Map<String, Integer> sourceMap = constraint.getSourceMap();
 
 		// get id of base symbolic string
-		int base = (sourceMap.get("t"));
+		Integer base = (sourceMap.get("t"));
+		if (base == null) {// caused by dual edges in binary predicates and the graph overriding the type of duplicate edge
+			printDebug("Warning: no base in predicate " + constraint);
+			base = (sourceMap.get("s1"));
+			sourceMap.clear();
+			sourceMap.put("t", base);
+			if (fName.equals("equals") || fName.equals("contentEquals")) {
+				constraint.setOp(EQUALS);
+			}
+			return result;
+		}
 
 		// get id of second symbolic string if it exists
 		int arg = -1;
@@ -1290,6 +1302,13 @@ public class Parser_2<T extends A_Model<T>> {
 			if (constraint.getArgList().size() == 0) {
 				constraint.addArg(arg);
 			}
+		} else if (!fName.equals("isEmpty")){ // edge case where we have dual edges, i.e. reflexive predicate
+			// not sure if we need to do symbolic map stuff here for a true
+			printDebug("Warning: no arg in predicate " + constraint);
+			if (fName.equals("equals") || fName.equals("contentEquals")) {
+				constraint.setOp(EQUALS);
+			}
+			return result;
 		}
 
 		// TODO: add starts with for sourceMap size 3 (two args)

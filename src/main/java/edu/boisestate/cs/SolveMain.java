@@ -576,6 +576,12 @@ public class SolveMain {
 
 				// create symbolic edge in graph from data
 				SymbolicEdge edge = graph.addEdge(source, target);
+
+				// case when edge exists already... not ideal
+				if (edge == null) {
+					printDebug("WARNING: edge already exists " + source + " -> " + target + " (" + type + ")");
+					continue;
+				}
 				edge.setType(type);
 				SymbolicEdge edgeExtra = graphExtra.addEdge(source, target);
 				edgeExtra.setType(type);

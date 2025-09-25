@@ -6,54 +6,38 @@
 	"vertices" : [
 		{
 			"num" : 0,
-			"actualValue" : "s1_1",
+			"actualValue" : "",
 			"incomingEdges" :[
 			],
 			"sourceConstraints" : [ ],
-			"timeStamp" : 1758067538891,
+			"timeStamp" : 1758830527430,
 			"type" : 0,
 			"id" : 0,
-			"value" : "r0!:!getStringValue!!"
+			"value" : "\"\"\"\"!:!<init>"
 		},{
 			"num" : 0,
-			"actualValue" : "s2_2",
+			"actualValue" : "string0",
 			"incomingEdges" :[
 			],
 			"sourceConstraints" : [ ],
-			"timeStamp" : 1758067538891,
+			"timeStamp" : 1758830527430,
 			"type" : 0,
 			"id" : 1,
-			"value" : "r1!:!getStringValue!!"
-		},{
-			"num" : 0,
-			"actualValue" : "true",
-			"incomingEdges" :[
-				 {
-					"source" : 0,
-					"type" : "t"
-				}, {
-					"source" : 1,
-					"type" : "s1"
-				}],
-			"sourceConstraints" : [ ],
-			"timeStamp" : 1758067538891,
-			"type" : 0,
-			"id" : 2,
-			"value" : "endsWith!!Ljava/lang/String;!:!0"
+			"value" : "r0!:!getStringValue!!"
 		},{
 			"num" : 0,
 			"actualValue" : "false",
 			"incomingEdges" :[
 				 {
 					"source" : 0,
-					"type" : "s1"
+					"type" : "t"
 				}, {
 					"source" : 1,
-					"type" : "t"
+					"type" : "s1"
 				}],
 			"sourceConstraints" : [ ],
-			"timeStamp" : 1758067538891,
+			"timeStamp" : 1758830527430,
 			"type" : 0,
-			"id" : 3,
-			"value" : "endsWith!!Ljava/lang/String;!:!0"
+			"id" : 2,
+			"value" : "equals!!Ljava/lang/Object;!:!0"
 		} ] }

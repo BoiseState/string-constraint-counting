@@ -1,8 +1,6 @@
-(declare-const s1_1 String)
-(declare-const s2_2 String)
+(declare-const string0 String)
 
-(assert (str.suffixof s1_1 s2_2))
-(assert (not (str.suffixof s2_2 s1_1)))
+(assert (not (= "" string0)))
 
 (check-sat)
 (exit)

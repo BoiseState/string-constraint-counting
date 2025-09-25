@@ -130,6 +130,14 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 		//thus only output the matching pair and do similar tracking
 		//as in symbolic concat
 
+		// nps: 9-25-25 - stupid edge case for duplicate edges:
+		if (this.argConstraint == null || this.nextConstraint == null) {
+			printDebug("EVALUATE EQUALS PREDICATE " + ID + " is unary ...");
+			int id = this.argConstraint == null ? this.nextID : this.argID;
+			outputSet.put(1, solver.getSymbolicModel(nextID));
+			outputSet.put(2, solver.getSymbolicModel(argID));
+			return ret; // would have returned false if not equals
+		}
 
 		//first time around inputs have not been initialize
 		if(inputs == null) {
@@ -172,10 +180,10 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 					return new Tuple<Boolean, Boolean>(true, true);
 				}
 
-				if(this.nextConstraint.getOp() == Operation.INIT_CON){
-					indxSymb = 2;
-					indxConcr = 1;
-				}
+//				if(this.nextConstraint.getOp() == Operation.INIT_CON){
+//					indxSymb = 2;
+//					indxConcr = 1;
+//				}
 				//System.out.println("arg " + (this.argConstraint==null? null : this.argConstraint.getOp()));
 				//System.out.println("oper " + this.nextConstraint.getOp());
 				// place symbolic string from solver string table into output set, position 1
