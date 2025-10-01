@@ -528,6 +528,16 @@ public class SolveMain {
 				int type = (Integer) obj.get("type");
 				String value = (String) obj.get("value");
 
+				if (value.contains("<init>")) {
+					String concrete = value.split("!")[0];
+					concrete = concrete.replace("\"","");
+					int conc_string_length = concrete.length();
+					if (initialBound < conc_string_length) {
+						printDebug("Using Higher initial bound based on concrete string length: " + conc_string_length);
+						initialBound = conc_string_length;
+					}
+				}
+
 				// create constraint from vertex data
 				PrintConstraint constraint = new PrintConstraint(id, actualValue, num, timeStamp, type, value);
 
