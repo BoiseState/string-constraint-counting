@@ -9,7 +9,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import dk.brics.automaton.State;
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
 
@@ -28,7 +30,8 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 	// private int input, arg, base;
 	private T inputs = null;
 	//for BFS we need a map: input to outputs and does not use outputs
-	private Map<T, List<Tuple<T,T>>> mapInOut = new HashMap<T, List<Tuple<T,T>>>();
+//	private Map<T, List<Tuple<T,T>>> mapInOut = new HashMap<T, List<Tuple<T,T>>>();
+	private Iterator<State> it; // for tracking solutions when being eager and for backtracking
 
 	public InvConstraintConcatSym (int ID, Solver_Inverse<T> solver) {
 
@@ -110,15 +113,16 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 	public void clear() {
 		super.clear();
 		inputs = null;
-		mapInOut.clear();
+//		mapInOut.clear();
 //		initialized = false;
 	}
 
 	@Override
 	public Tuple<Boolean, Boolean> evaluate() {
+		printDebug("EVALUATE CONCAT " + ID + " ...");
 		Tuple<Boolean, Boolean> ret = new Tuple<Boolean, Boolean>(true, true); //continue and don't add to backtrack
 		//compute the intersection of all incoming values
-		boolean ostrich = true;
+//		boolean ostrich = true;
 
 //		if (!initialized) {
 //			printDebug("INITIAL EVAL OF CONCAT " + ID + " ...");
@@ -126,10 +130,12 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 //			inputs = incoming();
 //		}
 		if(inputs == null) { // first time processing (or after clear)
+			// nps - 10.1.25 : now leaves leftover input for next time if not all used
 			printDebug("inputs is null");
 			//the first time the node is evaluated
 			//do the intersection
 			inputs = incoming();
+			this.it = inputs.getDFSStateIterator();
 		}
 		if(inputs.isEmpty()) {
 			printDebug("CONCAT SYMV INCOMING SET INCONSISTENT...");
@@ -138,73 +144,80 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 
 			//System.out.println("inputs " + inputs.getFiniteStrings());
 			//remove one example from the inputs
-			T input = ostrich? inputs : inputs.getShortestExampleModel();
+//			T input = ostrich? inputs : inputs.getShortestExampleModel();
 //			System.out.println("input " + input.getFiniteStrings() + " hash " + input.hashCode());
-			List<Tuple<T,T>> currOutput = new ArrayList<Tuple<T,T>>();
+//			List<Tuple<T,T>> currOutput = new ArrayList<Tuple<T,T>>();
 			//equals is implemented between two automata, but
 			//the hash functions is not, so in order to use hash map
 			//we just find the equal object use that's object hash value.
-			for(T in : mapInOut.keySet()) {
-				if(in.equals(input)) {
-					input = in;
-					break;
-				}
-			}
-			printDebug("mapInOut " + mapInOut.containsKey(input));
+//			for(T in : mapInOut.keySet()) {
+//				if(in.equals(input)) {
+//					input = in;
+//					break;
+//				}
+//			}
+//			printDebug("mapInOut " + mapInOut.containsKey(input));
 
 
-			if(mapInOut.containsKey(input)) {
-				//already computed outputs before just get the next value
-				currOutput = mapInOut.get(input);
-				printDebug("Processed trying new valus");
-			} else {
+//			if(mapInOut.containsKey(input)) {
+//				//already computed outputs before just get the next value
+//				currOutput = mapInOut.get(input);
+//				printDebug("Processed trying new valus");
+//			} else {
 				//compute it fresh and add to the map
 				//compute outgoing solutions
 				T nextModel = solver.getSymbolicModel(nextConstraint.getID());
 				T argModel = solver.getSymbolicModel(argConstraint.getID());
 
+				// nps - 10.1.25 : changing to do eager/greedy computation
+				Tuple<T,T> possible_solution = inputs.getPathConsistentPair(nextModel, argModel, it);
+				if (possible_solution == null) {
+					printDebug("CONCAT SYMV RESULT MODEL EMPTY...");
+					return new Tuple<Boolean, Boolean>(false, true);
+				}
 			
-				if(ostrich) {
+//				if(ostrich) {
 					//Make two copies of inputs
 					//the algorithm from ostrich paper POPL'19
-					currOutput = inputs.inv_concatenate_sym_all(nextModel, argModel);
-					if(currOutput.isEmpty()) {
-						//backtrack to previous nodes, don't add to backtrack, no more inputs are left here
-						return new Tuple<Boolean, Boolean>(false, true);
-					}
-					mapInOut.put(inputs, currOutput);
 
-				} else {
-					//compute it fresh and add to the map
-					//compute outgoing solutions
-					//					T nextModel = solver.getSymbolicModel(nextConstraint.getID());
-					//					T argModel = solver.getSymbolicModel(argConstraint.getID());
-					//			System.out.println("input " + input.getFiniteStrings());
-					//			System.out.println("nextM " + nextModel.getFiniteStrings());
-					//			System.out.println("argM " + argModel.getFiniteStrings());
-					//let's try this input
-					currOutput = input.inv_concatenate_sym_set(nextModel, argModel);
-					//if not a single split is produced then try another if some inputs are left
-					printDebug("currOutput " + currOutput);
-					while(currOutput.isEmpty()) {
-						//more inputs left?
-						inputs.minus(input);
-						printDebug("inputs empty " + inputs.isEmpty());
-						if(inputs.isEmpty()) {
-							//backtrack to previous nodes, don't add to backtrack, no more inputs are left here
-							return new Tuple<Boolean, Boolean>(false, true);
-						}
-						//try them that
-						input = inputs.getShortestExampleModel();
-						currOutput = input.inv_concatenate_sym_set(nextModel, argModel);
-					}
-					mapInOut.put(input, currOutput);
+					// inv_concatenate_sym_all returns full List<Tuple<T,T>>(splits)
+//					currOutput = inputs.inv_concatenate_sym_all(nextModel, argModel);
+//					if(currOutput.isEmpty()) {
+//						//backtrack to previous nodes, don't add to backtrack, no more inputs are left here
+//						return new Tuple<Boolean, Boolean>(false, true);
+//					}
+//					mapInOut.put(inputs, currOutput);
+//				} else {
+//					//compute it fresh and add to the map
+//					//compute outgoing solutions
+//					//					T nextModel = solver.getSymbolicModel(nextConstraint.getID());
+//					//					T argModel = solver.getSymbolicModel(argConstraint.getID());
+//					//			System.out.println("input " + input.getFiniteStrings());
+//					//			System.out.println("nextM " + nextModel.getFiniteStrings());
+//					//			System.out.println("argM " + argModel.getFiniteStrings());
+//					//let's try this input
+//					currOutput = input.inv_concatenate_sym_set(nextModel, argModel);
+//					//if not a single split is produced then try another if some inputs are left
+//					printDebug("currOutput " + currOutput);
+//					while(currOutput.isEmpty()) {
+//						//more inputs left?
+//						inputs.minus(input);
+//						printDebug("inputs empty " + inputs.isEmpty());
+//						if(inputs.isEmpty()) {
+//							//backtrack to previous nodes, don't add to backtrack, no more inputs are left here
+//							return new Tuple<Boolean, Boolean>(false, true);
+//						}
+//						//try them that
+//						input = inputs.getShortestExampleModel();
+//						currOutput = input.inv_concatenate_sym_set(nextModel, argModel);
+//					}
+//					mapInOut.put(input, currOutput);
 
-				}
+//				}
 
 
 
-			}
+//			}
 
 //			for (Tuple<T,T> t : currOutput) {
 //				//System.out.format("RCVD1:  P %4s  S %4s\n", t.get1().getShortestExampleString(),t.get2().getShortestExampleString());
@@ -214,10 +227,12 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 
 			//recomputing new outgoing values and updating the 
 			//set of choices
-			Tuple<T,T> split = currOutput.remove(0);
-
-			T prefix = split.get1();
-			T suffix = split.get2();
+//			Tuple<T,T> split = currOutput.remove(0);
+//
+//			T prefix = split.get1();
+//			T suffix = split.get2();
+			T prefix = possible_solution.get1();
+			T suffix = possible_solution.get2();
 
 			// we need to get all possible suffixes with the same prefix and then intersect them.
 			//Step 1: create prefix*
@@ -226,9 +241,14 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 			outputSet.put(1, prefix);
 			outputSet.put(2, suffix);
 
+			printDebug("CHOSE: P " + prefix.getShortestExampleString() + "\t S " + suffix.getShortestExampleString());
+			printDebug("INPUT EXAMPLE: " + inputs.getShortestExampleString());
+
 			//if there are more choices left in currOutput then 
 			//backtrack to it
-			if(!currOutput.isEmpty()) {
+//			if(!currOutput.isEmpty()) {
+			if(it.hasNext()) {
+				printDebug("Solutions possibly still present for INV_CONCAT");
 				ret = new Tuple<Boolean, Boolean>(true, false);//continue and add to backtrack
 			} else {
 				// nps - 9.2.24 - do not add to backtrack map, all the outputs have been processed
@@ -236,14 +256,15 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 				//probably don't need to do mapinout stuff here but leaving for now
 				//TODO: remove this
 //				inputs.minus(input);
-				mapInOut.remove(input);
+//				mapInOut.remove(input);
 //				//check if more input left
-				if (!mapInOut.isEmpty()) {
-					inputs = mapInOut.keySet().iterator().next();
-				} else {
+//				if (!mapInOut.isEmpty()) {
+//					inputs = mapInOut.keySet().iterator().next();
+//				} else {
 					inputs = null;
-				}
-				//if no more inputs left then don't add to backtrack
+					it = null;
+//				}
+				printDebug("No more solutions for current input for this INV_CONCAT");
 				ret = new Tuple<Boolean, Boolean>(true, true);// don't add to backtrack cause this is last output
 			}
 

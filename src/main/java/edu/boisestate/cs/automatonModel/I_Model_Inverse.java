@@ -1,7 +1,9 @@
 package edu.boisestate.cs.automatonModel;
 
+import java.util.Iterator;
 import java.util.List;
 
+import dk.brics.automaton.State;
 import edu.boisestate.cs.util.Quadruple;
 import edu.boisestate.cs.util.Tuple;
 
@@ -19,6 +21,9 @@ public interface I_Model_Inverse<T extends I_Model_Inverse<T>> {
 
 	Quadruple<T,T,T,T> inv_insert(T baseModel, T argModel, int offset);
 	Tuple<T,T> getPathConsistentPair(T pref, T suff);
+	Tuple<T,T> getPathConsistentPair(T pref, T suff, Iterator<State> it);
+	Iterator<State> getDFSStateIterator();
+	Iterator<State> getBFSStateIterator();
 	T inv_replace(char find, char replace);
 
 	T inv_replace(String find, String replace);
