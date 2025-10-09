@@ -60,6 +60,13 @@ public class SolveMainTest {
 //    }
 
 	@Test
+	public void testLength() {
+		restoreStreams();
+		String[] args = {"Length.json", "-s", "inverse", "-v", "2", "-l", "5"};
+		SolveMain.main(args);
+	}
+
+	@Test
 	public void testIsEmpty() {
 		restoreStreams();
 		String[] args = {"isEmpty.json", "-s", "inverse", "-v", "2", "-l", "5"};

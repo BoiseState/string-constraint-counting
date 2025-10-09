@@ -23,8 +23,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 
 	private Automaton automaton;
-	private int minBound = 0; // length of first accepting string
-	private static int maxBoundLength = 32;// actaulyl unecessary? may be useful to have a static initBoundLength though?
 
 	/**
 	 * Constructor 1: Requires *ACYCLIC* automata as argument. <br>
@@ -1533,8 +1531,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	 * of the original automaton that are subsets of the provided insert and suffix automata respectively.
 	 * this is identical to inv_concatenate_sym_all but only returns one pair and removes it from the underlying model
 	 *
-	 * @param aut1
-	 * @param aut2
+	 * @param m1
+	 * @param m2
 	 * @return tuple of prefix and suffix models (note it removes this pair from the underlying model)
 	 */
 	@Override
@@ -2683,6 +2681,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 	// finds largest possilbe string length in acyclic automaton
 	public int calculateBoundLength(Automaton a) {
+		a.minimize(); // in case there are dead end states
 		int bound = -1;
 		State init = a.getInitialState();
 		Set<State> next = new HashSet<>();
@@ -2700,6 +2699,14 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return bound;
 	}
 
+	@Override
+	public int getLowerBoundLength() {
+		if (this.lowerBoundLength == -1) {
+			this.lowerBoundLength = calculateMinBoundLength();
+		}
+		return this.lowerBoundLength;
+	}
+
 	public int calculateMinBoundLength() {
 		State init = this.automaton.getInitialState();
 		Set<State> curr = new HashSet<>();
@@ -2709,7 +2716,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 			Set<State> next = new HashSet<>();
 			for (State s : curr) {
 				if (s.isAccept()) {
-					return minBound; // found an accepting state, set bound and return
+					return bound; // found an accepting state, set bound and return
 				}
 				for (Transition t : s.getTransitions()) {
 					next.add(t.getDest());
@@ -2724,10 +2731,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 	public void setAutomaton(Automaton a) {
 		this.automaton = a;
-	}
-
-	public static void setMaxBoundLength(int length) {
-		maxBoundLength = length;
 	}
 
 	public void minimize() {

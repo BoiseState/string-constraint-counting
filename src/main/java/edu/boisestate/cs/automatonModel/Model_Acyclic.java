@@ -30,7 +30,7 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 	 * 
 	 * @param automaton          - ACYCLIC Automaton
 	 * @param alphabet           - Alphabet
-	 * @param initialBoundLength - Initial bound, should match Automaton length
+	 * @param boundLength - Initial bound, should match Automaton length
 	 */
 	protected Model_Acyclic(Automaton automaton, Alphabet alphabet, int boundLength) {
 

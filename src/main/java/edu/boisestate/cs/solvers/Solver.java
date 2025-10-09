@@ -991,4 +991,12 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
     }
 
 
+	public void length(int id, int base) {
+		T baseModel = this.symbolicStringMap.get(base);
+		int upperBound = baseModel.getBoundLength();
+		int lowerBound = baseModel.getLowerBoundLength();
+		// create anyString with lengths bounds that will act as integer check
+		T boundModel = this.modelManager.createAnyString(lowerBound, upperBound);
+		this.symbolicStringMap.put(id, baseModel);
+	}
 }

@@ -7,7 +7,6 @@ import dk.brics.automaton.Transition;
 import dk.brics.string.stringoperations.UnaryOperation;
 import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.MinMaxPair;
-import edu.boisestate.cs.util.Tuple;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -25,6 +24,7 @@ public abstract class A_Model <T extends A_Model <T>> implements Cloneable, I_Mo
 
     protected final Alphabet alphabet;
     protected int boundLength;
+	protected int lowerBoundLength = -1; // uninitialized, used in Model_Acyclic_Inverse and length analysis
     protected A_Model_Manager<T> modelManager;
     
     /**
@@ -46,6 +46,11 @@ public abstract class A_Model <T extends A_Model <T>> implements Cloneable, I_Mo
 	public int getBoundLength() {
         return boundLength;
     }
+
+	@Override
+	public int getLowerBoundLength() {
+		return lowerBoundLength;
+	}
     
 
     @Override

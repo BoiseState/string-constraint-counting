@@ -180,10 +180,35 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 					return new Tuple<Boolean, Boolean>(true, true);
 				}
 
-//				if(this.nextConstraint.getOp() == Operation.INIT_CON){
-//					indxSymb = 2;
-//					indxConcr = 1;
-//				}
+				if(this.nextConstraint.getOp() == Operation.INIT_CON){
+					indxSymb = 2;
+					indxConcr = 1;
+					if (this.argConstraint.getOp() == Operation.LENGTH){
+						// parse concrete value and propogate back valid model
+						String concrStr = solver.getSymbolicModel(nextID).getShortestExampleString();
+						int len = Integer.parseInt(concrStr);
+						T lenModel = solver.modelManager.createAnyString(len,len);
+						if (!result) {
+							T all = solver.modelManager.createAnyString();
+							all.minus(lenModel);
+							lenModel = all;
+						}
+						inputs = lenModel;
+					}
+				} else { //arg is the one const
+					if (this.nextConstraint.getOp() == Operation.LENGTH){
+						// parse concrete value and propogate back valid model
+						String concrStr = solver.getSymbolicModel(argID).getShortestExampleString();
+						int len = Integer.parseInt(concrStr);
+						T lenModel = solver.modelManager.createAnyString(len,len);
+						if (!result) {
+							T all = solver.modelManager.createAnyString();
+							all.minus(lenModel);
+							lenModel = all;
+						}
+						inputs = lenModel;
+					}
+				}
 				//System.out.println("arg " + (this.argConstraint==null? null : this.argConstraint.getOp()));
 				//System.out.println("oper " + this.nextConstraint.getOp());
 				// place symbolic string from solver string table into output set, position 1

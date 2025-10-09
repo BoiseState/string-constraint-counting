@@ -236,9 +236,10 @@ public class Parser_2<T extends A_Model<T>> {
 
 		} else if (fName.equals("charAt")) {
 			operationString = processCharAt(constraint);
-		}else if (fName.equals("toString") || fName.equals("intern") || fName.equals("trimToSize")
-				|| fName.equals("length")) {
-
+		}else if (fName.equals("length")) {
+			operationString = processLength(constraint);
+		}else if (fName.equals("toString") || fName.equals("intern") || fName.equals("trimToSize")) {
+			// nps - 10-9-25 : this does nothing really
 			// perform string propagation
 			processPropagation(constraint);
 			operationString = String.format("<S:%d>.%s()", base, fName);
@@ -259,6 +260,21 @@ public class Parser_2<T extends A_Model<T>> {
 
 		// return op string
 		return operationString;
+	}
+
+	private String processLength(PrintConstraint constraint) {
+		// get constraint info as variables
+		Map<String, Integer> sourceMap = constraint.getSourceMap();
+		int id = constraint.getId();
+		int base = sourceMap.get("t");
+
+		constraint.addArg(base);
+		constraint.setOp(LENGTH);
+
+		solver.length(id, base);
+
+		// return operation string
+		return String.format("<S:%d>.length()", base);
 	}
 
 	private String processIndexOf(PrintConstraint constraint) {

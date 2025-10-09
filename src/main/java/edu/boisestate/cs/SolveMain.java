@@ -493,7 +493,9 @@ public class SolveMain {
 			// add alphabet data to settings
 			Map<String, Object> alphabetData = (Map<String, Object>) graphData.get("alphabet");
 			String minAlphabet = (String) alphabetData.get("declaration");
-			alpha = new Alphabet(minAlphabet);
+			// make sure alphabet has numbers so integers can be processed
+			String nums = "0-9";
+			alpha = new Alphabet(minAlphabet + "," + nums);
 
 			// determine initialBound
 			if (initialBound == 0) {
@@ -613,7 +615,6 @@ public class SolveMain {
 	 * Run inverse solver
 	 */
 	private static void run_Acyclic_Inverse_r3(DirectedGraph<PrintConstraint, SymbolicEdge> graph) {
-		Model_Acyclic_Inverse.setMaxBoundLength(initialBound); // nps - 6/25/25 : to reason about the bound length
 		Model_Acyclic_Inverse_Manager mFactory 					= new Model_Acyclic_Inverse_Manager(alpha, initialBound);
 		Solver_Inverse<Model_Acyclic_Inverse> mSolver 		= new Solver_Inverse<Model_Acyclic_Inverse>(mFactory,	initialBound);
 		Parser_2<Model_Acyclic_Inverse> mParser 				= new Parser_2<Model_Acyclic_Inverse>(mSolver, debug);

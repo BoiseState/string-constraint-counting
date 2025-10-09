@@ -14,6 +14,8 @@ public interface I_Model<T extends I_Model<T>> {
 
 	int getBoundLength();
 
+	int getLowerBoundLength();
+
 	Set<String> getFiniteStrings();
 
 	Set<String> getFiniteStrings(int limit);
