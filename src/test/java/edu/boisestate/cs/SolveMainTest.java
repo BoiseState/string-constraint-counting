@@ -27,12 +27,12 @@ public class SolveMainTest {
         System.setOut(originalOut);
     }
 
-//	@Test
-//	public void testSolve() {
-//		restoreStreams();
-//		String[] args = {"graphs/real/jerichoHTMLParser01.json", "-s", "inverse", "-v", "2", "-l", "5"};
-//		SolveMain.main(args);
-//	}
+	@Test
+	public void testSolve() {
+		restoreStreams();
+		String[] args = {"graphs/real/cleaned/htmlCleaner01.json", "-s", "inverse", "-v", "2", "-l", "5", "-d"};
+		SolveMain.main(args);
+	}
 
 	// friendly reminder generator has bugs and is incomplete :)
 //	@Test

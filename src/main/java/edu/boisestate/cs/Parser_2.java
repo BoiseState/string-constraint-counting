@@ -808,7 +808,7 @@ public class Parser_2<T extends A_Model<T>> {
 	 * @param constraint - The constraint corresponding to the operation.
 	 */
 	private void processPropagation(PrintConstraint constraint) {
-		System.out.println("Propagating " + constraint);
+//		System.out.println("Propagating " + constraint);
 
 		// MJR set operation type so the inverse can be built properly.
 		constraint.setOp(PROPAGATION);

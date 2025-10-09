@@ -791,7 +791,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
             } // end if
             else {
                 System.err.println("WARNING: UNDEFINED constraint in Reporter_Inverse.buildICG_r3() of type... "  + pc.getId() + "  " + pc.getValue());
-                System.exit(1);
+//                System.exit(1);
             }
 
         }  // end for each printconstraint

@@ -213,12 +213,12 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	}
 
 	@Override
-	public void removeEmptyString(){
+	public void removeEmptyString() {
 		this.automaton.getInitialState().setAccept(false);
 	}
 
 	@Override
-	public Model_Acyclic_Inverse resolveNotContains(Model_Acyclic_Inverse arg){
+	public Model_Acyclic_Inverse resolveNotContains(Model_Acyclic_Inverse arg) {
 		Model_Acyclic_Inverse temp = arg.clone();
 		temp.createDisjunct();
 		return this.assertNotContainsOther(temp);
@@ -262,13 +262,13 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		Automaton result = automaton;
 //		if (!notContaining.isEmpty()) {
 
-			// get all substrings
-			Automaton substrings = performUnaryOperation(notContaining,
-					new Substring(),
-					this.alphabet);
+		// get all substrings
+		Automaton substrings = performUnaryOperation(notContaining,
+				new Substring(),
+				this.alphabet);
 
-			// get resulting automaton
-			result = this.automaton.minus(substrings);
+		// get resulting automaton
+		result = this.automaton.minus(substrings);
 //		}
 
 		// return new model from resulting automaton
@@ -300,46 +300,47 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 //		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
 //	}
 
-	    public Model_Acyclic_Inverse assertNotContainsOther(Model_Acyclic_Inverse notContainedModel) {
-        //ensureAcyclicModel(notContainedModel);
+	public Model_Acyclic_Inverse assertNotContainsOther(Model_Acyclic_Inverse notContainedModel) {
+		//ensureAcyclicModel(notContainedModel);
 
-        // get not contained automaton
-        Automaton notContained = getAutomatonFromAcyclicModel(notContainedModel);
+		// get not contained automaton
+		Automaton notContained = getAutomatonFromAcyclicModel(notContainedModel);
 
-        // if not containing automaton is  empty
-        if (notContained.isEmpty() || automaton.isEmpty()) {
-            return new Model_Acyclic_Inverse(BasicAutomata.makeEmpty(), alphabet, 0);
-        }
+		// if not containing automaton is  empty
+		if (notContained.isEmpty() || automaton.isEmpty()) {
+			return new Model_Acyclic_Inverse(BasicAutomata.makeEmpty(), alphabet, 0);
+		}
 
-        if (notContainedModel.isSingleton() && notContainedModel.boundLength > this.boundLength) { // if contained is longer than this then impossible to be contained
-            return new Model_Acyclic_Inverse(this.automaton, this.alphabet, this.boundLength);
-        }
+		if (notContainedModel.isSingleton() && notContainedModel.boundLength > this.boundLength) { // if contained is longer than this then impossible to be contained
+			return new Model_Acyclic_Inverse(this.automaton, this.alphabet, this.boundLength);
+		}
 
 
-        // gets automaton of required chars if any
+		// gets automaton of required chars if any
 //        notContained = getRequiredCharAutomaton(notContained, alphabet, boundLength);
 
-        Automaton result = automaton;
+		Automaton result = automaton;
 //        if (!notContained.isEmpty()) {
-            // create any string automata
-            Automaton anyString1 =
-                    BasicAutomata.makeCharSet(this.alphabet.getCharSet())
-                            .repeat();
-            Automaton anyString2 =
-                    BasicAutomata.makeCharSet(this.alphabet.getCharSet())
-                            .repeat();
+		// create any string automata
+		Automaton anyString1 =
+				BasicAutomata.makeCharSet(this.alphabet.getCharSet())
+						.repeat();
+		Automaton anyString2 =
+				BasicAutomata.makeCharSet(this.alphabet.getCharSet())
+						.repeat();
 
-            // concatenate with not contained automaton
-            Automaton x = anyString1.concatenate(notContained)
-                    .concatenate(anyString2);
+		// concatenate with not contained automaton
+		Automaton x = anyString1.concatenate(notContained)
+				.concatenate(anyString2);
 
-            // get resulting automaton
-            result = this.automaton.minus(x);
+		// get resulting automaton
+		result = this.automaton.minus(x);
 //        }
 
-        // return new model from resulting automaton
-        return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
-    }
+		// return new model from resulting automaton
+		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
+	}
+
 	@Override
 	public Model_Acyclic_Inverse assertNotEmpty() {
 		// get resulting automaton
@@ -368,13 +369,13 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		Automaton result = automaton;
 //		if (!notContaining.isEmpty()) {
 
-			// get all suffixes
-			Automaton suffixes = performUnaryOperation(notContaining,
-					new Postfix(),
-					this.alphabet);
+		// get all suffixes
+		Automaton suffixes = performUnaryOperation(notContaining,
+				new Postfix(),
+				this.alphabet);
 
-			// get resulting automaton
-			result = this.automaton.minus(suffixes);
+		// get resulting automaton
+		result = this.automaton.minus(suffixes);
 //		} else {
 //			Automaton choice = notContainingModel.clone().createDisjunct().automaton; // chooose some model
 //			Automaton suffixes = performUnaryOperation(choice,
@@ -406,16 +407,16 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		Automaton result = automaton;
 //		if (!notEnding.isEmpty()) {
 
-			// create any string automata
-			Automaton anyString =
-					BasicAutomata.makeCharSet(this.alphabet.getCharSet())
-							.repeat(0, this.boundLength);
+		// create any string automata
+		Automaton anyString =
+				BasicAutomata.makeCharSet(this.alphabet.getCharSet())
+						.repeat(0, this.boundLength);
 
-			// concatenate with not ending automaton
-			Automaton x = anyString.concatenate(notEnding);
+		// concatenate with not ending automaton
+		Automaton x = anyString.concatenate(notEnding);
 
-			// get resulting automaton
-			result = this.automaton.minus(x);
+		// get resulting automaton
+		result = this.automaton.minus(x);
 //		} else {
 //			Automaton choice = notEndingModel.clone().createDisjunct().automaton; // chooose some model
 //			Automaton anyString =
@@ -598,13 +599,13 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		Automaton result = automaton;
 //		if (!notContaining.isEmpty()) {
 
-			// get all prefixes
-			Automaton prefixes = performUnaryOperation(notContaining,
-					new Prefix(),
-					this.alphabet);
+		// get all prefixes
+		Automaton prefixes = performUnaryOperation(notContaining,
+				new Prefix(),
+				this.alphabet);
 
-			// get resulting automaton
-			result = this.automaton.minus(prefixes);
+		// get resulting automaton
+		result = this.automaton.minus(prefixes);
 //		} else {
 //			Automaton choice = notContainingModel.clone().createDisjunct().automaton; // chooose some model
 //			Automaton prefixes = performUnaryOperation(choice,
@@ -636,16 +637,16 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 		Automaton result = automaton;
 //		if (!notStarting.isEmpty()) {
-			// create any string automata
-			Automaton anyString =
-					BasicAutomata.makeCharSet(this.alphabet.getCharSet())
-							.repeat();
+		// create any string automata
+		Automaton anyString =
+				BasicAutomata.makeCharSet(this.alphabet.getCharSet())
+						.repeat();
 
-			// concatenate with not starts automaton
-			Automaton x = notStarting.concatenate(anyString);
+		// concatenate with not starts automaton
+		Automaton x = notStarting.concatenate(anyString);
 
-			// get resulting automaton
-			result = this.automaton.minus(x);
+		// get resulting automaton
+		result = this.automaton.minus(x);
 //		} else {
 //			Automaton choice = notStartsModel.clone().createDisjunct().automaton; // chooose some model
 //			Automaton anyString =
@@ -1952,8 +1953,26 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 	@Override
 	public Model_Acyclic_Inverse getShortestExampleModel() {
-		return modelManager.createString(this.automaton.getShortestExample(true));
-
+		State initial = this.automaton.getInitialState();
+		State exampleStart = new State();
+		exampleStart.setAccept(initial.isAccept());
+		State currentExample = exampleStart;
+		State current = initial;
+		while (!current.isAccept()) {
+			LogicalTransition trans = AutomatonHelper.getLogicalTransitions(current).get(0);
+			// lt gives you the largest transition set first
+			State next = trans.getDestination();
+			State nextExample = new State();
+			for (Transition t : trans.getTransitions()) {
+				currentExample.addTransition(new Transition(t.getMin(), t.getMax(), nextExample));
+			}
+			nextExample.setAccept(next.isAccept());
+			current = next;
+			currentExample = nextExample;
+		}
+		Automaton exampleAut = new Automaton();
+		exampleAut.setInitialState(exampleStart);
+		return new Model_Acyclic_Inverse(exampleAut, this.alphabet, calculateBoundLength(exampleAut));
 	}
 
 //    private void ensureAcyclicModel(Model_Acyclic_Inverse arg) {

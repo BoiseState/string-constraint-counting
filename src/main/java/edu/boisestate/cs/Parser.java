@@ -1062,7 +1062,7 @@ public class Parser {
         value = solver.replaceEscapes(value);
 
         // if labeled as root value
-        if (value.startsWith("r") || value.startsWith("$r")) {
+        if (value.startsWith("r") || value.startsWith("$r") || value.startsWith("$c") || value.startsWith("$i")) {
 
             // create new symbolic string for id
             solver.newSymbolicString(id);
