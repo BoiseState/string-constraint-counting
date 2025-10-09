@@ -39,6 +39,7 @@ public class PreciseSuffix
             return BasicAutomata.makeEmpty();
         }
         Automaton b = a.clone();
+		// TODO: User AutomatonHelper for logical transitions (in all operations probably)
         LinkedList<State> states = new LinkedList<State>();
         states.add(b.getInitialState());
         for (int i = 0; i < start; i++) {
@@ -48,7 +49,10 @@ public class PreciseSuffix
                 transitions.addAll(states.removeFirst().getTransitions());
             }
             while (transitions.size() > 0) {
-                states.add(transitions.removeFirst().getDest());
+				State dest = transitions.removeFirst().getDest();
+				if (!states.contains(dest)) {
+					states.add(dest);
+				}
             }
         }
         Set<StatePair> epsilons = new HashSet<StatePair>();

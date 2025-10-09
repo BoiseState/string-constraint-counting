@@ -27,30 +27,37 @@ public class SolveMainTest {
         System.setOut(originalOut);
     }
 
+//	@Test
+//	public void testSolve() {
+//		restoreStreams();
+//		String[] args = {"graphs/real/jerichoHTMLParser01.json", "-s", "inverse", "-v", "2", "-l", "5"};
+//		SolveMain.main(args);
+//	}
+
 	// friendly reminder generator has bugs and is incomplete :)
-	@Test
-    public void smtQueryPlaygroundTest(){
-        restoreStreams();
-        try {
-			// generator takes directory as input and converts smt2 files
-			File file = new File("src/test/java/edu/boisestate/cs");
-			String javaPath = "/usr/lib/jvm/java-21-openjdk-amd64/bin/java";
-            ProcessBuilder pb = new ProcessBuilder(
-					javaPath, "-cp",
-					"/home/nat/Repos/SMT-parser-generator/target/GenJSONs-1.0-SNAPSHOT-jar-with-dependencies.jar",
-					"edu.boisestate.cs.MainJSON",
-					file.getAbsolutePath()
-			);
-			pb.redirectErrorStream(true);
-            pb.start();
-
-			String[] args = {"output_cs/smt-input.smt2.json", "-s", "inverse", "-v", "2", "-l", "8"};
-			SolveMain.main(args);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//	@Test
+//    public void smtQueryPlaygroundTest(){
+//        restoreStreams();
+//        try {
+//			// generator takes directory as input and converts smt2 files
+//			File file = new File("src/test/java/edu/boisestate/cs");
+//			String javaPath = "/usr/lib/jvm/java-21-openjdk-amd64/bin/java";
+//            ProcessBuilder pb = new ProcessBuilder(
+//					javaPath, "-cp",
+//					"/home/nat/Repos/SMT-parser-generator/target/GenJSONs-1.0-SNAPSHOT-jar-with-dependencies.jar",
+//					"edu.boisestate.cs.MainJSON",
+//					file.getAbsolutePath()
+//			);
+//			pb.redirectErrorStream(true);
+//            pb.start();
+//
+//			String[] args = {"output_cs/smt-input.smt2.json", "-s", "inverse", "-v", "2", "-l", "8"};
+//			SolveMain.main(args);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 	@Test
 	public void testIsEmpty() {
@@ -95,23 +102,17 @@ public class SolveMainTest {
 
     @Test
     public void testDeleteAgain(){
-        restoreStreams();
         String[] args = {"Delete.json", "-s", "inverse", "-v", "2", "-l", "5"};
         SolveMain.main(args);
+		assertEquals("sat,\n3: \"0\"\n", outContent.toString());
     }
 
     @Test
     public void testContains(){
-        restoreStreams();
-        String expectedOutput = "";
-        try {
-            expectedOutput = new String (Files.readAllBytes(Paths.get(outPath + "concat.txt")));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String expectedOutput = "sat,\n2: \"0\"\n";
         String[] args = {"notContains.json", "-s", "inverse", "-v", "2", "-l", "2"};
         SolveMain.main(args);
-//        assertEquals(expectedOutput, outContent.toString());
+        assertEquals(expectedOutput, outContent.toString());
     }
 
 

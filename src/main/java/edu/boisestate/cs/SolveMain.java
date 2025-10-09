@@ -528,7 +528,7 @@ public class SolveMain {
 				int type = (Integer) obj.get("type");
 				String value = (String) obj.get("value");
 
-				if (value.contains("<init>")) {
+				if (value.contains("\"")||value.contains("<init>")) {
 					String concrete = value.split("!")[0];
 					concrete = concrete.replace("\"","");
 					int conc_string_length = concrete.length();

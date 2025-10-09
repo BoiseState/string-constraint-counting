@@ -167,6 +167,8 @@ abstract public class A_Reporter <T extends A_Model<T>> {
 
             // set the constraint source map
             constraint.setSourceMap(sourceMap);
+			// supposed to happen in parser but Operation class is built to do this so parses doesnt need to
+//			constraint.setOp(Operation.constraintOp(constraint));
 
             // if constraint is a leaf node
             if (leaves.contains(constraint)) {
