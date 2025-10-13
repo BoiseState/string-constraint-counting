@@ -81,6 +81,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 		// get resulting automaton
 		Automaton result = this.automaton.intersection(substrings);
+		result.minimize();
 
 		// return new model from resulting automaton
 		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
@@ -90,6 +91,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	public Model_Acyclic_Inverse assertContainsOther(Model_Acyclic_Inverse containedModel) {
 		//ensureAcyclicModel(containedModel);
 
+//		int padding = Math.max(0, this.boundLength - containedModel.boundLength);
 		// create any string automata
 		Automaton anyString1 =
 				BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
@@ -2051,11 +2053,12 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	public List<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>> inv_concatenate_sym_all(Model_Acyclic_Inverse base,
 																							 Model_Acyclic_Inverse arg) {
 		List<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>> results = new ArrayList<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>>();
+		this.setBoundLength(calculateBoundLength(this.automaton));// safety as apparently sometimes dont properly propogate?
 		if (base.isSingleton()) {
 			String prefixStr = base.getAcceptedStringExample();
 			int prefixLen = prefixStr.length();
 			Model_Acyclic_Inverse prefixModel = this.substring(0, prefixLen);
-			if (!prefixModel.getFiniteStrings().contains(prefixStr)) return results;
+//			if (!prefixModel.getFiniteStrings().contains(prefixStr)) return results;
 			Model_Acyclic_Inverse suffixModel = this.substring(prefixLen, this.getBoundLength());
 			suffixModel = arg.intersect(suffixModel);
 			if (!suffixModel.isEmpty()) {
@@ -2073,7 +2076,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 			if (prefixLen < 0) return results;
 			Model_Acyclic_Inverse prefixModel = this.substring(0, prefixLen);
 			Model_Acyclic_Inverse suffixModel = this.substring(prefixLen, this.getBoundLength());
-			if (!suffixModel.getFiniteStrings().contains(suffixStr)) return results;
+//			if (!suffixModel.getFiniteStrings().contains(suffixStr)) return results;
 			prefixModel = base.intersect(prefixModel);
 			if (!prefixModel.isEmpty()) {
 				prefixModel.automaton.minimize();
@@ -2261,14 +2264,19 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return result;
 	}
 
+	//singletons
 	@Override
 	public Model_Acyclic_Inverse replaceFirst(String find, String replace) {
-		System.err.println("Shuoldnt be using `concrete` replaceFirst");
+		//both charsequence singleton/known
+		Automaton base = this.automaton;
+		base.determinize();
+		System.err.println("replaceFirst(String, String) not implemetned");
 		System.exit(1);
-		return null;
+		Automaton result = performUnaryOperation(base, new Replace6(find, replace), this.alphabet);// not repalecfirst :)
+		return new Model_Acyclic_Inverse(result, this.alphabet, calculateBoundLength(result));
 	}
 // Note that we do not use an operations class as we need visiblity of the solver instance
-//
+
 
 	/**
 	 * Replaces the first occurrence of a substring matching the regex with the replacement string.
@@ -2290,6 +2298,11 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 			printDebug("Replace: " + replacementString.automaton.getFiniteStrings());
 			printDebug("Brute: " + bruteModel.automaton.getFiniteStrings());
 		}
+//		if (regexString.isSingleton() && replacementString.isSingleton()) {
+//			String find = regexString.getAcceptedStringExample();
+//			String replace = replacementString.getAcceptedStringExample();
+//			return this.replaceFirst(find, replace);
+//		}
 
 		Automaton regexAut = regexString.automaton;
 		Automaton origAut = Automaton.minimize(automaton.clone());
@@ -2522,6 +2535,12 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		Model_Acyclic_Inverse bruteForce=null;
 		if (debug) {
 			bruteForce = this.replaceAllBruteForce(regexString, replacementString);
+		}
+		if (regexString.isSingleton() && replacementString.isSingleton()) {
+			String find = regexString.getAcceptedStringExample();
+			String replace = replacementString.getAcceptedStringExample();
+			this.automaton.determinize();
+			return this.replace(find, replace);
 		}
 		Model_Acyclic_Inverse result, next;
 		next = this.replaceFirst(regexString, replacementString);

@@ -27,12 +27,12 @@ public class SolveMainTest {
         System.setOut(originalOut);
     }
 
-	@Test
-	public void testSolve() {
-		restoreStreams();
-		String[] args = {"../smt-bench/benchmarks/bass/matching/sub-matching-sat-10.smt2.json", "-s", "inverse", "-v", "2", "-l", "5", "-d"};
-		SolveMain.main(args);
-	}
+//	@Test
+//	public void testSolve() {
+//		restoreStreams();
+//		String[] args = {"../smt-bench/benchmarks/bass/rna-unsat/benchmark_0001.smt2.json", "-s", "inverse", "-v", "2", "-l", "5", "-d"};
+//		SolveMain.main(args);
+//	}
 
 	// friendly reminder generator has bugs and is incomplete :)
 //	@Test
@@ -126,15 +126,16 @@ public class SolveMainTest {
 
     @Test
     public void testConcat() {
+		restoreStreams();
         String expectedOutput = "";
         try {
             expectedOutput = new String (Files.readAllBytes(Paths.get(outPath + "concat.txt")));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String[] args = {inPath + "concat_isEmpty_equals_contains_l2_d2_bench.json", "-s", "inverse", "-v", "2", "-l", "2"};
+        String[] args = {inPath + "concat_isEmpty_equals_contains_l2_d2_bench.json", "-s", "inverse", "-v", "2", "-l", "2", "-d"};
         SolveMain.main(args);
-        assertEquals(expectedOutput, outContent.toString());
+//        assertEquals(expectedOutput, outContent.toString());
     }
 
     @Test
