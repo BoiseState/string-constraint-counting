@@ -163,6 +163,13 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 				T nextModel = solver.getSymbolicModel(nextConstraint.getID());
 				T argModel = solver.getSymbolicModel(argConstraint.getID());
 
+				if (nextModel.isSingleton() && argModel.isSingleton()) { // inputs is also singleton
+					currOutput = new ArrayList<Tuple<T,T>>();
+					Tuple<T,T> t = new Tuple<T,T>(nextModel, argModel);
+					currOutput.add(t);
+					mapInOut.put(input, currOutput);
+					printDebug("Both next and arg are singleton: propagating");
+				} else {
 			
 				if(ostrich) {
 					//Make two copies of inputs
@@ -200,7 +207,7 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 					}
 					mapInOut.put(input, currOutput);
 
-				}
+				}}
 
 
 

@@ -61,7 +61,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
         // get models
         T baseModel = this.symbolicStringMap.get(base);
         T argModel = this.symbolicStringMap.get(arg);
-
         // start timer
         BasicTimer.start();
         //System.out.println("bM " + baseModel.getAutomaton().toString() + " aM " + argModel.getAutomaton().toString());
@@ -83,24 +82,35 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
         // get models
         T baseModel = this.symbolicStringMap.get(base);
         T argModel = this.symbolicStringMap.get(arg);
+		if (baseModel.isSingleton() && argModel.isSingleton()) {
+			String b = baseModel.getAcceptedStringExample();
+			String a = argModel.getAcceptedStringExample();
+			if (!b.contains(a)) {
+				if (result){
+				baseModel = null;
+				argModel = null;}
 
+			}
+			BasicTimer.stop();
+		}
        // System.out.println("base " + base + " m\t" + baseModel + "\tresult " + result);
        // System.out.println("arg " + arg + " m\t "  + argModel);
         // true branch
-        if (result) {
+        else if (result) {
 
             // start timer
             BasicTimer.start();
 
-            // get satisfying base model
-            baseModel = baseModel.assertContainsOther(argModel);
-           // System.out.println("Done with baseModel");
-            // get satisfying arg model
-            argModel = argModel.assertContainedInOther(baseModel);
 
-            //System.exit(2);
-            // stop timer
-            BasicTimer.stop();
+				// get satisfying base model
+				baseModel = baseModel.assertContainsOther(argModel);
+				// System.out.println("Done with baseModel");
+				// get satisfying arg model
+				argModel = argModel.assertContainedInOther(baseModel);
+
+				//System.exit(2);
+				// stop timer
+				BasicTimer.stop();
 
         } else {
 

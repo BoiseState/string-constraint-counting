@@ -110,17 +110,22 @@ abstract public class A_Reporter <T extends A_Model<T>> {
         // set max id in parser
         this.parser.setMaxGraphId(maxId);
 
-        // create priority queue structure for topological iteration
-        Queue<PrintConstraint> queue = new PriorityQueue<>(1, new PrintConstraintComparator());
+//        // create priority queue structure for topological iteration
+//        Queue<PrintConstraint> queue = new PriorityQueue<>(1, new PrintConstraintComparator());
+//
+//        // create topological iterator for graph
+//        TopologicalOrderIterator<PrintConstraint, SymbolicEdge> iterator = new TopologicalOrderIterator<>(this.graph, queue);
 
-        // create topological iterator for graph
-        TopologicalOrderIterator<PrintConstraint, SymbolicEdge> iterator = new TopologicalOrderIterator<>(this.graph, queue);
+		//trying somethign different
+		Queue<PrintConstraint> queue = new PriorityQueue<>(new PrintConstraintComparator());
+		queue.addAll(this.graph.vertexSet());
 
         // while processing constraints in topological order
-        while (forwardPropagation && iterator.hasNext()) {
-
+//        while (forwardPropagation && iterator.hasNext()) {
+while (forwardPropagation && !queue.isEmpty()) {
             // get constraint
-            PrintConstraint constraint = iterator.next();
+//            PrintConstraint constraint = iterator.next();
+			PrintConstraint constraint = queue.poll();
             int constraintId = constraint.getId();
             //System.out.println("c " + constraint);
             // add to unfinished edges

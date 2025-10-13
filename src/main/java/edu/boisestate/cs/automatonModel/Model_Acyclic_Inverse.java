@@ -95,7 +95,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 				BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
 		Automaton anyString2 =
 				BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
-
 		// concatenate with contained automaton
 		Automaton contained = getAutomatonFromAcyclicModel(containedModel);
 		Automaton x = anyString1.concatenate(contained).concatenate(anyString2);
@@ -726,6 +725,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 		// minimize result automaton
 //        result.reduce(); //?
+		result.determinize();
 		result.minimize();
 
 		// calculate new bound length
@@ -2051,7 +2051,37 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	public List<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>> inv_concatenate_sym_all(Model_Acyclic_Inverse base,
 																							 Model_Acyclic_Inverse arg) {
 		List<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>> results = new ArrayList<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>>();
+		if (base.isSingleton()) {
+			String prefixStr = base.getAcceptedStringExample();
+			int prefixLen = prefixStr.length();
+			Model_Acyclic_Inverse prefixModel = this.substring(0, prefixLen);
+			if (!prefixModel.getFiniteStrings().contains(prefixStr)) return results;
+			Model_Acyclic_Inverse suffixModel = this.substring(prefixLen, this.getBoundLength());
+			suffixModel = arg.intersect(suffixModel);
+			if (!suffixModel.isEmpty()) {
+				prefixModel.automaton.minimize();
+				suffixModel.automaton.minimize();
+				results.add(new Tuple<>(prefixModel, suffixModel));
+			}
+			return results;
+		}
 
+		if (arg.isSingleton()) {
+			String suffixStr = arg.getAcceptedStringExample();
+			int suffixLen = suffixStr.length();
+			int prefixLen = this.getBoundLength() - suffixLen;
+			if (prefixLen < 0) return results;
+			Model_Acyclic_Inverse prefixModel = this.substring(0, prefixLen);
+			Model_Acyclic_Inverse suffixModel = this.substring(prefixLen, this.getBoundLength());
+			if (!suffixModel.getFiniteStrings().contains(suffixStr)) return results;
+			prefixModel = base.intersect(prefixModel);
+			if (!prefixModel.isEmpty()) {
+				prefixModel.automaton.minimize();
+				suffixModel.automaton.minimize();
+				results.add(new Tuple<>(prefixModel, suffixModel));
+			}
+			return results;
+		}
 		Model_Acyclic_Inverse prefixModelInit = this.clone();
 		//clear all final states in the prefix model
 		Set<State> accepting = prefixModelInit.automaton.getAcceptStates();
@@ -2489,7 +2519,10 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	@Override
 	public Model_Acyclic_Inverse replaceAll(Model_Acyclic_Inverse regexString, Model_Acyclic_Inverse replacementString) {
 		// assuming prefix seleciton is fairly straightforward calling replaceFirst iteratively shuoldnt be much less efficienct
-		Model_Acyclic_Inverse bruteForce = this.replaceAllBruteForce(regexString, replacementString);
+		Model_Acyclic_Inverse bruteForce=null;
+		if (debug) {
+			bruteForce = this.replaceAllBruteForce(regexString, replacementString);
+		}
 		Model_Acyclic_Inverse result, next;
 		next = this.replaceFirst(regexString, replacementString);
 		do {
@@ -2497,9 +2530,9 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 			next = result.replaceFirst(regexString, replacementString);
 
 		} while (!result.equals(next));
-		if (bruteForce.equals(result)) {
+		if (bruteForce!=null && bruteForce.equals(result)) {
 			printDebug("Brute force and result match");
-		} else {
+		} else if (bruteForce!=null){
 			System.err.println("Brute force and result do not match");
 			System.err.println("Brute force: " + bruteForce.getFiniteStrings());
 			System.err.println("Result: " + result.getFiniteStrings());

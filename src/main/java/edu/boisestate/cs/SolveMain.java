@@ -81,7 +81,11 @@ public class SolveMain {
 			printDebug("NUM CONSTRAINTS:\t" + graph.vertexSet().size());
 			printDebug("NUM PREDICATES:\t\t" + graph.getPredicates().size());
 			printDebug("NUM SYMBOLIC INPUTS:\t" + graph.getNumSymInputs());
+			printDebug("MAX CONCRETE STRING LENGTH:\t" + initialBound);
+//			initialBound = graph.boundLengthHeuristic();
+//			printDebug("BOUND LENGTH HEURISTIC:\t" + initialBound);
 			printDebug("========================================================================================================");
+//			initialBound= initialBound + 3;// add some padding
 			run_Acyclic_Inverse_r3(graph);
 
 
@@ -531,11 +535,11 @@ public class SolveMain {
 				String value = (String) obj.get("value");
 
 				if (value.contains("\"")||value.contains("<init>")) {
-					String concrete = value.split("!")[0];
+					String concrete = value.split("!:!")[0];
 					concrete = concrete.replace("\"","");
 					int conc_string_length = concrete.length();
 					if (initialBound < conc_string_length) {
-						printDebug("Using Higher initial bound based on concrete string length: " + conc_string_length);
+//						printDebug("Using Higher initial bound based on concrete string length: " + conc_string_length);
 						initialBound = conc_string_length;
 					}
 				}

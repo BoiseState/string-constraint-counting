@@ -1,6 +1,7 @@
 package edu.boisestate.cs.graph;
 
 import edu.boisestate.cs.Alphabet;
+import edu.boisestate.cs.util.Tuple;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.EdgeReversedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
@@ -12,77 +13,77 @@ import java.util.Map.Entry;
 
 public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstraint, SymbolicEdge> {
 
-    private Map<PrintConstraint, Set<PrintConstraint>> predDepend;
-    private Map<Integer, Set<Integer>> predDependID;
-    private ArrayList<PrintConstraint> necessaryPredicates = new ArrayList<>();
-    private HashSet<PrintConstraint> sources = new HashSet<>();
-    private Map<Integer, Set<Integer>> symDepend = new HashMap<Integer, Set<Integer>>(); // map of predicates and the symbolics in their ancestors...
-    private Map<Integer, Set<Integer>> dependSym = new HashMap<Integer, Set<Integer>>(); // map of symbolics and the predicates that depend on them...
+	private Map<PrintConstraint, Set<PrintConstraint>> predDepend;
+	private Map<Integer, Set<Integer>> predDependID;
+	private ArrayList<PrintConstraint> necessaryPredicates = new ArrayList<>();
+	private HashSet<PrintConstraint> sources = new HashSet<>();
+	private Map<Integer, Set<Integer>> symDepend = new HashMap<Integer, Set<Integer>>(); // map of predicates and the symbolics in their ancestors...
+	private Map<Integer, Set<Integer>> dependSym = new HashMap<Integer, Set<Integer>>(); // map of symbolics and the predicates that depend on them...
 
-    public InvDefaultDirectedGraph(Class<? extends SymbolicEdge> edgeClass) {
-        super(edgeClass);
-        predDepend = new HashMap<PrintConstraint, Set<PrintConstraint>>();
-        predDependID = new HashMap<Integer, Set<Integer>>();
-    }
+	public InvDefaultDirectedGraph(Class<? extends SymbolicEdge> edgeClass) {
+		super(edgeClass);
+		predDepend = new HashMap<PrintConstraint, Set<PrintConstraint>>();
+		predDependID = new HashMap<Integer, Set<Integer>>();
+	}
 
-    public void computePredicateDependencies() {
-        //get all the sinks that are predicates and create map entry for them
-        //get all the symbolic sources
-        for (PrintConstraint c : vertexSet()) {
-            if (this.outDegreeOf(c) == 0 && (c.getActualVal().equals("false") || c.getActualVal().equals("true"))) {
-                HashSet<PrintConstraint> dependSet = new HashSet<PrintConstraint>();
-                HashSet<Integer> dependSetID = new HashSet<Integer>();
-                dependSet.add(c);
-                dependSetID.add(c.getId());
-                predDepend.put(c, dependSet);
-                predDependID.put(c.getId(), dependSetID);
-            }
-        }
+	public void computePredicateDependencies() {
+		//get all the sinks that are predicates and create map entry for them
+		//get all the symbolic sources
+		for (PrintConstraint c : vertexSet()) {
+			if (this.outDegreeOf(c) == 0 && (c.getActualVal().equals("false") || c.getActualVal().equals("true"))) {
+				HashSet<PrintConstraint> dependSet = new HashSet<PrintConstraint>();
+				HashSet<Integer> dependSetID = new HashSet<Integer>();
+				dependSet.add(c);
+				dependSetID.add(c.getId());
+				predDepend.put(c, dependSet);
+				predDependID.put(c.getId(), dependSetID);
+			}
+		}
 
-        //get all the symbolic sources
+		//get all the symbolic sources
 
-        for (PrintConstraint s : vertexSet()) {
-            // TODO: this will sometimes not identify the symbolic inputs
-            if (this.inDegreeOf(s) == 0 && (s.getSplitValue().startsWith("r") || s.getSplitValue().startsWith("$r"))) {
-                sources.add(s);
-                //System.out.println(s.getSplitValue());
-            }
-        }
+		for (PrintConstraint s : vertexSet()) {
+			// TODO: this will sometimes not identify the symbolic inputs
+			if (this.inDegreeOf(s) == 0 && (s.getSplitValue().startsWith("r") || s.getSplitValue().startsWith("$r"))) {
+				sources.add(s);
+				//System.out.println(s.getSplitValue());
+			}
+		}
 
-        //System.out.println(sources);
+		//System.out.println(sources);
 
-        //intermediate map that remember symbolic sources for each predicate
-        Map<PrintConstraint, Set<PrintConstraint>> symbValPred = new HashMap<PrintConstraint, Set<PrintConstraint>>();
-        //DFS for each sink
-        for (PrintConstraint s : sources) {
+		//intermediate map that remember symbolic sources for each predicate
+		Map<PrintConstraint, Set<PrintConstraint>> symbValPred = new HashMap<PrintConstraint, Set<PrintConstraint>>();
+		//DFS for each sink
+		for (PrintConstraint s : sources) {
 //			System.out.println(s.getValue());
 //			System.out.print("\t");
-            Set<PrintConstraint> reachedPred = new HashSet<PrintConstraint>();
-            Set<Integer> reachedPredID = new HashSet<Integer>();
-            DepthFirstIterator<PrintConstraint, SymbolicEdge> dfi = new DepthFirstIterator<PrintConstraint, SymbolicEdge>(this, s);
-            while (dfi.hasNext()) {
-                PrintConstraint n = dfi.next();
-                if (this.outDegreeOf(n) == 0 && (n.getActualVal().equals("false") || n.getActualVal().equals("true"))) {
+			Set<PrintConstraint> reachedPred = new HashSet<PrintConstraint>();
+			Set<Integer> reachedPredID = new HashSet<Integer>();
+			DepthFirstIterator<PrintConstraint, SymbolicEdge> dfi = new DepthFirstIterator<PrintConstraint, SymbolicEdge>(this, s);
+			while (dfi.hasNext()) {
+				PrintConstraint n = dfi.next();
+				if (this.outDegreeOf(n) == 0 && (n.getActualVal().equals("false") || n.getActualVal().equals("true"))) {
 //					System.out.print(n.getId() + " ");
-                    reachedPred.add(n);
-                    reachedPredID.add(n.getId());
-                }
-            }
+					reachedPred.add(n);
+					reachedPredID.add(n.getId());
+				}
+			}
 //			System.out.println();
-            //iterate over predicates and add them to each other
-            for (PrintConstraint p : reachedPred) {
-                predDepend.get(p).addAll(reachedPred);
-            }
+			//iterate over predicates and add them to each other
+			for (PrintConstraint p : reachedPred) {
+				predDepend.get(p).addAll(reachedPred);
+			}
 
-            for (Integer p : reachedPredID) {
-                predDependID.get(p).addAll(reachedPredID);
-            }
+			for (Integer p : reachedPredID) {
+				predDependID.get(p).addAll(reachedPredID);
+			}
 
-        }
+		}
 
-        findNecessaryPredicates();
-        makeSymDepend();
-        makeDependSym();
+		findNecessaryPredicates();
+		makeSymDepend();
+		makeDependSym();
 
 //		//resulting map
 //		for(Entry<PrintConstraint, Set<PrintConstraint>> e : predDepend.entrySet()) {
@@ -94,211 +95,241 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
 //			}
 //			System.out.println();
 //		}
-    }
+	}
 
-    public Set<Integer> getDependedPredicates(Integer id) {
+	public Set<Integer> getDependedPredicates(Integer id) {
 
-        return new HashSet<Integer>(predDependID.get(id));
-    }
+		return new HashSet<Integer>(predDependID.get(id));
+	}
 
-    // note that this includes itself
-    public Set<Integer> getAncestors(PrintConstraint start) {
-        Set<Integer> ret = new HashSet<Integer>();
-        EdgeReversedGraph<PrintConstraint, SymbolicEdge> reversedGraph = new EdgeReversedGraph<PrintConstraint, SymbolicEdge>(this);
-        BreadthFirstIterator<PrintConstraint, SymbolicEdge> breadthFirstIterator =
-                new BreadthFirstIterator<PrintConstraint, SymbolicEdge>(reversedGraph, start);
-        while (breadthFirstIterator.hasNext()) {
-            ret.add(breadthFirstIterator.next().getId());
-        }
+	// note that this includes itself
+	public Set<Integer> getAncestors(PrintConstraint start) {
+		Set<Integer> ret = new HashSet<Integer>();
+		EdgeReversedGraph<PrintConstraint, SymbolicEdge> reversedGraph = new EdgeReversedGraph<PrintConstraint, SymbolicEdge>(this);
+		BreadthFirstIterator<PrintConstraint, SymbolicEdge> breadthFirstIterator =
+				new BreadthFirstIterator<PrintConstraint, SymbolicEdge>(reversedGraph, start);
+		while (breadthFirstIterator.hasNext()) {
+			ret.add(breadthFirstIterator.next().getId());
+		}
 
-        return ret;
-    }
+		return ret;
+	}
 
-    public Set<Integer> getChildren(PrintConstraint start) {
-        Set<Integer> ret = new HashSet<Integer>();
-        BreadthFirstIterator<PrintConstraint, SymbolicEdge> breadthFirstIterator =
-                new BreadthFirstIterator<PrintConstraint, SymbolicEdge>(this, start);
-        while (breadthFirstIterator.hasNext()) {
-            ret.add(breadthFirstIterator.next().getId());
-        }
-        return ret;
-    }
+	public Set<Integer> getChildren(PrintConstraint start) {
+		Set<Integer> ret = new HashSet<Integer>();
+		BreadthFirstIterator<PrintConstraint, SymbolicEdge> breadthFirstIterator =
+				new BreadthFirstIterator<PrintConstraint, SymbolicEdge>(this, start);
+		while (breadthFirstIterator.hasNext()) {
+			ret.add(breadthFirstIterator.next().getId());
+		}
+		return ret;
+	}
 
-    public PrintConstraint getConstraint(Integer id) {
-        for (PrintConstraint c : vertexSet()) {
-            if (c.getId() == id) {
-                return c;
-            }
-        }
-        return null;
-    }
+	public Set<PrintConstraint> getChildrenPC(PrintConstraint start) {
+		Set<PrintConstraint> ret = new HashSet<PrintConstraint>();
+		BreadthFirstIterator<PrintConstraint, SymbolicEdge> breadthFirstIterator =
+				new BreadthFirstIterator<PrintConstraint, SymbolicEdge>(this, start);
+		while (breadthFirstIterator.hasNext()) {
+			ret.add(breadthFirstIterator.next());
+		}
+		return ret;
+	}
 
-    public Set<PrintConstraint> getPredicates() {
-        return predDepend.keySet();
-    }
+	public PrintConstraint getConstraint(Integer id) {
+		for (PrintConstraint c : vertexSet()) {
+			if (c.getId() == id) {
+				return c;
+			}
+		}
+		return null;
+	}
 
-    public Set<Integer> getPredicatesID() {
-        return predDependID.keySet();
-    }
+	public Set<PrintConstraint> getPredicates() {
+		return predDepend.keySet();
+	}
 
-    public Integer getNumSymInputs() {
-        return sources.size();
-    }
+	public Set<Integer> getPredicatesID() {
+		return predDependID.keySet();
+	}
 
-    public ArrayList<PrintConstraint> getNecessaryPredicates() {
-        return necessaryPredicates;
-    }
+	public Integer getNumSymInputs() {
+		return sources.size();
+	}
 
-    public void findNecessaryPredicates() {
-        // create priority queue structure for topological iteration
-        Queue<PrintConstraint> queue = new PriorityQueue<>(1, new PrintConstraintComparator());
+	public ArrayList<PrintConstraint> getNecessaryPredicates() {
+		return necessaryPredicates;
+	}
 
-        // create topological iterator for graph
-        TopologicalOrderIterator<PrintConstraint, SymbolicEdge> iterator = new TopologicalOrderIterator<>(this, queue);
+	public void findNecessaryPredicates() {
+		// create priority queue structure for topological iteration
+		Queue<PrintConstraint> queue = new PriorityQueue<>(1, new PrintConstraintComparator());
 
-        HashMap<Integer, Set<Integer>> copyPredDepends = new HashMap<Integer, Set<Integer>>();
-        for (Entry<Integer, Set<Integer>> e : predDependID.entrySet()) {
-            copyPredDepends.put(e.getKey(), new HashSet<Integer>(e.getValue()));
-        }
+		// create topological iterator for graph
+		TopologicalOrderIterator<PrintConstraint, SymbolicEdge> iterator = new TopologicalOrderIterator<>(this, queue);
 
-        // iterate over graph in topological order to find predicates that will need to be processed
-        while (iterator.hasNext()) {
-            PrintConstraint current = iterator.next();
-            int currentID = current.getId();
-            if (copyPredDepends.containsKey(currentID)) {
-                // if not just itself, remove itself from all predicates that depend on it
-                if (copyPredDepends.get(currentID).size() == 1) {
-                    necessaryPredicates.add(current);
-                }
-                Set<Integer> removals = new HashSet<Integer>(copyPredDepends.get(currentID));
-                copyPredDepends.remove(currentID);
-                for (Integer pred : removals) {
-                    if (copyPredDepends.containsKey(pred)) copyPredDepends.get(pred).remove(currentID);
-                }
+		HashMap<Integer, Set<Integer>> copyPredDepends = new HashMap<Integer, Set<Integer>>();
+		for (Entry<Integer, Set<Integer>> e : predDependID.entrySet()) {
+			copyPredDepends.put(e.getKey(), new HashSet<Integer>(e.getValue()));
+		}
 
-            }
-        }
+		// iterate over graph in topological order to find predicates that will need to be processed
+		while (iterator.hasNext()) {
+			PrintConstraint current = iterator.next();
+			int currentID = current.getId();
+			if (copyPredDepends.containsKey(currentID)) {
+				// if not just itself, remove itself from all predicates that depend on it
+				if (copyPredDepends.get(currentID).size() == 1) {
+					necessaryPredicates.add(current);
+				}
+				Set<Integer> removals = new HashSet<Integer>(copyPredDepends.get(currentID));
+				copyPredDepends.remove(currentID);
+				for (Integer pred : removals) {
+					if (copyPredDepends.containsKey(pred)) copyPredDepends.get(pred).remove(currentID);
+				}
 
-        // nps - 8.13.24
-        // sometimes in real graphs there are no symbolics for certain predicates so just remove those
-        // probably a better way of doing this...
-        ArrayList<PrintConstraint> ret = new ArrayList<>();
-        for (PrintConstraint c : necessaryPredicates) {
-            if (hasSymbolicAncestor(c)) {
-                ret.add(c);
-            }
-        }
+			}
+		}
 
-        necessaryPredicates = ret;
-    }
+		// nps - 8.13.24
+		// sometimes in real graphs there are no symbolics for certain predicates so just remove those
+		// probably a better way of doing this...
+		ArrayList<PrintConstraint> ret = new ArrayList<>();
+		for (PrintConstraint c : necessaryPredicates) {
+			if (hasSymbolicAncestor(c)) {
+				ret.add(c);
+			}
+		}
 
-    public boolean hasSymbolicAncestor(PrintConstraint c) {
-        for (int ancestor : getAncestors(c)) {
-            if (sources.contains(getConstraint(ancestor))) {
-                return true;
-            }
-        }
-        return false;
-    }
+		necessaryPredicates = ret;
+	}
 
-    // get each predicate and the symbolics that it has as ancestors
-    private void makeSymDepend() {
-        for (PrintConstraint p : predDepend.keySet()) {
-            Set<Integer> symSet = new HashSet<Integer>();
-            for (int a : getAncestors(p)) {
-                if (sources.contains(getConstraint(a))) {
-                    symSet.add(a);
-                }
-            }
-            symDepend.put(p.getId(), symSet);
-        }
-    }
+	public boolean hasSymbolicAncestor(PrintConstraint c) {
+		for (int ancestor : getAncestors(c)) {
+			if (sources.contains(getConstraint(ancestor))) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-    private void makeDependSym() {
-        for (PrintConstraint s : sources) {
-            dependSym.put(s.getId(), new HashSet<>());
-        }
-        for (Entry<Integer, Set<Integer>> e : symDepend.entrySet()) {
-            for (Integer sym : e.getValue()) {
-                dependSym.get(sym).add(e.getKey());
-            }
+	// get each predicate and the symbolics that it has as ancestors
+	private void makeSymDepend() {
+		for (PrintConstraint p : predDepend.keySet()) {
+			Set<Integer> symSet = new HashSet<Integer>();
+			for (int a : getAncestors(p)) {
+				if (sources.contains(getConstraint(a))) {
+					symSet.add(a);
+				}
+			}
+			symDepend.put(p.getId(), symSet);
+		}
+	}
 
-        }
-    }
+	private void makeDependSym() {
+		for (PrintConstraint s : sources) {
+			dependSym.put(s.getId(), new HashSet<>());
+		}
+		for (Entry<Integer, Set<Integer>> e : symDepend.entrySet()) {
+			for (Integer sym : e.getValue()) {
+				dependSym.get(sym).add(e.getKey());
+			}
 
-    public void orderIDsTopologically () {
-        // MAS algorithm requires the constraints to be IDed in topological order, otherwise the queue for evaluation will break
-        HashSet<PrintConstraint> processed = new HashSet<>();
-        ArrayList<PrintConstraint> toProcess = new ArrayList<>();
-        // should have made a getLeaves helper
-        for (PrintConstraint c : vertexSet()) {
-            if (this.outDegreeOf(c) == 0) {
-                toProcess.add(c);
-            }
-        }
-        toProcess.sort(new PrintConstraintComparator());
-        int id = vertexSet().size();
-        // we just need to make sure all ancestors of a constraint are processed before the constraint itself
-        while (!toProcess.isEmpty()) {
+		}
+	}
 
-            PrintConstraint current = toProcess.remove(0);
+	// java
+	public void orderIDsTopologically() {
+		// Precompute total descendants (excluding self) for stable, cheap tie‑breaks
+		Map<PrintConstraint, Integer> descCount = new HashMap<>();
+		for (PrintConstraint v : this.vertexSet()) {
+			int totalDesc = Math.max(0, this.getChildren(v).size() - 1);
+			descCount.put(v, totalDesc);
+		}
 
-            boolean parentsProcessed = true;
-            for (PrintConstraint next : this.getParents(current)) {
-                if (next!=current && !processed.contains(next)) {
-                    parentsProcessed = false;
-                    break;
-                }
-            }
-            if (parentsProcessed) {
-                processed.add(current);
-                current.setID(id--);
-                for (PrintConstraint child : this.getNextChildren(current)) {
-                    if (!toProcess.contains(child)) {
-                        toProcess.add(child);
-                    }
-                }
-            } else {
-                toProcess.add(current);
-            }
-        }
-    }
+		// Priority: lower descendant count first
+		Queue<PrintConstraint> queue = new PriorityQueue<>(
+				Comparator.comparingInt((PrintConstraint c) -> descCount.get(c))
+		);
 
-    public ArrayList<PrintConstraint> getNextChildren(PrintConstraint c){
-       Set<SymbolicEdge> edges = this.incomingEdgesOf(c);
-       ArrayList<PrintConstraint> ret = new ArrayList<>();
-       for (SymbolicEdge e : edges) {
-            ret.add((PrintConstraint) e.getASource());
-       }
-       ret.sort(new PrintConstraintComparator());
-       return ret;
-    }
+		// Emits each vertex only after all predecessors are emitted
+		TopologicalOrderIterator<PrintConstraint, SymbolicEdge> it =
+				new TopologicalOrderIterator<>(this, queue);
 
-    public ArrayList<PrintConstraint> getParents(PrintConstraint c){
-       Set<SymbolicEdge> edges = this.outgoingEdgesOf(c);
-       ArrayList<PrintConstraint> ret = new ArrayList<>();
-       for (SymbolicEdge e : edges) {
-            ret.add((PrintConstraint) e.getATarget());
-       }
-       ret.sort(new PrintConstraintComparator());
-       return ret;
-    }
+		int id = 0;
+		while (it.hasNext()) {
+			it.next().setID(id++);
+		}
+	}
 
-    // print 'visualization' of graph for debugging (note this could be very big)
-    public void printGraph() {
-       Iterator<PrintConstraint> iter = new TopologicalOrderIterator<PrintConstraint, SymbolicEdge>(this);
-       // based on topological level, print out constraint name and then edges below it...
-        System.out.println("============ GRAPH ================");
-         while (iter.hasNext()) {
-             PrintConstraint c = iter.next();
-             System.out.println(c + ", actual val: " + c.getActualVal());
-             for (SymbolicEdge e : this.outgoingEdgesOf(c)) {
-                 System.out.println("-> " + e.getATarget());
-             }
-             System.out.println("-------------------------------");
-         }
-    }
+	public ArrayList<PrintConstraint> getNextChildren(PrintConstraint c) {
+		Set<SymbolicEdge> edges = this.incomingEdgesOf(c);
+		ArrayList<PrintConstraint> ret = new ArrayList<>();
+		for (SymbolicEdge e : edges) {
+			ret.add((PrintConstraint) e.getASource());
+		}
+		ret.sort(new PrintConstraintComparator());
+		return ret;
+	}
 
+	public ArrayList<PrintConstraint> getParents(PrintConstraint c) {
+		Set<SymbolicEdge> edges = this.outgoingEdgesOf(c);
+		ArrayList<PrintConstraint> ret = new ArrayList<>();
+		for (SymbolicEdge e : edges) {
+			ret.add((PrintConstraint) e.getATarget());
+		}
+		ret.sort(new PrintConstraintComparator());
+		return ret;
+	}
+
+	public int boundLengthHeuristic() {
+		int length = 0;
+		for (PrintConstraint c : getPredicates()) {
+			// do a depth first search from each predicate looking for symbolic strings and concatenations
+			int concats = getBoundHeuristic(c);
+			if (concats > length) {
+				length = concats;
+			}
+		}
+		return length;
+	}
+
+	private int getBoundHeuristic(PrintConstraint current) {
+		// having this just be largest possible constructed string
+		String val = current.getSplitValue();
+		if (val.startsWith("\"")) {
+			return val.length() - 2; // remove quotes and escapes?
+		} else if (val.startsWith("r") || val.startsWith("$")) {
+			return 0;
+		}
+		ArrayList<PrintConstraint> children = getNextChildren(current);
+		if (val.startsWith("concat")) {
+			return getBoundHeuristic(children.get(0)) + getBoundHeuristic(children.get(1));
+		} else {
+			int max = 0;
+			for (PrintConstraint c : children) {
+				int child_max = getBoundHeuristic(c);
+				if (child_max > max) {
+					max = child_max;
+				}
+			}
+			return max;
+		}
+	}
+
+	// print 'visualization' of graph for debugging (note this could be very big)
+	public void printGraph() {
+		Iterator<PrintConstraint> iter = new TopologicalOrderIterator<PrintConstraint, SymbolicEdge>(this);
+		// based on topological level, print out constraint name and then edges below it...
+		System.out.println("============ GRAPH ================");
+		while (iter.hasNext()) {
+			PrintConstraint c = iter.next();
+			System.out.println(c + ", actual val: " + c.getActualVal());
+			for (SymbolicEdge e : this.outgoingEdgesOf(c)) {
+				System.out.println("-> " + e.getATarget());
+			}
+			System.out.println("-------------------------------");
+		}
+	}
 
 
 }

@@ -24,8 +24,8 @@ public class Model_Acyclic_Inverse_Manager extends A_Model_Manager <Model_Acycli
         this.alphabet = alphabet;
         this.boundLength = boundLength;
 
-        // set automaton minimization as huffman
-        Automaton.setMinimization(0);
+        // set automaton minimization as hopcroft
+        Automaton.setMinimization(2);
     }
 
 //    static void setInstance(Alphabet alphabet, int initialBoundLength) {

@@ -1360,6 +1360,9 @@ public class Parser_2<T extends A_Model<T>> {
 		// this is a quick and dirty check for forward prop unsat
 		T baseModel = solver.getModel(base);
 		T argModel = solver.getModel(arg);
+		if (baseModel == null || argModel == null) {
+			return false;
+		}
 		if (baseModel.isEmpty() || (argModel != null && argModel.isEmpty())) {
 			return false;
 		}

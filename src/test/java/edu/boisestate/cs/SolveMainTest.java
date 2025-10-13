@@ -30,7 +30,7 @@ public class SolveMainTest {
 	@Test
 	public void testSolve() {
 		restoreStreams();
-		String[] args = {"graphs/real/cleaned/htmlCleaner01.json", "-s", "inverse", "-v", "2", "-l", "5", "-d"};
+		String[] args = {"../smt-bench/benchmarks/bass/matching/sub-matching-sat-10.smt2.json", "-s", "inverse", "-v", "2", "-l", "5", "-d"};
 		SolveMain.main(args);
 	}
 
