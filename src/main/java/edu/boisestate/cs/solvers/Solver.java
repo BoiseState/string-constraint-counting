@@ -127,18 +127,20 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
             T tempArgModel = argModel.isSingleton() ? argModel : argModel.assertNotContainedInOther(tempBaseModel);
 
 			// potential issue with two symbolics...:
-			if (tempBaseModel.isEmpty()) {// basically shuoldnt happen?
-				System.err.println("Warning, Solver.contains(): base model is empty");
-				System.exit(1);
-				if (tempArgModel.isEmpty()){
-				}
-			} else if (tempArgModel.isEmpty()){
-				System.err.println("Warning, Solver.contains(): arg model is empty");
-				tempBaseModel = baseModel.resolveNotContains(argModel);
-				tempArgModel = argModel.assertNotContainedInOther(tempBaseModel);
+			if (tempBaseModel.isEmpty() || tempArgModel.isEmpty()) {// basically shuoldnt happen?
+//				System.err.println("Warning, Solver.contains(): base model is empty");
 //				System.exit(1);
-//				tempArgModel = argModel.assertNotContainsOther(tempBaseModel);
+//				if (tempArgModel.isEmpty()){
+				tempArgModel = null;
+				tempBaseModel = null;
 			}
+//			} else if (tempArgModel.isEmpty()){
+//				System.err.println("Warning, Solver.contains(): arg model is empty");
+//				tempBaseModel = baseModel.resolveNotContains(argModel);
+//				tempArgModel = argModel.assertNotContainedInOther(tempBaseModel);
+////				System.exit(1);
+////				tempArgModel = argModel.assertNotContainsOther(tempBaseModel);
+//			}
             // set base model from temp
             baseModel = tempBaseModel;
 			argModel = tempArgModel;

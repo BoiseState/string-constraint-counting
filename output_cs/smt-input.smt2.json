@@ -1,0 +1,43 @@
+{
+	"alphabet" : {
+		"size" : 95,
+		"declaration" : "a,b,c"
+	},
+	"vertices" : [
+		{
+			"num" : 0,
+			"actualValue" : "abc",
+			"incomingEdges" :[
+			],
+			"sourceConstraints" : [ ],
+			"timeStamp" : 1760489409047,
+			"type" : 0,
+			"id" : 0,
+			"value" : "\"abc\"!:!<init>"
+		},{
+			"num" : 0,
+			"actualValue" : "string0",
+			"incomingEdges" :[
+			],
+			"sourceConstraints" : [ ],
+			"timeStamp" : 1760489409047,
+			"type" : 0,
+			"id" : 1,
+			"value" : "r0!:!getStringValue!!"
+		},{
+			"num" : 0,
+			"actualValue" : "false",
+			"incomingEdges" :[
+				 {
+					"source" : 0,
+					"type" : "t"
+				}, {
+					"source" : 1,
+					"type" : "s1"
+				}],
+			"sourceConstraints" : [ ],
+			"timeStamp" : 1760489409047,
+			"type" : 0,
+			"id" : 2,
+			"value" : "equals!!Ljava/lang/Object;!:!0"
+		} ] }

@@ -369,6 +369,11 @@ public class Parser_2<T extends A_Model<T>> {
 		// MJR
 		constraint.setOp(CONCAT_SYM);
 
+		if (arg == -1) {
+			System.err.println("LIKELY DOUBLE EDGE (two same args) CONCAT IN GRAPH");
+			System.exit(1);
+		}
+
 		if (this.solver.isSingleton(arg)) {
 			operation = String.format("<S:%d>.%s(\"%s\")", base, fName, actualVals.get(arg));
 			constraint.setOp(CONCAT_CON);

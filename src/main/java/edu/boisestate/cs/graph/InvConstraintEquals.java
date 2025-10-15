@@ -181,8 +181,8 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 				}
 
 				if(this.nextConstraint.getOp() == Operation.INIT_CON){
-					indxSymb = 2;
-					indxConcr = 1;
+//					indxSymb = 2;
+//					indxConcr = 1;
 					if (this.argConstraint.getOp() == Operation.LENGTH){
 						// parse concrete value and propogate back valid model
 						String concrStr = solver.getSymbolicModel(nextID).getShortestExampleString();
