@@ -9,10 +9,8 @@ import static edu.boisestate.cs.automaton.AutomatonHelper.LogicalTransition;
 
 import edu.boisestate.cs.automatonModel.operations.*;
 import edu.boisestate.cs.util.Quadruple;
-import edu.boisestate.cs.util.Triple;
 import edu.boisestate.cs.util.Tuple;
 
-import javax.jws.WebParam;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -1952,9 +1950,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return this.automaton.getShortestExample(true);
 	}
 
-
 	@Override
-	public Model_Acyclic_Inverse getShortestExampleModel() {
+	public Model_Acyclic_Inverse getShortestModel() {
 		State initial = this.automaton.getInitialState();
 		State exampleStart = new State();
 		exampleStart.setAccept(initial.isAccept());
@@ -1975,6 +1972,12 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		Automaton exampleAut = new Automaton();
 		exampleAut.setInitialState(exampleStart);
 		return new Model_Acyclic_Inverse(exampleAut, this.alphabet, calculateBoundLength(exampleAut));
+	}
+
+	@Override
+	public Model_Acyclic_Inverse getShortestExampleModel() {
+		return modelManager.createString(this.automaton.getShortestExample(true));
+
 	}
 
 //    private void ensureAcyclicModel(Model_Acyclic_Inverse arg) {

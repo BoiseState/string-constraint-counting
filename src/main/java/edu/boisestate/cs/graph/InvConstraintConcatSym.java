@@ -138,7 +138,7 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 
 			//System.out.println("inputs " + inputs.getFiniteStrings());
 			//remove one example from the inputs
-			T input = ostrich? inputs : inputs.getShortestExampleModel();
+			T input = ostrich? inputs : inputs.getShortestModel();
 //			System.out.println("input " + input.getFiniteStrings() + " hash " + input.hashCode());
 			List<Tuple<T,T>> currOutput = new ArrayList<Tuple<T,T>>();
 			//equals is implemented between two automata, but
@@ -202,7 +202,7 @@ public class InvConstraintConcatSym<T extends A_Model_Inverse<T>> extends A_Inv_
 							return new Tuple<Boolean, Boolean>(false, true);
 						}
 						//try them that
-						input = inputs.getShortestExampleModel();
+						input = inputs.getShortestModel();
 						currOutput = input.inv_concatenate_sym_set(nextModel, argModel);
 					}
 					mapInOut.put(input, currOutput);

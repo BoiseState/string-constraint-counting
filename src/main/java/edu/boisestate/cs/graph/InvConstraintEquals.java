@@ -225,6 +225,19 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 					//expected result is true
 					//cannot do any optimization since it is relational
 					T input = inputs.getShortestExampleModel();
+//					T suggestNext = this.getSuggestion(nextConstraint);
+//					T suggestArg = this.getSuggestion(argConstraint);
+//					if (suggestNext != null) {
+//						input = suggestNext;
+//						if (suggestArg != null) {
+//							input = suggestNext.intersect(suggestArg);
+//							this.setSuggestion(argConstraint, null);
+//						}
+//						this.setSuggestion(nextConstraint, null);
+//					} else if (suggestArg != null) {
+//						input = suggestArg;
+//						this.setSuggestion(argConstraint, null);
+//					}
 //					System.out.println("Solution " + input.getFiniteStrings());
 					//remove it from the inputs
 					inputs.minus(input);

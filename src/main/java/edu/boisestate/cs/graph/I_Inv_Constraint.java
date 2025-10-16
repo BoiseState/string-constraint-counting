@@ -63,5 +63,5 @@ public interface I_Inv_Constraint<T extends A_Model_Inverse<T>> {
 	 * synch prevIDs
 	 */
 	void update();
-	
+
 }

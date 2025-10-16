@@ -1,7 +1,6 @@
 package edu.boisestate.cs.automatonModel;
 
 import java.math.BigInteger;
-import java.util.Collections;
 import java.util.Set;
 
 import dk.brics.automaton.Automaton;

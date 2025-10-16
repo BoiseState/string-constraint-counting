@@ -144,6 +144,9 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 			printDebug("DEBUG " + op.toString() + " " + ID);
 			printDebug("Current SOLUTION: " + inputs.getShortestExampleString());
 
+			//TODO: should/could forward prop here
+//			suggest(inputs);
+
 //    		BigInteger oneHundred = new BigInteger("300");
 //
 //    		if (inputs.modelCount().compareTo(oneHundred) > 0) {
@@ -170,6 +173,7 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 
 		} else {
 			//example not consistent, then backtrack
+			// suggest solution to backtracked parents?
 			ret = new Tuple<Boolean, Boolean> (false, true);
 			printDebug("      example set " + this.ID + " not consistent, falling back ...");
 //			System.out.println("      example set " + this.ID + " not consistent, falling back ...");

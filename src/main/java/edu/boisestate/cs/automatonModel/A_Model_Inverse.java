@@ -20,8 +20,10 @@ public abstract class A_Model_Inverse <T extends A_Model_Inverse <T>> extends A_
     public String getShortestExampleString() {
         return this.automaton.getShortestExample(true);
     }
-    
-    public abstract T getShortestExampleModel();
+
+	public abstract T getShortestModel();
+
+	public abstract T getShortestExampleModel();
     
     public Automaton getAutomatonObject() {
  	   return this.automaton;
