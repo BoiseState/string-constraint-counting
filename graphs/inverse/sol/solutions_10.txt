@@ -1,8 +1,0 @@
-{
-  "SAT" : true,
-  "inputs" : [ {
-    "ID" : 5,
-    "SPFsym" : "",
-    "input" : "aa"
-  } ]
-}

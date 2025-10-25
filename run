@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ $# -lt 2 ]; then
-	echo "Usage: $0 <file> <length> [debug(-d)]" >&2
+if [[ $# -lt 1 || $# -gt 3 ]]; then
+	echo "Usage: $0 <json-file> [length] [debug(-d)]" >&2
 	exit 1
 fi
 
