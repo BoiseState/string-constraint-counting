@@ -254,7 +254,8 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
                 if (solution == null || solution.isEmpty()) {
                     printDebug("INPUT SOLUTION SET INCONSISTENT: " + c.getID());
                 } else {
-                    solutions.add(c.getID(), solution);
+					InvConstraintInput ic = (InvConstraintInput<T>) c;
+                    solutions.add(c.getID(), solution, (T) ic.getComp());
                 }
             }
         }

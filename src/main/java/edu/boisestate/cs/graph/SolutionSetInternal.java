@@ -18,6 +18,7 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 
 	Map<Integer,T> solutions;
 	HashSet<T> sols;
+	T comp;
 	int ID;
 	
 	/**
@@ -39,7 +40,6 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 	 * @param solution - Automata example
 	 */
 	public void setSolution (Integer incomingEdge, T solution) {
-
 		solutions.put(incomingEdge, solution);
 	}
 
@@ -105,8 +105,12 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 				}
 			}
 		}
-		
+		if (firstSolution != null) comp = firstSolution.complement();	// :)
 		return firstSolution;
+	}
+
+	public T getComp() {
+		return comp;
 	}
 	
 	/**

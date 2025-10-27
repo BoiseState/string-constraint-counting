@@ -249,10 +249,7 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 		return this.prevIDs;
 	}
 
-
 	public T getSolution() {
-
-
 		return solutionSet.getSolution();
 
 	}

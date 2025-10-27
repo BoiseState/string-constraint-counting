@@ -24,7 +24,9 @@ public abstract class A_Model_Inverse <T extends A_Model_Inverse <T>> extends A_
 	public abstract T getShortestModel();
 
 	public abstract T getShortestExampleModel();
-    
+
+	public abstract T complement();
+
     public Automaton getAutomatonObject() {
  	   return this.automaton;
     }

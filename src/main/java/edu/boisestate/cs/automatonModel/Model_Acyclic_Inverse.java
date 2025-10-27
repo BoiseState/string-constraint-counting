@@ -2571,6 +2571,12 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 //        return null;
 	}
 
+	public Model_Acyclic_Inverse complement() {
+		Automaton comp = this.automaton.complement();
+		comp.minimize();
+		return new Model_Acyclic_Inverse(comp, this.alphabet, this.boundLength);
+	}
+
 
 	// create automaton from stack that represents specific prefix path
 	public static Automaton automatonFromStack(Stack<State> stack) {

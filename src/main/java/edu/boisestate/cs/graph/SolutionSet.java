@@ -24,11 +24,13 @@ public class SolutionSet<T extends A_Model<T>> {
 		public int ID;
 		public String example;
 		public A_Model<T> model; // model included for debugging i guess
+		public A_Model<T> comp;
 
-		public Solution(int ID, String solution, T model) {
+		public Solution(int ID, String solution, T model, T comp) {
 			this.ID = ID;
 			this.example = solution;
 			this.model = model;
+			this.comp = comp;
 		}
 
 		public String toString() {
@@ -54,8 +56,8 @@ public class SolutionSet<T extends A_Model<T>> {
 		this.SAT = sat;
 	}
 
-	public void add(int id, T solution) {
-		Solution sol = new Solution(id, solution.getAcceptedStringExample(), solution);
+	public void add(int id, T solution, T comp) {
+		Solution sol = new Solution(id, solution.getAcceptedStringExample(), solution, comp);
 		for (Solution s : solutions) {
 			if (s.ID == id) {
 				solutions.remove(s);

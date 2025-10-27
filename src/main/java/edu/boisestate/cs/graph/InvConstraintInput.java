@@ -168,7 +168,7 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 				ret = new Tuple<>(false, true); //backtrack as example for input for currentbackprop not consistent with a previous example
 				// TODO: does not backtrack to previous run
 			} else {
-				this.outputSet.put(0, inputs);
+				this.outputSet.put(0, inputs); // used?
 			}
 
 		} else {
@@ -179,6 +179,10 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 //			System.out.println("      example set " + this.ID + " not consistent, falling back ...");
 		}
 		return ret;//never backtrack here
+	}
+
+	public T getComp() {
+		return solutionSet.getComp();
 	}
 
 	public void clear() {
