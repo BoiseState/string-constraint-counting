@@ -1,6 +1,6 @@
-# String Constraint Counting
+# A-Str
 
-A Java-based string constraint solver that analyzes symbolic string operations using automaton-based techniques. The tool uses an acyclic automaton model to solve string constraints represented as directed graphs in JSON or SMT2 format.
+An acylic automata based string constraint solver for Java programs. Symbolic string inputs are represented as deterministic acylic automata and manipulated throughout the course of a programs data flow graph to find satisfying assignments. The tool accepts a proprietary .json format that represents an execution path in a Java progam and returns `unsat` or `sat` and an example assignment set.
 
 ## Build
 
@@ -15,39 +15,27 @@ This creates the executable JAR at:
 
 ## Running the Solver
 
-The simplest way to run the solver is using the provided `run` script, which automatically builds the project if needed:
-
 ```bash
-./run <graph-file> <length>
+./run <graph-file>
 ```
 
-**Example:**
+The `run` script:
+- Builds the project using Maven if this has not been done before
+- Converts an input `.smt2` file to `.json` 
+- Runs the solver with the necessary arguments on the input provided
+
+It takes one argument, the input file to be solved. Note that this script does not provide any guards for time outs or memory limits so use it with caution and/or add the desired limitations.
+
+**Examples:**
+
 ```bash
-./run graphs/inverse/inverse_case_1.json 2
+./run ../benchmarks/a-str/real/beasties01.smt2.json
 ```
-
-The script runs the solver with the acyclic automaton model (version 2) configured for satisfiability reporting.
-
-### Input Files
-
-Provide constraint graphs in either:
-- **JSON format**: See example files in the root directory and `graphs/` subdirectory
-- **SMT2 format**: Standard SMT-LIB format for string constraints
-
-Example JSON constraint files:
-- Root directory: Simple examples (HelloWorld.json, CharAt.json, etc.)
-- `graphs/inverse/`: Inverse solver test cases
-- `graphs/benchmarks/`: Performance benchmarks
-- `graphs/real/`: Real-world extracted constraints
-
-## Test
-
-Run the test suite:
-
+or
 ```bash
-mvn test
+./run ../benchmarks/smt/automatark/instance00022.smt2
 ```
 
 ## Additional Information
 
-See the code repository at https://github.com/BoiseState/string-constraint-counting for more details.
+The repository for the development of this tool can be found at https://github.com/BoiseState/string-constraint-counting
