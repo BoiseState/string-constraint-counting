@@ -1,8 +1,32 @@
 #!/bin/bash
 
-if [[ $# -lt 1 || $# -gt 3 ]]; then
-	echo "Usage: $0 <json-file> [length] [debug(-d)]" >&2
+if [[ $# -lt 1 || $# -gt 2 ]]; then
+	echo "Usage: $0 <input-file> [debug(-d)]" >&2
 	exit 1
+fi
+
+INPUT="$1"
+if [[ ! -f "$INPUT" ]]; then
+  echo "Input file '$INPUT' does not exist." >&2
+  exit 1
+fi
+SMT=0
+if [[ $INPUT == *.smt2 ]]; then
+  echo "Input file is in SMT-LIB format."
+  SMT=1
+  echo "Converting..."
+elif [[ $INPUT != *.json ]]; then
+    echo "Unsupported input file format. Please provide a .smt2 or .json file." >&2
+    exit 1
+fi
+
+if [[ $SMT -eq 1 ]]; then
+  mkdir -p tmp
+  mv "$INPUT" tmp/input.smt2
+  java -cp tools/smtlib-converter.jar edu.boisestate.cs.MainJSON tmp
+  INPUT="output_tmp/input.smt2.json"
+  rm -rf tmp
+  echo -n " success."
 fi
 
 if find src -type f -newer target | grep -q .; then
@@ -16,4 +40,11 @@ if [ "$status" -ne 0 ]; then
 	exit "$status"
 fi
 
-java -cp target/string-constraint-solvers-1.0-SNAPSHOT-jar-with-dependencies.jar edu.boisestate.cs.SolveMain "$1" -s inverse -v 2 -l "$2" $3
+DEBUG=""
+if [[ $# -eq 2 ]]; then
+  DEBUG="$2"
+fi
+
+java -cp target/string-constraint-solvers-1.0-SNAPSHOT-jar-with-dependencies.jar edu.boisestate.cs.SolveMain "$1" -s inverse -v 2 -l 2 $DEBUG
+
+rm -rf output_tmp

@@ -1,83 +1,53 @@
-# string-constraint-counting
+# String Constraint Counting
 
-To test solution, run the concrete singleton solver:
-java SolveMain ./graphs/inverse/inverse_case_1.json -l 2 -s concrete -v 2
+A Java-based string constraint solver that analyzes symbolic string operations using automaton-based techniques. The tool uses an acyclic automaton model to solve string constraints represented as directed graphs in JSON or SMT2 format.
 
-Where -s concrete is the concrete solver
--v 2 is for second version of it, which is singleton - it only tracks one values for a symbolic variable, and that values is read from the actual value of the symbolic variable in the graph.
+## Build
 
-Correct input values would always have true* in the reporter:
-ID	SING	TSAT	FSAT	DISJ	PREV OPS
-32	true	true*	false	yes	<S:5> = <init>{647} -> [10]<S:5>.toLowerCase(){28} -> [17]<S:10>.concat("AB"){20} -> [32]<S:17>.contains("aA"){695}
+Build the project using Maven:
 
-Incorrect input value would produce some false* in the reporter (changed the actual value of <S:5> to "bb" instead of "AA"
-ID	SING	TSAT	FSAT	DISJ	PREV OPS
-32	true	false*	true	yes	<S:5> = <init>{642} -> [10]<S:5>.toLowerCase(){26} -> [17]<S:10>.concat("AB"){17} -> [32]<S:17>.contains("aA"){685}
+```bash
+mvn install
+```
 
+This creates the executable JAR at:
+`target/string-constraint-solvers-1.0-SNAPSHOT-jar-with-dependencies.jar`
 
-Output from solverMain -h
+## Running the Solver
 
-USAGE:
+The simplest way to run the solver is using the provided `run` script, which automatically builds the project if needed:
 
-  java edu.boisestate.cs.SolveMain <Graph File> [-d] [-h] [-l <length>]
-         [-r <reporter>] [-s <solver>] [-v <version>]
+```bash
+./run <graph-file> <length>
+```
 
-Run string constraint solver on specified control flow graph. The default
-string constraint solver is jsa. The default reporter is sat.
+**Example:**
+```bash
+./run graphs/inverse/inverse_case_1.json 2
+```
 
-OPTIONS:
+The script runs the solver with the acyclic automaton model (version 2) configured for satisfiability reporting.
 
- -d,--debug                     Runs the solver framework in debug mode.
-                                Default value is false.
- -h,--help                      Display this message.
- -l,--length <length>           Initial bounding length of the underlying
-                                symbolic string, used with JSA, inverse
-                                and Concrete solvers. Default value is 10.
- -r,--reporter <reporter>       The reporter used to gather information
-                                for each string constraint:
-                                sat - Reports on the satisfiability of
-                                each string constraint in the specified
-                                graph
-                                model-count - Reports on the number and
-                                percent of string instances for each
-                                branch leaving the string constraint,
-                                includes satisfiability.
-                                The default reporter is sat
- -s,--solver <solver>           The solver that will be used to solve
-                                string constraints:
-                                blank - The blank solver used for testing.
-                                concrete - The concrete solver which
-                                provides an oracle for other solvers.
-                                jsa - The Java String Analyzer solver
-                                which comes from the dk.brics automaton
-                                and string libraries.
-                                inverse - Input generation solver.
-                                Reporter and automata types are ignored
-                                with this solver.
-                                The default solver is jsa
- -v,--model-version <version>   The version of the automaton model used by
-                                the JSA string constraint solver:
-                                1 - Bounded Automaton Model
-                                2 - Acyclic Automaton Model
-                                3 - Acyclic Weighted Automaton
+### Input Files
 
+Provide constraint graphs in either:
+- **JSON format**: See example files in the root directory and `graphs/` subdirectory
+- **SMT2 format**: Standard SMT-LIB format for string constraints
 
-USAGE EXAMPLES:
+Example JSON constraint files:
+- Root directory: Simple examples (HelloWorld.json, CharAt.json, etc.)
+- `graphs/inverse/`: Inverse solver test cases
+- `graphs/benchmarks/`: Performance benchmarks
+- `graphs/real/`: Real-world extracted constraints
 
-    java edu.boisestate.cs.SolveMain <PROJECT_ROOT>/graphs/iText02.json
-        -s jsa -r sat -v 1 -l 10
+## Test
 
-Run sat reporter for the iText02.json constraint graph file using the JSA
-solver with bounded automata and an initial bounding length of 10.
+Run the test suite:
 
-    java edu.boisestate.cs.SolveMain <PROJECT_ROOT>/graphs/iText02.json
-        -s concrete -r model-count -l 10
+```bash
+mvn test
+```
 
-Run model count reporter for the iText02.json constraint graph file using
-the Concrete solver with an initial bounding length of 10.
+## Additional Information
 
-ADDITIONAL INFORMATION:
-
-See the code repository at
-https://github.com/BoiseState/string-constraint-counting for more details.
-
+See the code repository at https://github.com/BoiseState/string-constraint-counting for more details.
