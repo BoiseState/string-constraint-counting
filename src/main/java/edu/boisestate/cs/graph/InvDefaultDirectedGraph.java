@@ -249,6 +249,7 @@ public class InvDefaultDirectedGraph extends DefaultDirectedGraph<PrintConstrain
 		// Priority: lower descendant count first
 		Queue<PrintConstraint> queue = new PriorityQueue<>(
 				Comparator.comparingInt((PrintConstraint c) -> descCount.get(c))
+						.thenComparingInt(PrintConstraint::getId)
 		);
 
 		// Emits each vertex only after all predecessors are emitted
