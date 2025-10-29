@@ -474,7 +474,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
                 case INIT_SYM:
 
-                    newConstraint = new InvConstraintInput<T>(ID, invSolver);
+                    newConstraint = new InvConstraintInput<T>(ID, invSolver, value);
                     allInverseConstraints.put(ID, newConstraint);
 
                     if (localDebug) {

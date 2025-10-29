@@ -255,7 +255,8 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
                     printDebug("INPUT SOLUTION SET INCONSISTENT: " + c.getID());
                 } else {
 					InvConstraintInput ic = (InvConstraintInput<T>) c;
-                    solutions.add(c.getID(), solution, (T) ic.getComp());
+					// Adding solution complements for caching purposes
+                    solutions.add(c.getID(), ic.getOriginalName(), solution, (T) ic.getComp());
                 }
             }
         }
@@ -297,7 +298,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 //			}
 //		}
 
-        System.out.println(solutions.getSolutions());
+        System.out.println(solutions.getResult());
 
     }
 

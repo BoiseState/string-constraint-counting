@@ -25,13 +25,15 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 	//private SolutionSet<T> solutionSet;
 	
 	//private int solutionIndex = -1;
+	private final String originalName;
 	
 	
-	public InvConstraintInput (int ID, Solver_Inverse<T> solver) {
+	public InvConstraintInput (int ID, Solver_Inverse<T> solver, String originalName) {
 		
 		// Store reference to solver
 		this.solver = solver;
 		this.ID = ID;
+		this.originalName = originalName;
 		this.outputSet = new HashMap<Integer,T>();
 		this.solutionSet = new SolutionSetInternal<T>(ID);
 		this.op  = Operation.INIT_SYM;
@@ -188,6 +190,10 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 	public void clear() {
 		super.clear();
 		solutionSet.clear();
+	}
+
+	public String getOriginalName() {
+		return originalName;
 	}
 
 

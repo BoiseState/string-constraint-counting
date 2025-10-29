@@ -2570,10 +2570,12 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return result.union(this);
 //        return null;
 	}
-
+	// note that this shuld be the complement within te universe of alphabet and boundLength
 	public Model_Acyclic_Inverse complement() {
-		Automaton comp = this.automaton.complement();
-		comp.minimize();
+		Automaton comp = this.automaton.clone();
+		for (State s : comp.getStates()) {
+			s.setAccept(!s.isAccept());
+		}
 		return new Model_Acyclic_Inverse(comp, this.alphabet, this.boundLength);
 	}
 

@@ -22,19 +22,21 @@ public class SolutionSet<T extends A_Model<T>> {
 	public class Solution implements Comparable<Solution> {
 
 		public int ID;
+		public String originalName;
 		public String example;
 		public A_Model<T> model; // model included for debugging i guess
 		public A_Model<T> comp;
 
-		public Solution(int ID, String solution, T model, T comp) {
+		public Solution(int ID, String originalName, String solution, T model, T comp) {
 			this.ID = ID;
+			this.originalName = originalName.replace("_SYMSTRING", ""); // just for spf
 			this.example = solution;
 			this.model = model;
 			this.comp = comp;
 		}
 
 		public String toString() {
-			return ID + ": \"" + example + "\"";
+			return originalName + ": \"" + example + "\"";
 		}
 
 		public int compareTo(Solution s) {
@@ -56,8 +58,8 @@ public class SolutionSet<T extends A_Model<T>> {
 		this.SAT = sat;
 	}
 
-	public void add(int id, T solution, T comp) {
-		Solution sol = new Solution(id, solution.getAcceptedStringExample(), solution, comp);
+	public void add(int id, String originalName, T solution, T comp) {
+		Solution sol = new Solution(id, originalName, solution.getAcceptedStringExample(), solution, comp);
 		for (Solution s : solutions) {
 			if (s.ID == id) {
 				solutions.remove(s);
@@ -68,7 +70,7 @@ public class SolutionSet<T extends A_Model<T>> {
 		if (solutions.size() == numInputs) SAT = true;
 	}
 
-	public String getSolutions() {
+	public String getResult() {
 		if (!SAT) return "unsat";
 		else {
 			StringBuilder sb = new StringBuilder();
@@ -79,6 +81,10 @@ public class SolutionSet<T extends A_Model<T>> {
 			}
 			return sb.toString();
 		}
+	}
+
+	public List<Solution> getSolutions() {
+		return solutions;
 	}
 
 	public String toString() {
@@ -94,5 +100,24 @@ public class SolutionSet<T extends A_Model<T>> {
 
 	public boolean isSAT() {
 		return SAT;
+	}
+
+	public SolutionSet<T> clone() {
+		SolutionSet<T> newSet = new SolutionSet<>(this.numInputs);
+		newSet.setSAT(this.SAT);
+		for (Solution s : this.solutions) {
+			Solution newSol = new Solution(s.ID, s.originalName, s.example, s.model.clone(), s.comp.clone());
+			newSet.solutions.add(newSol);
+		}
+		return newSet;
+	}
+
+	public Solution getSolutionForVar(String originalName) {
+		for (Solution s : solutions) {
+			if (s.originalName.equals(originalName)) {
+				return s;
+			}
+		}
+		return null;
 	}
 }

@@ -6,7 +6,7 @@
   "vertices" : [
     {
       "num" : 0,
-      "actualValue" : "",
+      "actualValue" : "1",
       "incomingEdges" :[
       ],
       "sourceConstraints" : [ ],
