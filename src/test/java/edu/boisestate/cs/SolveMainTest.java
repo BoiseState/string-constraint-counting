@@ -116,7 +116,7 @@ public class SolveMainTest {
 
     @Test
     public void testContains(){
-        String expectedOutput = "sat,\n0: \"0\"\n";
+        String expectedOutput = "sat,\n1: \"0\"\n";
         String[] args = {"notContains.json", "-s", "inverse", "-v", "2", "-l", "2"};
         SolveMain.main(args);
         assertEquals(expectedOutput, outContent.toString());
@@ -126,16 +126,16 @@ public class SolveMainTest {
 
     @Test
     public void testConcat() {
-		restoreStreams();
+//		restoreStreams();
         String expectedOutput = "";
         try {
             expectedOutput = new String (Files.readAllBytes(Paths.get(outPath + "concat.txt")));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String[] args = {inPath + "concat_isEmpty_equals_contains_l2_d2_bench.json", "-s", "inverse", "-v", "2", "-l", "2", "-d"};
+        String[] args = {inPath + "concat_isEmpty_equals_contains_l2_d2_bench.json", "-s", "inverse", "-v", "2", "-l", "2"};
         SolveMain.main(args);
-//        assertEquals(expectedOutput, outContent.toString());
+        assertEquals(expectedOutput, outContent.toString());
     }
 
     @Test
