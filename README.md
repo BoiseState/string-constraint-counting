@@ -4,12 +4,16 @@ An acylic automata based string constraint solver for Java programs. Symbolic st
 
 ## Build
 
-Build the project using Maven:
+The project is built using Maven. If necessary install Maven with, for example:
+```bash
+sudo apt install -y maven
+```
+
+When at the root of this project where the `pom.xml` is located, run:
 
 ```bash
 mvn install
 ```
-
 This creates the executable JAR at:
 `target/string-constraint-solvers-1.0-SNAPSHOT-jar-with-dependencies.jar`
 
@@ -22,7 +26,7 @@ This creates the executable JAR at:
 The `run` script:
 - Builds the project using Maven if this has not been done before
 - Converts an input `.smt2` file to `.json` 
-- Runs the solver with the necessary arguments on the input provided
+- Runs the solver using the JAR, with the necessary arguments, on the input provided
 
 It takes one argument, the input file to be solved. Note that this script does not provide any guards for time outs or memory limits so use it with caution and/or add the desired limitations.
 
