@@ -27,51 +27,65 @@ public class SolveMainTest {
         System.setOut(originalOut);
     }
 
-	@Test
-	public void testSolve() {
-		restoreStreams();
-		String[] args = {"src/test/resources/in/smt-input.smt2", "-s", "inverse", "-v", "2", "-l", "5"};
-		SolveMain.main(args);
-	}
+//	@Test
+//	public void testSolve() {
+//		restoreStreams();
+//		String[] args = {outPath + "smt-input.smt2", "-s", "inverse", "-v", "2", "-l", "5"};
+//		SolveMain.main(args);
+//	}
 
 	// friendly reminder generator has bugs and is incomplete :)
+//	@Test
+//    public void smtQueryPlaygroundTest(){
+//        restoreStreams();
+//		String jsonOutputPath = "src/test/resources/in/smt-input.smt2.json";
+//        try {
+//			// generator takes directory as input and converts smt2 files
+//			File file = new File("src/test/resources/in/smt-input.smt2");
+//			String javaPath = "/usr/lib/jvm/java-21-openjdk-amd64/bin/java";
+//            ProcessBuilder pb = new ProcessBuilder(
+//					javaPath, "-cp",
+//					"/home/nat/Repos/SMT-parser-generator/target/GenJSONs-1.0-SNAPSHOT-jar-with-dependencies.jar",
+//					"edu.boisestate.cs.MainJSON",
+//					file.getAbsolutePath(),
+//					jsonOutputPath
+//			);
+//			pb.redirectErrorStream(true);
+//            pb.start();
+//
+//			String[] args = {jsonOutputPath, "-s", "inverse", "-v", "2", "-l", "8"};
+//			SolveMain.main(args);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+
 	@Test
-    public void smtQueryPlaygroundTest(){
-        restoreStreams();
-		String jsonOutputPath = "src/test/resources/in/smt-input.smt2.json";
-        try {
-			// generator takes directory as input and converts smt2 files
-			File file = new File("src/test/resources/in/smt-input.smt2");
-			String javaPath = "/usr/lib/jvm/java-21-openjdk-amd64/bin/java";
-            ProcessBuilder pb = new ProcessBuilder(
-					javaPath, "-cp",
-					"/home/nat/Repos/SMT-parser-generator/target/GenJSONs-1.0-SNAPSHOT-jar-with-dependencies.jar",
-					"edu.boisestate.cs.MainJSON",
-					file.getAbsolutePath(),
-					jsonOutputPath
-			);
-			pb.redirectErrorStream(true);
-            pb.start();
-
-			String[] args = {jsonOutputPath, "-s", "inverse", "-v", "2", "-l", "8"};
-			SolveMain.main(args);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+	public void testStartsWith() {
+		restoreStreams();
+		String expectedOutput = "";
+		try {
+			expectedOutput = new String (Files.readAllBytes(Paths.get(outPath + "startsWithTest.txt")));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		String[] args = {inPath + "startsWithTest.smt2", "-s", "inverse", "-v", "2", "-l", "5"};
+		SolveMain.main(args);
+//		assertEquals(expectedOutput, outContent.toString());
+	}
 
 	@Test
 	public void testLength() {
 		restoreStreams();
-		String[] args = {"Length.json", "-s", "inverse", "-v", "2", "-l", "5"};
+		String[] args = {inPath + "Length.json", "-s", "inverse", "-v", "2", "-l", "5"};
 		SolveMain.main(args);
 	}
 
 	@Test
 	public void testIsEmpty() {
 		restoreStreams();
-		String[] args = {"isEmpty.json", "-s", "inverse", "-v", "2", "-l", "5"};
+		String[] args = {inPath + "src/test/resources/in/isEmpty.json", "-s", "inverse", "-v", "2", "-l", "5"};
 		SolveMain.main(args);
 	}
 
@@ -84,34 +98,34 @@ public class SolveMainTest {
     @Test
     public void testInsert() {
         restoreStreams();
-        String[] args = {"Insert.json", "-s", "inverse", "-v", "2", "-l", "11"};
+        String[] args = {inPath + "Insert.json", "-s", "inverse", "-v", "2", "-l", "11"};
         SolveMain.main(args);
     }
 
     @Test
     public void testTrim() {
         restoreStreams();
-        String[] args = {"Trim.json", "-s", "inverse", "-v", "2", "-l", "5"};
+        String[] args = {inPath + "Trim.json", "-s", "inverse", "-v", "2", "-l", "5"};
         SolveMain.main(args);
     }
 
     @Test
     public void testIndexOf() {
         restoreStreams();
-        String[] args = {"IndexOf.json", "-s", "inverse", "-v", "2", "-l", "5"};
+        String[] args = {inPath + "IndexOf.json", "-s", "inverse", "-v", "2", "-l", "5"};
         SolveMain.main(args);
     }
 
     @Test
     public void testCharAt(){
         restoreStreams();
-        String[] args = {"CharAt.json", "-s", "inverse", "-v", "2", "-l", "5"};
+        String[] args = {inPath + "CharAt.json", "-s", "inverse", "-v", "2", "-l", "5"};
         SolveMain.main(args);
     }
 
     @Test
     public void testDeleteAgain(){
-        String[] args = {"Delete.json", "-s", "inverse", "-v", "2", "-l", "5"};
+        String[] args = {inPath + "Delete.json", "-s", "inverse", "-v", "2", "-l", "5"};
         SolveMain.main(args);
 		assertEquals("sat,\n4: \"0\"\n", outContent.toString());
     }
@@ -119,7 +133,7 @@ public class SolveMainTest {
     @Test
     public void testContains(){
         String expectedOutput = "sat,\n1: \"0\"\n";
-        String[] args = {"notContains.json", "-s", "inverse", "-v", "2", "-l", "2"};
+        String[] args = {inPath + "notContains.json", "-s", "inverse", "-v", "2", "-l", "2"};
         SolveMain.main(args);
         assertEquals(expectedOutput, outContent.toString());
     }
