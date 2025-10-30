@@ -64,6 +64,21 @@ public class SolveMain {
 		if (settings == null) {
 			return;
 		}
+
+		// Check if input is SMT2 file and convert if needed
+		String graphFilePath = settings.getGraphFilePath();
+		if (graphFilePath.endsWith(".smt2")) {
+			try {
+				graphFilePath = convertSmt2ToJson(graphFilePath);
+				settings.setGraphFilePath(graphFilePath);
+			} catch (IOException | InterruptedException e) {
+				System.err.println("Failed to convert SMT2 file: " + e.getMessage());
+				e.printStackTrace();
+				return;
+			}
+		}
+
+		inputFile = settings.getGraphFilePath();
 			
 		inputFile = settings.getGraphFilePath();
 		initialBound = settings.getInitialBoundingLength();
@@ -710,6 +725,32 @@ public class SolveMain {
 		Reporter_SAT<Model_Concrete_Singleton> mReporter = new Reporter_SAT<Model_Concrete_Singleton>(graph, mParser, mSolver, debug);
 		mReporter.run();
 		
+	}
+
+	private static String convertSmt2ToJson(String smt2Path) throws IOException, InterruptedException {
+	    // Create temp file for JSON output
+	    File tempJson = File.createTempFile("smt-input-", ".json");
+	    tempJson.deleteOnExit();
+
+	    String javaPath = System.getProperty("java.home") + "/bin/java";
+	    String jarPath = "lib/GenJSONs-1.0-SNAPSHOT-jar-with-dependencies.jar";
+
+	    ProcessBuilder pb = new ProcessBuilder(
+	        javaPath, "-cp", jarPath,
+	        "edu.boisestate.cs.MainJSON",
+	        new File(smt2Path).getAbsolutePath(),
+	        tempJson.getAbsolutePath()
+	    );
+	    pb.redirectErrorStream(true);
+
+	    Process process = pb.start();
+	    int exitCode = process.waitFor();
+
+	    if (exitCode != 0) {
+	        throw new IOException("SMT2 conversion failed with exit code: " + exitCode);
+	    }
+
+	    return tempJson.getAbsolutePath();
 	}
 	
 	private static void printHeader (String graph, int length, String solver, String reporter, String automata) {

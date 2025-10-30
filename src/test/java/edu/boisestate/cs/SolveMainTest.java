@@ -27,13 +27,13 @@ public class SolveMainTest {
         System.setOut(originalOut);
     }
 
-//	@Test
-//	public void testSolve() {
-//		restoreStreams();
-//		String[] args = {"../tacas26-artifact/A-Str/tmp.json/input.smt2.json", "-s", "inverse", "-v", "2", "-l", "5", "-d"};
-//		SolveMain.main(args);
-//	}
-//
+	@Test
+	public void testSolve() {
+		restoreStreams();
+		String[] args = {"src/test/resources/in/smt-input.smt2", "-s", "inverse", "-v", "2", "-l", "5"};
+		SolveMain.main(args);
+	}
+
 	// friendly reminder generator has bugs and is incomplete :)
 	@Test
     public void smtQueryPlaygroundTest(){

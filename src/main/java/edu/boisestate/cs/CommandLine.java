@@ -155,7 +155,7 @@ class CommandLine {
 
     private static boolean isValidGraphFile(String filePath) {
         File graphFile = new File(filePath);
-        return graphFile.exists() && filePath.endsWith(".json");
+        return graphFile.exists() && (filePath.endsWith(".json") || filePath.endsWith(".smt2"));
     }
 
     private static void printHelp(Options options) {
