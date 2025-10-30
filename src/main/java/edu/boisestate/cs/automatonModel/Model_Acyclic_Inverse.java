@@ -87,7 +87,15 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 	@Override
 	public Model_Acyclic_Inverse assertContainsOther(Model_Acyclic_Inverse containedModel) {
+		// nps 10-29-25
+		// this should simply check that the assertion is possible givne forward prop
 		//ensureAcyclicModel(containedModel);
+//		Automaton base = getRequiredCharAutomaton(this.automaton, this.alphabet, this.boundLength);
+//		Automaton contained = getRequiredCharAutomaton(containedModel.automaton, this.alphabet, containedModel.boundLength);
+//
+//		if (base.intersection(contained).isEmpty()){
+//			return new Model_Acyclic_Inverse(BasicAutomata.makeEmpty(), this.alphabet, 0);
+//		}
 
 //		int padding = Math.max(0, this.boundLength - containedModel.boundLength);
 		// create any string automata

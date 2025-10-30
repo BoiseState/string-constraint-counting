@@ -53,7 +53,11 @@ public enum Operation {
 	UNDEFINED,
 	CHAR_AT,
 	INDEX_OF,
-	LENGTH;                    // args:
+	LENGTH,                   // args:
+	CONTAINS,
+	STARTS_WITH,
+	ENDS_WITH,
+	IS_EMPTY;
 
 
 	/**
