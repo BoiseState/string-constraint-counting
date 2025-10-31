@@ -801,6 +801,11 @@ public class Model_Bounded extends A_Model<Model_Bounded> {
 	}
 
 	@Override
+	public Model_Bounded union(Model_Bounded arg) {
+		return null;
+	}
+
+	@Override
 	public Model_Bounded replaceFirst(String regexString, String replacementString) {
 		return null;
 	}

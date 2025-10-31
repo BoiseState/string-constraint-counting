@@ -647,6 +647,11 @@ public class Model_Acyclic_Weighted extends A_Model<Model_Acyclic_Weighted>{
 	}
 
 	@Override
+	public Model_Acyclic_Weighted union(Model_Acyclic_Weighted arg) {
+		return null;
+	}
+
+	@Override
 	public Model_Acyclic_Weighted insert(int offset, Model_Acyclic_Weighted argModel) {
 		// TODO Auto-generated method stub
 		return null;

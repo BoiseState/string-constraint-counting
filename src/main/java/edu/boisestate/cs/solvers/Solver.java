@@ -8,478 +8,472 @@ import edu.boisestate.cs.util.Tuple;
 
 public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implements I_Solver<T> {
 
-    public final A_Model_Manager<T> modelManager;
+	public final A_Model_Manager<T> modelManager;
 
-    public Solver(A_Model_Manager<T> modelManager) {
-        super();
+	public Solver(A_Model_Manager<T> modelManager) {
+		super();
 
-        // initialize factory from parameter
-        this.modelManager = modelManager;
-    }
+		// initialize factory from parameter
+		this.modelManager = modelManager;
+	}
 
-    public Solver(A_Model_Manager<T> modelManager,
-                                int initialBound) {
-        super(initialBound);
+	public Solver(A_Model_Manager<T> modelManager,
+				  int initialBound) {
+		super(initialBound);
 
-        // initialize factory from parameter
-        this.modelManager = modelManager;
-    }
+		// initialize factory from parameter
+		this.modelManager = modelManager;
+	}
 
 	@Override
 	public T getModel(int id) {
 		return this.symbolicStringMap.get(id);
 	}
 
-    @Override
-    public void append(int id, int base, int arg, int start, int end) {
+	@Override
+	public void append(int id, int base, int arg, int start, int end) {
 
-        // get models
-        T baseModel = this.symbolicStringMap.get(base);
-        T argModel = this.symbolicStringMap.get(arg);
+		// get models
+		T baseModel = this.symbolicStringMap.get(base);
+		T argModel = this.symbolicStringMap.get(arg);
 
-        // start timer
-        BasicTimer.start();
+		// start timer
+		BasicTimer.start();
 
-        // get substring model
-        T substrModel = argModel.substring(start, end);
+		// get substring model
+		T substrModel = argModel.substring(start, end);
 
-        // append substring model to base model
-        baseModel = baseModel.concatenate(substrModel);
+		// append substring model to base model
+		baseModel = baseModel.concatenate(substrModel);
 
-        // stop timer
-        BasicTimer.stop();
+		// stop timer
+		BasicTimer.stop();
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
-    }
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-    @Override
-    public void append(int id, int base, int arg) {
+	@Override
+	public void append(int id, int base, int arg) {
 
 //    	System.out.println(id + " " + base + " " + arg);
 //    	System.out.println("sybmolicStringMap " + symbolicStringMap);
-        // get models
-        T baseModel = this.symbolicStringMap.get(base);
-        T argModel = this.symbolicStringMap.get(arg);
-        // start timer
-        BasicTimer.start();
-        //System.out.println("bM " + baseModel.getAutomaton().toString() + " aM " + argModel.getAutomaton().toString());
-        // perform operation
-        baseModel = baseModel.concatenate(argModel);
-        
-        //System.out.println("Append " + baseModel + " id " + id);
+		// get models
+		T baseModel = this.symbolicStringMap.get(base);
+		T argModel = this.symbolicStringMap.get(arg);
+		// start timer
+		BasicTimer.start();
+		//System.out.println("bM " + baseModel.getAutomaton().toString() + " aM " + argModel.getAutomaton().toString());
+		// perform operation
+		baseModel = baseModel.concatenate(argModel);
 
-        // stop timer
-        BasicTimer.stop();
+		//System.out.println("Append " + baseModel + " id " + id);
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
-    }
+		// stop timer
+		BasicTimer.stop();
 
-    @Override
-    public void contains(boolean result, int base, int arg) {
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-        // get models
-        T baseModel = this.symbolicStringMap.get(base);
-        T argModel = this.symbolicStringMap.get(arg);
+	@Override
+	public void contains(boolean result, int base, int arg) {
+
+		// get models
+		T baseModel = this.symbolicStringMap.get(base);
+		T argModel = this.symbolicStringMap.get(arg);
 		if (baseModel.isSingleton() && argModel.isSingleton()) {
 			String b = baseModel.getAcceptedStringExample();
 			String a = argModel.getAcceptedStringExample();
 			if (!b.contains(a)) {
-				if (result){
-				baseModel = null;
-				argModel = null;}
+				if (result) {
+					baseModel = null;
+					argModel = null;
+				}
 
 			}
 			BasicTimer.stop();
 		}
-       // System.out.println("base " + base + " m\t" + baseModel + "\tresult " + result);
-       // System.out.println("arg " + arg + " m\t "  + argModel);
-        // true branch
-        else if (result) {
+		// System.out.println("base " + base + " m\t" + baseModel + "\tresult " + result);
+		// System.out.println("arg " + arg + " m\t "  + argModel);
+		// true branch
+		else if (result) {
 
-            // start timer
-            BasicTimer.start();
+			// start timer
+			BasicTimer.start();
 
 
-				// get satisfying base model
-				baseModel = baseModel.assertContainsOther(argModel);
-				// System.out.println("Done with baseModel");
-				// get satisfying arg model
-				argModel = argModel.assertContainedInOther(baseModel);
+			// get satisfying base model
+			baseModel = baseModel.isSingleton() ? baseModel : baseModel.assertContainsOther(argModel);
+			// System.out.println("Done with baseModel");
+			// get satisfying arg model
+			argModel = argModel.isSingleton() ? argModel : argModel.assertContainedInOther(baseModel);
 
-				//System.exit(2);
-				// stop timer
-				BasicTimer.stop();
+			//System.exit(2);
+			// stop timer
+			BasicTimer.stop();
 
-        } else {
+		} else {
 
-            // start timer
-            BasicTimer.start();
-			// by default we know arg cannot have ""
-			if (argModel.containsString("")){
+			// start timer
+			BasicTimer.start();
+			if (argModel.containsString("")) {
 				argModel.removeEmptyString();
 			}
-            // get satisfying base model as temp
-           T tempBaseModel = baseModel.isSingleton() ? baseModel : baseModel.assertNotContainsOther(argModel);
 
-            // get satisfying arg model
-            T tempArgModel = argModel.isSingleton() ? argModel : argModel.assertNotContainedInOther(tempBaseModel);
+			// get satisfying base model as temp
+			T tempBaseModel = baseModel.isSingleton() ? baseModel : baseModel.assertNotStartsWith(argModel);
 
-			// potential issue with two symbolics...:
-			if (tempBaseModel.isEmpty() || tempArgModel.isEmpty()) {// basically shuoldnt happen?
-//				System.err.println("Warning, Solver.contains(): base model is empty");
-//				System.exit(1);
-//				if (tempArgModel.isEmpty()){
-				tempArgModel = null;
-				tempBaseModel = null;
+			// get satisfying arg model
+			T tempArgModel = argModel.isSingleton() ? argModel : argModel.assertNotStartsOther(baseModel);
+
+			if (tempBaseModel.isEmpty()) {
+				System.err.println("Warning, Solver.startsWith(): base model is empty");
+				if (tempArgModel.isEmpty()) {
+					System.err.println("and arg model is empty");
+				}
+			} else if (tempArgModel.isEmpty()) {
+				tempBaseModel = baseModel.clone();
+				tempArgModel = tempBaseModel.createDisjunct();
+				tempArgModel.removeEmptyString();
 			}
-//			} else if (tempArgModel.isEmpty()){
-//				System.err.println("Warning, Solver.contains(): arg model is empty");
-//				tempBaseModel = baseModel.resolveNotContains(argModel);
-//				tempArgModel = argModel.assertNotContainedInOther(tempBaseModel);
-////				System.exit(1);
-////				tempArgModel = argModel.assertNotContainsOther(tempBaseModel);
-//			}
-            // set base model from temp
-            baseModel = tempBaseModel;
+			// set base model from temp
+			baseModel = tempBaseModel;
 			argModel = tempArgModel;
-            //System.exit(2);
-            // stop timer
-            BasicTimer.stop();
-        }
 
-        
-        // store result models
-        this.symbolicStringMap.put(base, baseModel);
-        this.symbolicStringMap.put(arg, argModel);
-    }
+			// stop timer
+			BasicTimer.stop();
+		}
 
-    @Override
-    public void deleteCharAt(int id, int base, int loc) {
+		// store result models
+		this.symbolicStringMap.put(base, baseModel);
+		this.symbolicStringMap.put(arg, argModel);
+	}
 
-        // delegate to delete method with start and end based on loc
-        this.delete(id, base, loc, loc + 1);
-    }
+	@Override
+	public void deleteCharAt(int id, int base, int loc) {
 
-    @Override
-    public void delete(int id, int base, int start, int end) {
+		// delegate to delete method with start and end based on loc
+		this.delete(id, base, loc, loc + 1);
+	}
 
-        // get model
-        T baseModel = this.symbolicStringMap.get(base);
+	@Override
+	public void delete(int id, int base, int start, int end) {
 
-        // start timer
-        BasicTimer.start();
+		// get model
+		T baseModel = this.symbolicStringMap.get(base);
 
-        // perform delete
-        baseModel = baseModel.delete(start, end);
+		// start timer
+		BasicTimer.start();
 
-        // stop timer
-        BasicTimer.stop();
+		// perform delete
+		baseModel = baseModel.delete(start, end);
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
-    }
+		// stop timer
+		BasicTimer.stop();
 
-    @Override
-    public void endsWith(boolean result, int base, int arg) {
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-        // get models
-        T baseModel = this.symbolicStringMap.get(base);
-        T argModel = this.symbolicStringMap.get(arg);
+	@Override
+	public void endsWith(boolean result, int base, int arg) {
 
-        if (result) {
+		// get models
+		T baseModel = this.symbolicStringMap.get(base);
+		T argModel = this.symbolicStringMap.get(arg);
 
-            // start timer
-            BasicTimer.start();
+		if (result) {
 
-            // get satisfying base model
-            baseModel = baseModel.assertEndsWith(argModel);
+			// start timer
+			BasicTimer.start();
 
-            // get satisfying arg model
-            argModel = argModel.assertEndsOther(baseModel);
+			// get satisfying base model
+			baseModel = baseModel.assertEndsWith(argModel);
 
-            // stop timer
-            BasicTimer.stop();
-        } else {
+			// get satisfying arg model
+			argModel = argModel.assertEndsOther(baseModel);
 
-            // start timer
-            BasicTimer.start();
-            // get satisfying base model as temp
-            T tempBaseModel = baseModel.isSingleton() ? baseModel : baseModel.assertNotEndsWith(argModel);
+			// stop timer
+			BasicTimer.stop();
+		} else {
 
-            // get satisfying arg model
-            T tempArgModel = argModel.isSingleton() ? argModel : argModel.assertNotEndsOther(baseModel);
+			// start timer
+			BasicTimer.start();
+			// get satisfying base model as temp
+			T tempBaseModel = baseModel.assertNotEndsWith(argModel);
 
+			// get satisfying arg model
+			T tempArgModel = argModel.assertNotEndsOther(baseModel);
+
+			// issue with two symbolics
 			if (tempBaseModel.isEmpty()) {
 				System.err.println("Warning, Solver.endsWith(): base model is empty");
 				if (tempArgModel.isEmpty()) {
 					// likely both anyString
 					System.err.println("and arg model is empty");
 				}
-			} else if (tempArgModel.isEmpty()){
+			} else if (tempArgModel.isEmpty()) {
 //				System.err.println("Warning, Solver.endsWith(): argModel is empty");
-				// likely they are equivalent symbolic strings?
-				// both models empty so equivalent and need (ideally evenly split) disjunct models
 				tempBaseModel = baseModel.clone();
 				// this will manipulate the tempBaseModel and return its disjunct pair
 				tempArgModel = tempBaseModel.createDisjunct();
-
+				tempArgModel.removeEmptyString();
 			}
 
 			baseModel = tempBaseModel;
 			argModel = tempArgModel;
-            // stop timer
-            BasicTimer.stop();
-        }
+			// stop timer
+			BasicTimer.stop();
+		}
 
-        // store result models
-        this.symbolicStringMap.put(base, baseModel);
-        this.symbolicStringMap.put(arg, argModel);
-    }
+		// store result models
+		this.symbolicStringMap.put(base, baseModel);
+		this.symbolicStringMap.put(arg, argModel);
+	}
 
-    @Override
-    public void equals(boolean result, int base, int arg) {
+	@Override
+	public void equals(boolean result, int base, int arg) {
 
-        // get models
-        T baseModel = this.symbolicStringMap.get(base);
-        T argModel = this.symbolicStringMap.get(arg);
+		// get models
+		T baseModel = this.symbolicStringMap.get(base);
+		T argModel = this.symbolicStringMap.get(arg);
 //        System.out.println("argModel " + arg + "\n" + argModel.getAutomaton());
 //        System.out.println("result " + result);
-        // perform equals
-        if (result) {
+		// perform equals
+		if (result) {
 
-            // start timer
-            BasicTimer.start();
-            //System.out.println(baseModel + " id " + base);
-            // get satisfying base model
-            baseModel = baseModel.assertEquals(argModel);
+			// start timer
+			BasicTimer.start();
+			//System.out.println(baseModel + " id " + base);
+			// get satisfying base model
+			baseModel = baseModel.assertEquals(argModel);
 
-            // get satisfying arg model
-            argModel = argModel.assertEquals(baseModel);
+			// get satisfying arg model
+			argModel = argModel.assertEquals(baseModel);
 
-            // stop timer
-            BasicTimer.stop();
-        } else {
+			// stop timer
+			BasicTimer.stop();
+		} else {
 
-            // start timer
-            BasicTimer.start();
+			// start timer
+			BasicTimer.start();
 
-            T tempBaseModel = baseModel.isSingleton() ? baseModel.clone() : baseModel.assertNotEquals(argModel);
-            T tempArgModel = argModel.isSingleton() ? argModel.clone() : argModel.assertNotEquals(baseModel);
+			T tempBaseModel = baseModel.isSingleton() ? baseModel.clone() : baseModel.assertNotEquals(argModel);
+			T tempArgModel = argModel.isSingleton() ? argModel.clone() : argModel.assertNotEquals(baseModel);
 
-            // if either model is anyString we'll have an empty language
-            // or if one is a subset of the other
-            // also if the language are equivalent we'll have two empty languages....
-            // need to enforce disjunct languages
-            // for languages that are subsets we can just change the order
-            if (tempBaseModel.isEmpty()) {
-                if (tempArgModel.isEmpty()) {
-                    // both models empty so equivalent and need (ideally evenly split) disjunct models
-                    tempBaseModel = baseModel.clone();
-                    // this will manipulate the tempBaseModel and return its disjunct pair
-                    tempArgModel = tempBaseModel.createDisjunct();
-                } else {
-                    tempBaseModel = baseModel.clone();
-                }
-            } else if (tempArgModel.isEmpty()) {
-                tempArgModel = argModel.clone();
-            }
-            baseModel = tempBaseModel;
-            argModel = tempArgModel;
+			// if either model is anyString we'll have an empty language
+			// or if one is a subset of the other
+			// also if the language are equivalent we'll have two empty languages....
+			// need to enforce disjunct languages
+			// for languages that are subsets we can just change the order
+			if (tempBaseModel.isEmpty()) {
+				if (tempArgModel.isEmpty()) {
+					// both models empty so equivalent and need (ideally evenly split) disjunct models
+					tempBaseModel = baseModel.clone();
+					// this will manipulate the tempBaseModel and return its disjunct pair
+					tempArgModel = tempBaseModel.createDisjunct();
+				} else {
+					tempBaseModel = baseModel.clone();
+				}
+			} else if (tempArgModel.isEmpty()) {
+				tempArgModel = argModel.clone();
+			}
+			baseModel = tempBaseModel;
+			argModel = tempArgModel;
 
-            // stop timer
-            BasicTimer.stop();
-        }
+			// stop timer
+			BasicTimer.stop();
+		}
 
-        // store result models
-        this.symbolicStringMap.put(base, baseModel);
-        this.symbolicStringMap.put(arg, argModel);
-    }
+		// store result models
+		this.symbolicStringMap.put(base, baseModel);
+		this.symbolicStringMap.put(arg, argModel);
+	}
 
-    @Override
-    public void equalsIgnoreCase(boolean result, int base, int arg) {
+	@Override
+	public void equalsIgnoreCase(boolean result, int base, int arg) {
 
-        // get models
-        T baseModel = this.symbolicStringMap.get(base);
-        T argModel = this.symbolicStringMap.get(arg);
+		// get models
+		T baseModel = this.symbolicStringMap.get(base);
+		T argModel = this.symbolicStringMap.get(arg);
 
-        // perform equals
-        if (result) {
+		// perform equals
+		if (result) {
 
-            // start timer
-            BasicTimer.start();
+			// start timer
+			BasicTimer.start();
 
-            // get satisfying base model
-            baseModel = baseModel.assertEqualsIgnoreCase(argModel);
+			// get satisfying base model
+			baseModel = baseModel.assertEqualsIgnoreCase(argModel);
 
-            // get satisfying arg model
-            argModel = argModel.assertEqualsIgnoreCase(baseModel);
+			// get satisfying arg model
+			argModel = argModel.assertEqualsIgnoreCase(baseModel);
 
-            // stop timer
-            BasicTimer.stop();
-        } else {
+			// stop timer
+			BasicTimer.stop();
+		} else {
 
-            // start timer
-            BasicTimer.start();
+			// start timer
+			BasicTimer.start();
 
-            // get satisfying base model as temp
-            T tempModel = baseModel.assertNotEqualsIgnoreCase(argModel);
+			// get satisfying base model as temp
+			T tempModel = baseModel.assertNotEqualsIgnoreCase(argModel);
 
-            // get satisfying arg model
-            argModel = argModel.assertNotEqualsIgnoreCase(baseModel);
+			// get satisfying arg model
+			argModel = argModel.assertNotEqualsIgnoreCase(baseModel);
 
-            // set base model from temp
-            baseModel = tempModel;
+			// set base model from temp
+			baseModel = tempModel;
 
-            // stop timer
-            BasicTimer.stop();
-        }
+			// stop timer
+			BasicTimer.stop();
+		}
 
-        // store result models
-        this.symbolicStringMap.put(base, baseModel);
-        this.symbolicStringMap.put(arg, argModel);
-    }
+		// store result models
+		this.symbolicStringMap.put(base, baseModel);
+		this.symbolicStringMap.put(arg, argModel);
+	}
 
-    @Override
-    public String getSatisfiableResult(int id) {
+	@Override
+	public String getSatisfiableResult(int id) {
 
-        // get model
-        T model = this.symbolicStringMap.get(id);
-        return model.getAcceptedStringExample();
-    }
+		// get model
+		T model = this.symbolicStringMap.get(id);
+		return model.getAcceptedStringExample();
+	}
 
-    @Override
-    public void insert(int id, int base, int arg, int offset) {
+	@Override
+	public void insert(int id, int base, int arg, int offset) {
 
-        // get models
-        T baseModel = this.symbolicStringMap.get(base);
-        T argModel = this.symbolicStringMap.get(arg);
+		// get models
+		T baseModel = this.symbolicStringMap.get(base);
+		T argModel = this.symbolicStringMap.get(arg);
 
-        // start timer
-        BasicTimer.start();
+		// start timer
+		BasicTimer.start();
 
-        // perform insert
-        baseModel = baseModel.insert(offset, argModel);
+		// perform insert
+		baseModel = baseModel.insert(offset, argModel);
 
-        // stop timer
-        BasicTimer.stop();
+		// stop timer
+		BasicTimer.stop();
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
-    }
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-    @Override
-    public void insert(int id,
-                       int base,
-                       int arg,
-                       int offset,
-                       int start,
-                       int end) {
+	@Override
+	public void insert(int id,
+					   int base,
+					   int arg,
+					   int offset,
+					   int start,
+					   int end) {
 
-        // get models
-        T baseModel = this.symbolicStringMap.get(base);
-        T argModel = this.symbolicStringMap.get(arg);
+		// get models
+		T baseModel = this.symbolicStringMap.get(base);
+		T argModel = this.symbolicStringMap.get(arg);
 
-        // start timer
-        BasicTimer.start();
+		// start timer
+		BasicTimer.start();
 
-        // get substring from arg model
-        T substrModel = argModel.substring(start, end);
+		// get substring from arg model
+		T substrModel = argModel.substring(start, end);
 
-        // perform insert
-        baseModel = baseModel.insert(offset, substrModel);
+		// perform insert
+		baseModel = baseModel.insert(offset, substrModel);
 
-        // stop timer
-        BasicTimer.stop();
+		// stop timer
+		BasicTimer.stop();
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
-    }
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-    @Override
-    public void isEmpty(boolean result, int base) {
+	@Override
+	public void isEmpty(boolean result, int base) {
 
-        // get model
-        T baseModel = this.symbolicStringMap.get(base);
+		// get model
+		T baseModel = this.symbolicStringMap.get(base);
 
-        if (result) {
+		if (result) {
 
-            // start timer
-            BasicTimer.start();
+			// start timer
+			BasicTimer.start();
 
-            // get satisfying automaton
-            baseModel = baseModel.assertEmpty();
+			// get satisfying automaton
+			baseModel = baseModel.assertEmpty();
 
-            // stop timer
-            BasicTimer.stop();
+			// stop timer
+			BasicTimer.stop();
 
-        } else {
+		} else {
 
-            // start timer
-            BasicTimer.start();
+			// start timer
+			BasicTimer.start();
 
-            // get satisfying automaton
-            baseModel = baseModel.assertNotEmpty();
+			// get satisfying automaton
+			baseModel = baseModel.assertNotEmpty();
 
-            // stop timer
-            BasicTimer.stop();
+			// stop timer
+			BasicTimer.stop();
 
-        }
+		}
 
-        // store result models
-        this.symbolicStringMap.put(base, baseModel);
-    }
+		// store result models
+		this.symbolicStringMap.put(base, baseModel);
+	}
 
-    @Override
-    public boolean isSatisfiable(int id) {
+	@Override
+	public boolean isSatisfiable(int id) {
 
-        // get model
-        T model = this.symbolicStringMap.get(id);
-        //System.out.println("model " + model + " id " + id);
-        // return true if not empty
-        return !model.isEmpty();
-    }
+		// get model
+		T model = this.symbolicStringMap.get(id);
+		//System.out.println("model " + model + " id " + id);
+		// return true if not empty
+		return !model.isEmpty();
+	}
 
-    @Override
-    public boolean isSingleton(int id, String actualValue) {
+	@Override
+	public boolean isSingleton(int id, String actualValue) {
 
-        // get model
-        T model = this.symbolicStringMap.get(id);
-        //System.out.println("model " + model + " id " + id);
-        //System.out.println(model.getAutomaton() + " val " + actualValue);
+		// get model
+		T model = this.symbolicStringMap.get(id);
+		//System.out.println("model " + model + " id " + id);
+		//System.out.println(model.getAutomaton() + " val " + actualValue);
 
-        // return singleton status
-        return model.containsString(actualValue) && model.isSingleton();
-    }
+		// return singleton status
+		return model.containsString(actualValue) && model.isSingleton();
+	}
 
-    @Override
-    public boolean isSingleton(int id) {
-    	// System.out.println("singleton " + id);
-        // get model
-        T model = this.symbolicStringMap.get(id);
+	@Override
+	public boolean isSingleton(int id) {
+		// System.out.println("singleton " + id);
+		// get model
+		T model = this.symbolicStringMap.get(id);
 
-        // return singleton status
-        return model.isSingleton();
-    }
+		// return singleton status
+		return model.isSingleton();
+	}
 
-    @Override
-    public boolean isSound(int id, String actualValue) {
+	@Override
+	public boolean isSound(int id, String actualValue) {
 
-        // get model
-        T model = this.symbolicStringMap.get(id);
-        //why do we intersect? Why not just check whether 
-        //the automaton accepts the string?
-        //System.out.println("M " + model.getAutomaton() + " id " + id + " val " + actualValue);
-        boolean ret = true;
-        if(actualValue.equals("true") || actualValue.equals("false")){
-        	//since the actual program execution went either true 
-        	//or false then the resulting automaton should not be empty
-        	ret = !model.isEmpty();
-        } else {
-        	ret = model.containsString(actualValue);
-        }
-        return ret;
+		// get model
+		T model = this.symbolicStringMap.get(id);
+		//why do we intersect? Why not just check whether
+		//the automaton accepts the string?
+		//System.out.println("M " + model.getAutomaton() + " id " + id + " val " + actualValue);
+		boolean ret = true;
+		if (actualValue.equals("true") || actualValue.equals("false")) {
+			//since the actual program execution went either true
+			//or false then the resulting automaton should not be empty
+			ret = !model.isEmpty();
+		} else {
+			ret = model.containsString(actualValue);
+		}
+		return ret;
         
         /* eas 10-20-18 old code 
 
@@ -492,515 +486,527 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
         // sound if intersection is not empty
         return !intersection.isEmpty();
         */
-     
-    }
 
-    @Override
-    public void newConcreteString(int id, String string) {
-        // start timer
-        BasicTimer.start();
+	}
 
-        // create new automaton model from string
-        T model = this.modelManager.createString(string);
+	@Override
+	public void newConcreteString(int id, String string) {
+		// start timer
+		BasicTimer.start();
 
-        //System.out.println("newConcreteString " + id + " : " + string + " " + model.getClass());
-        // stop timer
-        BasicTimer.stop();
+		// create new automaton model from string
+		T model = this.modelManager.createString(string);
 
-        // store new model
-        this.symbolicStringMap.put(id, model);
-        
-       // System.out.println("m " + "\n" + model.getAutomaton());
+		//System.out.println("newConcreteString " + id + " : " + string + " " + model.getClass());
+		// stop timer
+		BasicTimer.stop();
 
-        // store string value
-        this.concreteStringMap.put(id, string);
-    }
+		// store new model
+		this.symbolicStringMap.put(id, model);
 
-    @Override
-    public void newSymbolicString(int id) {
-        // start timer
-        BasicTimer.start();
+		// System.out.println("m " + "\n" + model.getAutomaton());
 
-        // create new symbolic string
-        T model =
-                this.modelManager.createAnyString(this.initialBound);
+		// store string value
+		this.concreteStringMap.put(id, string);
+	}
 
-        // stop timer
-        BasicTimer.stop();
-        //System.out.println("M " + model + " id " + id);
-        // store new model
-        this.symbolicStringMap.put(id, model);
-    }
+	@Override
+	public void newSymbolicString(int id) {
+		// start timer
+		BasicTimer.start();
 
-    @Override
-    public void propagateSymbolicString(int id, int base) {
-        // get model
-        T model = this.symbolicStringMap.get(base);
+		// create new symbolic string
+		T model =
+				this.modelManager.createAnyString(this.initialBound);
 
-        // start timer
-        BasicTimer.start();
+		// stop timer
+		BasicTimer.stop();
+		//System.out.println("M " + model + " id " + id);
+		// store new model
+		this.symbolicStringMap.put(id, model);
+	}
 
-        // clone model
-        T clone = model.clone();
+	@Override
+	public void propagateSymbolicString(int id, int base) {
+		// get model
+		T model = this.symbolicStringMap.get(base);
 
-        // stop timer
-        BasicTimer.stop();
+		// start timer
+		BasicTimer.start();
 
-        // store clone
-        this.symbolicStringMap.put(id, clone);
-    }
+		// clone model
+		T clone = model.clone();
 
-    @Override
-    public void replaceCharFindKnown(int id, int base, char find) {
+		// stop timer
+		BasicTimer.stop();
 
-        // get model
-        T baseModel = this.symbolicStringMap.get(base);
+		// store clone
+		this.symbolicStringMap.put(id, clone);
+	}
 
-        // start timer
-        BasicTimer.start();
+	@Override
+	public void replaceCharFindKnown(int id, int base, char find) {
 
-        // perform replace string operation
-        baseModel = baseModel.replaceFindKnown(find);
+		// get model
+		T baseModel = this.symbolicStringMap.get(base);
 
-        // stop timer
-        BasicTimer.stop();
+		// start timer
+		BasicTimer.start();
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
+		// perform replace string operation
+		baseModel = baseModel.replaceFindKnown(find);
 
-    }
+		// stop timer
+		BasicTimer.stop();
 
-    @Override
-    public void replaceCharKnown(int id, int base, char find, char replace) {
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
 
-        // get model
-        T baseModel = this.symbolicStringMap.get(base);
+	}
 
-        // start timer
-        BasicTimer.start();
-        // perform replace string operation
-        baseModel = baseModel.replace(find, replace);
+	@Override
+	public void replaceCharKnown(int id, int base, char find, char replace) {
 
-        // stop timer
-        BasicTimer.stop();
+		// get model
+		T baseModel = this.symbolicStringMap.get(base);
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
+		// start timer
+		BasicTimer.start();
+		// perform replace string operation
+		baseModel = baseModel.replace(find, replace);
 
-    }
+		// stop timer
+		BasicTimer.stop();
 
-    @Override
-    public void replaceCharReplaceKnown(int id, int base, char replace) {
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
 
-        // get model
-        T baseModel = this.symbolicStringMap.get(base);
+	}
 
-        // start timer
-        BasicTimer.start();
+	@Override
+	public void replaceCharReplaceKnown(int id, int base, char replace) {
 
-        // perform replace string operation
-        baseModel = baseModel.replaceReplaceKnown(replace);
+		// get model
+		T baseModel = this.symbolicStringMap.get(base);
 
-        // stop timer
-        BasicTimer.stop();
+		// start timer
+		BasicTimer.start();
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
-    }
+		// perform replace string operation
+		baseModel = baseModel.replaceReplaceKnown(replace);
 
-    @Override
-    public void replaceCharUnknown(int id, int base) {
+		// stop timer
+		BasicTimer.stop();
 
-        // get model
-        T baseModel = this.symbolicStringMap.get(base);
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-        // start timer
-        BasicTimer.start();
+	@Override
+	public void replaceCharUnknown(int id, int base) {
 
-        // perform replace string operation
-        baseModel = baseModel.replaceChar();
+		// get model
+		T baseModel = this.symbolicStringMap.get(base);
 
-        // stop timer
-        BasicTimer.stop();
+		// start timer
+		BasicTimer.start();
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
+		// perform replace string operation
+		baseModel = baseModel.replaceChar();
 
-    }
+		// stop timer
+		BasicTimer.stop();
 
-    @Override
-    public String replaceEscapes(String value) {
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
 
-        // all unicode characters supported
-        return value;
-    }
-    
-    
-    /**
-     * This should be working
-     * @param id
-     * @param base
-     * @param argOne
-     * @param argTwo
-     */
-    public void replaceAll(int id, int base, int argOne, int argTwo) {
-    	// get models
-    	T baseModel = this.symbolicStringMap.get(base);
-        // nps - 04.16.25 - unsure why this is here
+	}
+
+	@Override
+	public String replaceEscapes(String value) {
+
+		// all unicode characters supported
+		return value;
+	}
+
+
+	/**
+	 * This should be working
+	 *
+	 * @param id
+	 * @param base
+	 * @param argOne
+	 * @param argTwo
+	 */
+	public void replaceAll(int id, int base, int argOne, int argTwo) {
+		// get models
+		T baseModel = this.symbolicStringMap.get(base);
+		// nps - 04.16.25 - unsure why this is here
 //    	if (baseModel.getClass() != Model_Acyclic.class)
 //    		return;
 
-        // nps - switched to models: untested as of 4.3.25
-        T arg1, arg2;
-        if (this.concreteStringMap.get(argOne) == null) {
-            arg1 = this.symbolicStringMap.get(argOne);
-        } else {
-            String arg1String = this.concreteStringMap.get(argOne);
-            arg1 = this.modelManager.createString(arg1String);
-        }
-        if (this.concreteStringMap.get(argTwo) == null) {
-            arg2 = this.symbolicStringMap.get(argTwo);
-        } else {
-            String arg2String = this.concreteStringMap.get(argTwo);
-            arg2 = this.modelManager.createString(arg2String);
-        }
+		// nps - switched to models: untested as of 4.3.25
+		T arg1, arg2;
+		if (this.concreteStringMap.get(argOne) == null) {
+			arg1 = this.symbolicStringMap.get(argOne);
+		} else {
+			String arg1String = this.concreteStringMap.get(argOne);
+			arg1 = this.modelManager.createString(arg1String);
+		}
+		if (this.concreteStringMap.get(argTwo) == null) {
+			arg2 = this.symbolicStringMap.get(argTwo);
+		} else {
+			String arg2String = this.concreteStringMap.get(argTwo);
+			arg2 = this.modelManager.createString(arg2String);
+		}
 
 //    	System.out.println("Before:\n" + baseModel.getFiniteStrings());
 //    	System.out.println("\n==========\n\nStarting Automaton:\n\n" + baseModel.getAutomaton().toString() + "\n\n========\n\n");
-    	// start timer
-    	BasicTimer.start();
-    	// perform replaceFirst string operation
-    	baseModel = baseModel.replaceAll(arg1, arg2);
-    	// stop timer
-    	BasicTimer.stop();
+		// start timer
+		BasicTimer.start();
+		// perform replaceFirst string operation
+		baseModel = baseModel.replaceAll(arg1, arg2);
+		// stop timer
+		BasicTimer.stop();
 //    	System.out.println("After:\n" + baseModel.getFiniteStrings());
 //    	System.out.println("\n==========\n\nFinished Automaton:\n\n" + baseModel.getAutomaton().toString() + "\n\n========\n\n");
-    	// store result model
-    	this.symbolicStringMap.put(id, baseModel);
-    }
-    
-    
-    /**
-     * This should be working
-     * 
-     * @param id
-     * @param base
-     * @param argOne
-     * @param argTwo
-     */
-    public void replaceFirst(int id, int base, int argOne, int argTwo) {
-    	// get models
-    	T baseModel = this.symbolicStringMap.get(base);
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
+
+
+	/**
+	 * This should be working
+	 *
+	 * @param id
+	 * @param base
+	 * @param argOne
+	 * @param argTwo
+	 */
+	public void replaceFirst(int id, int base, int argOne, int argTwo) {
+		// get models
+		T baseModel = this.symbolicStringMap.get(base);
 //    	if (baseModel.getClass() != Model_Acyclic.class)
 //    		return;
-        // nps - tryingot handle concrete and symbolic arguments.
-        T arg1, arg2;
-        if (this.concreteStringMap.get(argOne) == null) {
-            arg1 = this.symbolicStringMap.get(argOne);
-        } else {
-            String arg1String = this.concreteStringMap.get(argOne);
-            arg1 = this.modelManager.createString(arg1String);
-        }
-        if (this.concreteStringMap.get(argTwo) == null) {
-            arg2 = this.symbolicStringMap.get(argTwo);
-        } else {
-            String arg2String = this.concreteStringMap.get(argTwo);
-            arg2 = this.modelManager.createString(arg2String);
-        }
+		// nps - tryingot handle concrete and symbolic arguments.
+		T arg1, arg2;
+		if (this.concreteStringMap.get(argOne) == null) {
+			arg1 = this.symbolicStringMap.get(argOne);
+		} else {
+			String arg1String = this.concreteStringMap.get(argOne);
+			arg1 = this.modelManager.createString(arg1String);
+		}
+		if (this.concreteStringMap.get(argTwo) == null) {
+			arg2 = this.symbolicStringMap.get(argTwo);
+		} else {
+			String arg2String = this.concreteStringMap.get(argTwo);
+			arg2 = this.modelManager.createString(arg2String);
+		}
 //    	System.out.println("Before:\n" + baseModel.getFiniteStrings());
-    	// start timer
-    	BasicTimer.start();
-    	// perform replaceFirst string operation
-        // this replaceFirst does take find argument as regex as well
-    	baseModel = baseModel.replaceFirst(arg1, arg2);
-    	// stop timer
-    	BasicTimer.stop();
+		// start timer
+		BasicTimer.start();
+		// perform replaceFirst string operation
+		// this replaceFirst does take find argument as regex as well
+		baseModel = baseModel.replaceFirst(arg1, arg2);
+		// stop timer
+		BasicTimer.stop();
 //    	System.out.println("After:\n" + baseModel.getFiniteStrings());
-    	// store result model
-    	this.symbolicStringMap.put(id, baseModel);
-    }
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-    @Override
-    public void replaceStrings(int id, int base, int argOne, int argTwo) {
+	@Override
+	public void replaceStrings(int id, int base, int argOne, int argTwo) {
 
-        // get models
-        T baseModel = this.symbolicStringMap.get(base);
-        String arg1String = this.concreteStringMap.get(argOne);
-        String arg2String = this.concreteStringMap.get(argTwo);
+		// get models
+		T baseModel = this.symbolicStringMap.get(base);
+		String arg1String = this.concreteStringMap.get(argOne);
+		String arg2String = this.concreteStringMap.get(argTwo);
 
-        // start timer
-        BasicTimer.start();
+		// start timer
+		BasicTimer.start();
 
-        // perform replace string operation
-        baseModel = baseModel.replace(arg1String, arg2String);
+		// perform replace string operation
+		baseModel = baseModel.replace(arg1String, arg2String);
 
-        // stop timer
-        BasicTimer.stop();
+		// stop timer
+		BasicTimer.stop();
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
-    }
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-    @Override
-    public void reverse(int id, int base) {
+	@Override
+	public void reverse(int id, int base) {
 
-        // get model
-        T baseModel = this.symbolicStringMap.get(base);
+		// get model
+		T baseModel = this.symbolicStringMap.get(base);
 
-        // start timer
-        BasicTimer.start();
+		// start timer
+		BasicTimer.start();
 
-        // perform operation
-        baseModel = baseModel.reverse();
+		// perform operation
+		baseModel = baseModel.reverse();
 
-        // stop timer
-        BasicTimer.stop();
+		// stop timer
+		BasicTimer.stop();
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
-    }
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-    @Override
-    public void setCharAt(int id, int base, int arg, int offset) {
+	@Override
+	public void setCharAt(int id, int base, int arg, int offset) {
 
-        // get models
-        T baseModel = this.symbolicStringMap.get(base);
-        T argModel = this.symbolicStringMap.get(arg);
+		// get models
+		T baseModel = this.symbolicStringMap.get(base);
+		T argModel = this.symbolicStringMap.get(arg);
 
-        // start timer
-        BasicTimer.start();
+		// start timer
+		BasicTimer.start();
 
-        // perform set char
-        baseModel = baseModel.setCharAt(offset, argModel);
+		// perform set char
+		baseModel = baseModel.setCharAt(offset, argModel);
 
-        // stop timer
-        BasicTimer.stop();
+		// stop timer
+		BasicTimer.stop();
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
-    }
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-    @Override
-    public void setLength(int id, int base, int length) {
+	@Override
+	public void setLength(int id, int base, int length) {
 
-        // get model
-        T baseModel = this.symbolicStringMap.get(base);
+		// get model
+		T baseModel = this.symbolicStringMap.get(base);
 
-        // start timer
-        BasicTimer.start();
+		// start timer
+		BasicTimer.start();
 
-        // perform set length
-        baseModel = baseModel.setLength(length);
+		// perform set length
+		baseModel = baseModel.setLength(length);
 
-        // stop timer
-        BasicTimer.stop();
+		// stop timer
+		BasicTimer.stop();
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
-    }
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-    @Override
-    public void shutDown() {
-        // nothing needed
-    }
+	@Override
+	public void shutDown() {
+		// nothing needed
+	}
 
-    @Override
-    public void startsWith(boolean result, int base, int arg) {
+	@Override
+	public void startsWith(boolean result, int base, int arg) {
 
-        // get models
-        T baseModel = this.symbolicStringMap.get(base);
-        T argModel = this.symbolicStringMap.get(arg);
+		// get models
+		T baseModel = this.symbolicStringMap.get(base);
+		T argModel = this.symbolicStringMap.get(arg);
 
-        if (result) {
+		if (result) {
 
-            // start timer
-            BasicTimer.start();
+			// start timer
+			BasicTimer.start();
 
-            // get satisfying base model
-            baseModel = baseModel.assertStartsWith(argModel);
+			// get satisfying base model
+			baseModel = baseModel.assertStartsWith(argModel);
 
-            // get satisfying arg model
-            argModel = argModel.assertStartsOther(baseModel);
+			// get satisfying arg model
+			argModel = argModel.assertStartsOther(baseModel);
 
-            // stop timer
-            BasicTimer.stop();
+			// stop timer
+			BasicTimer.stop();
 
-        } else {
+		} else {
 
-            // start timer
-            BasicTimer.start();
+			// start timer
+			BasicTimer.start();
 
-            // get satisfying base model as temp
-            T tempModel = baseModel.isSingleton() ? baseModel : baseModel.assertNotStartsWith(argModel);
+			// get satisfying base model as temp
+			T tempBaseModel = baseModel.isSingleton() ? baseModel : baseModel.assertNotStartsWith(argModel);
 
-            // get satisfying arg model
-            argModel = argModel.isSingleton() ? argModel : argModel.assertNotStartsOther(baseModel);
+			// get satisfying arg model
+			T tempArgModel = argModel.isSingleton() ? argModel : argModel.assertNotStartsOther(baseModel);
 
-            // set base model from temp
-            baseModel = tempModel;
+			if (tempBaseModel.isEmpty()) {
+				System.err.println("Warning, Solver.startsWith(): base model is empty");
+				if (tempArgModel.isEmpty()) {
+					System.err.println("and arg model is empty");
+				}
+			} else if (tempArgModel.isEmpty()) {
+				tempBaseModel = baseModel.clone();
+				tempArgModel = tempBaseModel.createDisjunct();
+				tempArgModel.removeEmptyString();
+			}
+			// set base model from temp
+			baseModel = tempBaseModel;
+			argModel = tempArgModel;
 
-            // stop timer
-            BasicTimer.stop();
-        }
+			// stop timer
+			BasicTimer.stop();
+		}
 
-        // store result models
-        this.symbolicStringMap.put(base, baseModel);
-        this.symbolicStringMap.put(arg, argModel);
-    }
+		// store result models
+		this.symbolicStringMap.put(base, baseModel);
+		this.symbolicStringMap.put(arg, argModel);
+	}
 
-    @Override
-    public void substring(int id, int base, int start) {
+	@Override
+	public void substring(int id, int base, int start) {
 
-        // get model
-        T baseModel = this.symbolicStringMap.get(base);
+		// get model
+		T baseModel = this.symbolicStringMap.get(base);
 
-        // start timer
-        BasicTimer.start();
+		// start timer
+		BasicTimer.start();
 
-        // perform operation
-        baseModel = baseModel.suffix(start);
+		// perform operation
+		baseModel = baseModel.suffix(start);
 
-        // stop timer
-        BasicTimer.stop();
+		// stop timer
+		BasicTimer.stop();
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
-    }
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-    @Override
-    public void substring(int id, int base, int start, int end) {
+	@Override
+	public void substring(int id, int base, int start, int end) {
 
-        // get model
-        T baseModel = this.symbolicStringMap.get(base);
+		// get model
+		T baseModel = this.symbolicStringMap.get(base);
 
-        // start timer
-        BasicTimer.start();
+		// start timer
+		BasicTimer.start();
 
-        // perform operation
-        baseModel = baseModel.substring(start, end);
+		// perform operation
+		baseModel = baseModel.substring(start, end);
 
-        // stop timer
-        BasicTimer.stop();
+		// stop timer
+		BasicTimer.stop();
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
-    }
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-    @Override
-    public void toLowerCase(int id, int base) {
+	@Override
+	public void toLowerCase(int id, int base) {
 
-        // get model
-        T baseModel = this.symbolicStringMap.get(base);
+		// get model
+		T baseModel = this.symbolicStringMap.get(base);
 
-        // start timer
-        BasicTimer.start();
+		// start timer
+		BasicTimer.start();
 
-        // perform operation
-        baseModel = baseModel.toLowercase();
+		// perform operation
+		baseModel = baseModel.toLowercase();
 
-        // stop timer
-        BasicTimer.stop();
+		// stop timer
+		BasicTimer.stop();
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
-    }
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-    @Override
-    public void toUpperCase(int id, int base) {
+	@Override
+	public void toUpperCase(int id, int base) {
 
-        // get model
-        T baseModel = this.symbolicStringMap.get(base);
+		// get model
+		T baseModel = this.symbolicStringMap.get(base);
 
-        // start timer
-        BasicTimer.start();
+		// start timer
+		BasicTimer.start();
 
-        // perform operation
-        baseModel = baseModel.toUppercase();
+		// perform operation
+		baseModel = baseModel.toUppercase();
 
-        // stop timer
-        BasicTimer.stop();
+		// stop timer
+		BasicTimer.stop();
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
-    }
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-    @Override
-    public void trim(int id, int base) {
+	@Override
+	public void trim(int id, int base) {
 
-        // get model
-        T baseModel = this.symbolicStringMap.get(base);
+		// get model
+		T baseModel = this.symbolicStringMap.get(base);
 
-        // start timer
-        BasicTimer.start();
+		// start timer
+		BasicTimer.start();
 
-        // perform operation
-        baseModel = baseModel.trim();
+		// perform operation
+		baseModel = baseModel.trim();
 
-        // stop timer
-        BasicTimer.stop();
+		// stop timer
+		BasicTimer.stop();
 
-        // store result model
-        this.symbolicStringMap.put(id, baseModel);
-    }
+		// store result model
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-    public void charAt(int id, int base, int index) {
-        T baseModel = this.symbolicStringMap.get(base);
-        baseModel = baseModel.charAt(index);
-        this.symbolicStringMap.put(id, baseModel);
-    }
+	public void charAt(int id, int base, int index) {
+		T baseModel = this.symbolicStringMap.get(base);
+		baseModel = baseModel.charAt(index);
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-    public void indexOf(int id, int base, int find) {
-        T baseModel = this.symbolicStringMap.get(base);
-        T argModel = this.symbolicStringMap.get(find);
+	public void indexOf(int id, int base, int find) {
+		T baseModel = this.symbolicStringMap.get(base);
+		T argModel = this.symbolicStringMap.get(find);
 
-        baseModel = baseModel.indexOf(argModel);
-        this.symbolicStringMap.put(id, baseModel);
-    }
+		baseModel = baseModel.indexOf(argModel);
+		this.symbolicStringMap.put(id, baseModel);
+	}
 
-    private Tuple<Character, Boolean> getCharFromString(String string) {
+	private Tuple<Character, Boolean> getCharFromString(String string) {
 
-        // initialize result variables
-        boolean isKnown = true;
-        char charValue;
+		// initialize result variables
+		boolean isKnown = true;
+		char charValue;
 
-        // attempt to parse char value from string
-        try {
+		// attempt to parse char value from string
+		try {
 
-            // parse string to int
-            int tempVal = Integer.parseInt(string);
+			// parse string to int
+			int tempVal = Integer.parseInt(string);
 
-            // if value falls between 0 and 9, not known char value
-            if (tempVal >= 0 || tempVal < 10) {
-                isKnown = false;
-            }
+			// if value falls between 0 and 9, not known char value
+			if (tempVal >= 0 || tempVal < 10) {
+				isKnown = false;
+			}
 
-            // set char value via cast
-            charValue = (char) tempVal;
+			// set char value via cast
+			charValue = (char) tempVal;
 
-        } catch (NumberFormatException e) {
+		} catch (NumberFormatException e) {
 
-            // if string is not empty
-            if (!string.isEmpty()) {
+			// if string is not empty
+			if (!string.isEmpty()) {
 
-                // set value to first char in string
-                charValue = string.charAt(0);
+				// set value to first char in string
+				charValue = string.charAt(0);
 
-            } else {
+			} else {
 
-                // set value to first value from alphabet
-                Alphabet alphabet = this.modelManager.getAlphabet();
-                charValue = alphabet.getSymbolSet().iterator().next();
+				// set value to first value from alphabet
+				Alphabet alphabet = this.modelManager.getAlphabet();
+				charValue = alphabet.getSymbolSet().iterator().next();
 
-            }
-        }
+			}
+		}
 
-        // return results
-        return new Tuple<>(charValue, isKnown);
-    }
+		// return results
+		return new Tuple<>(charValue, isKnown);
+	}
 
-    public String getConcreteString(int id) {
-        return this.concreteStringMap.get(id);
-    }
+	public String getConcreteString(int id) {
+		return this.concreteStringMap.get(id);
+	}
 
 
 	public void length(int id, int base) {
@@ -1008,7 +1014,12 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		int upperBound = baseModel.getBoundLength();
 		int lowerBound = baseModel.getLowerBoundLength();
 		// create anyString with lengths bounds that will act as integer check
-		T boundModel = this.modelManager.createAnyString(lowerBound, upperBound);
-		this.symbolicStringMap.put(id, baseModel);
+		// TODO: any problem if this somehow isn't interpreted as an integer range?
+		T lenModel = this.modelManager.createString(Integer.toString(lowerBound));
+		for (int i = lowerBound + 1; i <= upperBound; i++) {
+			String lenStr = Integer.toString(i);
+			lenModel = lenModel.union(this.modelManager.createString(lenStr));
+		}
+		this.symbolicStringMap.put(id, lenModel);
 	}
 }

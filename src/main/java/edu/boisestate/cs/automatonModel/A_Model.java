@@ -165,6 +165,8 @@ public abstract class A_Model <T extends A_Model <T>> implements Cloneable, I_Mo
     @Override
 	public abstract T intersect(T arg);
 
+	public abstract T union(T arg);
+
     @Override
 	public abstract T insert(int offset, T argModel);
 

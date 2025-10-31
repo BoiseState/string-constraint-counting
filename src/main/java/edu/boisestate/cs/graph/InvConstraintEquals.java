@@ -202,7 +202,7 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 						int len = Integer.parseInt(concrStr);
 						T lenModel = solver.modelManager.createAnyString(len,len);
 						if (!result) {
-							T all = solver.modelManager.createAnyString();
+							T all = solver.modelManager.createAnyString(0, inputs.getBoundLength());
 							all.minus(lenModel);
 							lenModel = all;
 						}

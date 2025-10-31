@@ -3,5 +3,3 @@
 
 (assert (str.contains s1_18 s2_19))
 (assert (not (= (str.len s2_19) 0)))
-
-(check-sat)

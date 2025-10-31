@@ -21,7 +21,7 @@
     },
     {
       "num": 0,
-      "actualValue": "",
+      "actualValue": "Hi",
       "incomingEdges": [
       ],
       "sourceConstraints": [],
@@ -54,7 +54,7 @@
     },
     {
       "num": 0,
-      "actualValue": "true",
+      "actualValue": "false",
       "incomingEdges": [
         {
           "source": 1,

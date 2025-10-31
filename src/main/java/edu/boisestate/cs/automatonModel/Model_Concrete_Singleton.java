@@ -198,6 +198,11 @@ public class Model_Concrete_Singleton extends A_Model<Model_Concrete_Singleton >
 	}
 
 	@Override
+	public Model_Concrete_Singleton union(Model_Concrete_Singleton arg) {
+		return null;
+	}
+
+	@Override
 	public Model_Concrete_Singleton insert(int offset, Model_Concrete_Singleton argModel) {
 		// TODO Auto-generated method stub
 		return null;
