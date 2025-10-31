@@ -447,6 +447,7 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
             int ID = pc.getId();
             Operation op = pc.getOp();
             String value = pc.getActualVal();
+			List<Integer> argList = pc.getArgList();
             printDebug("ID " + ID + " op " + op);
             I_Inv_Constraint<T> newConstraint;
 
@@ -483,17 +484,17 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
 
                     break;
 
-                case PREDICATE:
-
-                    boolean result = value.equals("true") ? true : false;
-                    newConstraint = new InvConstraintPredicate<T>(ID, invSolver, result);
-                    allInverseConstraints.put(ID, newConstraint);
-
-                    if (localDebug) {
-                        System.out.println("processed " + op.toString() + "  " + pc.getId());
-                    }
-
-                    break;
+//                case PREDICATE:
+//
+//                    boolean result = value.equals("true") ? true : false;
+//                    newConstraint = new InvConstraintPredicate<T>(ID, invSolver, result);
+//                    allInverseConstraints.put(ID, newConstraint);
+//
+//                    if (localDebug) {
+//                        System.out.println("processed " + op.toString() + "  " + pc.getId());
+//                    }
+//
+//                    break;
 
                 case EQUALS:
                     boolean output = value.equals("true") ? true : false;
@@ -505,6 +506,16 @@ public class Reporter_Inverse<T extends A_Model_Inverse<T>> extends A_Reporter<T
                     }
 
                     break;
+
+				case CONTAINS:
+					newConstraint = new InvConstraintContains<T>(ID, invSolver, value.equals("true"));
+					allInverseConstraints.put(ID, newConstraint);
+
+					if (localDebug) {
+						System.out.println("processed " + op.toString() + "  " + pc.getId());
+					}
+
+					break;
 
                 case PROPAGATION:
 

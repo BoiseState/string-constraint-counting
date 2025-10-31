@@ -821,6 +821,16 @@ public class Model_Bounded extends A_Model<Model_Bounded> {
 	}
 
 	@Override
+	public Model_Bounded removeString(String aExample) {
+		return null;
+	}
+
+	@Override
+	public Model_Bounded assertContains(Model_Bounded argModel, boolean result) {
+		return null;
+	}
+
+	@Override
 	public Model_Bounded charAt(int index) { return null;}
 
 	@Override

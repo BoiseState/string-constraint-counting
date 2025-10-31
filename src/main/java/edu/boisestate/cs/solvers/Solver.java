@@ -78,78 +78,45 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 
     @Override
     public void contains(boolean result, int base, int arg) {
+		// here we do a preliminary search if possible and sat test (null models causing Parser_2 to return false)
 
         // get models
         T baseModel = this.symbolicStringMap.get(base);
         T argModel = this.symbolicStringMap.get(arg);
-		if (baseModel.isSingleton() && argModel.isSingleton()) {
+
+		// if either argument is concrete we do preliminary searches
+		if (baseModel.isSingleton()){
 			String b = baseModel.getAcceptedStringExample();
-			String a = argModel.getAcceptedStringExample();
-			if (!b.contains(a)) {
-				if (result){
-				baseModel = null;
-				argModel = null;}
-
+			if (argModel.isSingleton()){
+				String a = argModel.getAcceptedStringExample();
+				if (result && !b.contains(a)){
+					baseModel = null;
+					argModel = null;
+				} else if (!result && b.contains(a)){
+					baseModel = null;
+					argModel = null;
+				}
+			} else {
+				String aExample = argModel.getAcceptedStringExample();
+				// search for at least one possible assignment removing inconsistent examples on the way
+				if (result) {
+					while (aExample != null && !b.contains(aExample)) {
+						argModel = argModel.removeString(aExample);
+						aExample = argModel.getAcceptedStringExample();
+					}
+				} else {
+					while (aExample != null && b.contains(aExample)) {
+						argModel = argModel.removeString(aExample);
+						aExample = argModel.getAcceptedStringExample();
+					}
+				}
+				// if argModel is empty then no solution which is caught in Parser_2
 			}
-			BasicTimer.stop();
+		} else if (argModel.isSingleton()) {
+			// base sym, but arg concrete, so pin base to contain arg
+			baseModel = baseModel.assertContains(argModel, result);
 		}
-       // System.out.println("base " + base + " m\t" + baseModel + "\tresult " + result);
-       // System.out.println("arg " + arg + " m\t "  + argModel);
-        // true branch
-        else if (result) {
 
-            // start timer
-            BasicTimer.start();
-
-
-				// get satisfying base model
-				baseModel = baseModel.assertContainsOther(argModel);
-				// System.out.println("Done with baseModel");
-				// get satisfying arg model
-				argModel = argModel.assertContainedInOther(baseModel);
-
-				//System.exit(2);
-				// stop timer
-				BasicTimer.stop();
-
-        } else {
-
-            // start timer
-            BasicTimer.start();
-			// by default we know arg cannot have ""
-			if (argModel.containsString("")){
-				argModel.removeEmptyString();
-			}
-            // get satisfying base model as temp
-           T tempBaseModel = baseModel.isSingleton() ? baseModel : baseModel.assertNotContainsOther(argModel);
-
-            // get satisfying arg model
-            T tempArgModel = argModel.isSingleton() ? argModel : argModel.assertNotContainedInOther(tempBaseModel);
-
-			// potential issue with two symbolics...:
-			if (tempBaseModel.isEmpty() || tempArgModel.isEmpty()) {// basically shuoldnt happen?
-//				System.err.println("Warning, Solver.contains(): base model is empty");
-//				System.exit(1);
-//				if (tempArgModel.isEmpty()){
-				tempArgModel = null;
-				tempBaseModel = null;
-			}
-//			} else if (tempArgModel.isEmpty()){
-//				System.err.println("Warning, Solver.contains(): arg model is empty");
-//				tempBaseModel = baseModel.resolveNotContains(argModel);
-//				tempArgModel = argModel.assertNotContainedInOther(tempBaseModel);
-////				System.exit(1);
-////				tempArgModel = argModel.assertNotContainsOther(tempBaseModel);
-//			}
-            // set base model from temp
-            baseModel = tempBaseModel;
-			argModel = tempArgModel;
-            //System.exit(2);
-            // stop timer
-            BasicTimer.stop();
-        }
-
-        
         // store result models
         this.symbolicStringMap.put(base, baseModel);
         this.symbolicStringMap.put(arg, argModel);

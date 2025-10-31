@@ -116,4 +116,8 @@ public interface I_Model<T extends I_Model<T>> {
 	T replaceAll(String arg1String, String arg2String);
 
 	T replaceAll(T find, T replace);
+
+	T removeString(String aExample);
+
+	T assertContains(T argModel, boolean result);
 }

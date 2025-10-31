@@ -85,6 +85,15 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
 	}
 
+	// for concrete contained string
+	public Model_Acyclic_Inverse assertContains(Model_Acyclic_Inverse contained, boolean result) {
+		int padding = this.boundLength - contained.boundLength;
+		Automaton pad = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(0, padding);
+		Automaton contains = pad.concatenate(contained.automaton).concatenate(pad);
+		Automaton ret = result ? this.automaton.intersection(contains) : this.automaton.minus(contains);
+		return new Model_Acyclic_Inverse(ret, this.alphabet, calculateBoundLength(ret));
+	}
+
 	@Override
 	public Model_Acyclic_Inverse assertContainsOther(Model_Acyclic_Inverse containedModel) {
 		// nps 10-29-25
@@ -2578,6 +2587,30 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return result.union(this);
 //        return null;
 	}
+
+	// basically combines assertContainsOther, assertNotContainsOther, assertContainedInOther, and assertNotContainedInOther
+	public Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse> inv_contains(Model_Acyclic_Inverse contained, boolean result) {
+		// choose some contained
+		Automaton check, choice;
+		String example;
+		do {
+			example = contained.getShortestExampleString();
+			choice = BasicAutomata.makeString(example);
+			// remove choice from contained to avoid picking it again
+			contained.setAutomaton(contained.automaton.minus(choice));
+
+			int padding = this.boundLength - example.length();
+			Automaton pad = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat(0, padding);
+			Automaton anyContaining = pad.concatenate(choice).concatenate(pad);
+
+			check = result ? this.automaton.intersection(anyContaining) : this.automaton.minus(anyContaining);
+
+		} while (check.isEmpty());  //invlaid choice find another
+		Model_Acyclic_Inverse sup = new Model_Acyclic_Inverse(check, this.alphabet, calculateBoundLength(check));
+		Model_Acyclic_Inverse sub = new Model_Acyclic_Inverse(choice, this.alphabet, example.length());
+		return new Tuple<>(sup, sub);
+	}
+
 	// note that this shuld be the complement within te universe of alphabet and boundLength
 	public Model_Acyclic_Inverse complement() {
 		Automaton comp = this.automaton.clone();
@@ -2767,6 +2800,11 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 			}
 		}
 		return new Tuple<Automaton, HashMap<State, State>>(ret, stateMap);
+	}
+
+	public Model_Acyclic_Inverse removeString(String str) {
+		Automaton a = this.automaton.clone().minus(Automaton.makeString(str));
+		return new Model_Acyclic_Inverse(a, this.alphabet, calculateBoundLength(a));
 	}
 
 	// finds largest possilbe string length in acyclic automaton
