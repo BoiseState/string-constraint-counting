@@ -1295,7 +1295,7 @@ public class Parser_2<T extends A_Model<T>> {
 	@SuppressWarnings("unused")
 	public boolean assertBooleanConstraint(boolean result, PrintConstraint constraint) {
 
-		constraint.setOp(PREDICATE);
+//		constraint.setOp(PREDICATE);
 
 
 
@@ -1337,15 +1337,16 @@ public class Parser_2<T extends A_Model<T>> {
 		// TODO: add starts with for sourceMap size 3 (two args)
 		// assert the boolean constraint
 		if (fName.equals("contains")) {
+			constraint.setOp(CONTAINS);
 
 			solver.contains(result, base, arg);
 
 		} else if (fName.equals("endsWith")) {
-
+			constraint.setOp(ENDS_WITH);
 			solver.endsWith(result, base, arg);
 
 		} else if (fName.equals("startsWith") && sourceMap.size() == 2) {
-
+			constraint.setOp(STARTS_WITH);
 			solver.startsWith(result, base, arg);
 
 		} else if (fName.equals("equals") || fName.equals("contentEquals")) {
@@ -1358,7 +1359,7 @@ public class Parser_2<T extends A_Model<T>> {
 			solver.equalsIgnoreCase(result, base, arg);
 
 		} else if (fName.equals("isEmpty")) {
-
+			constraint.setOp(IS_EMPTY);
 			solver.isEmpty(result, base);
 
 		}

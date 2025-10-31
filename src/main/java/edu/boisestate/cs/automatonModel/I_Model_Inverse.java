@@ -102,7 +102,7 @@ public interface I_Model_Inverse<T extends I_Model_Inverse<T>> {
 	 * 03/24/2024
 	 */
 	List<Tuple<T, T>> inv_concatenate_sym_all (T base,	T arg);
-	
-	
-	
+
+	Tuple<T,T> inv_contains(T arg2, boolean result);
+
 }

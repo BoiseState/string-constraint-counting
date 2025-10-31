@@ -61,64 +61,6 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 		this.result = result;
 	}
 
-
-	public InvConstraintEquals (int ID, Solver_Inverse<T> solver, int argID) {
-
-		// Store reference to solver
-		this.solver = solver;
-		this.ID = ID;
-		this.argID = argID;
-		this.outputSet = new HashMap<Integer,T>();
-		//this.argString = "[" + argList.get(0) + "]";
-		this.op = Operation.EQUALS;
-
-	}
-
-	public InvConstraintEquals (int ID, Solver_Inverse<T> solver, List<Integer> args) {
-
-		// Store reference to solver
-		this.solver = solver;
-		this.ID = ID;
-		this.argList = args;
-		//this.argString = "[" + argList.get(0) + "]";
-		this.op = Operation.EQUALS;
-	}
-
-	public InvConstraintEquals (int ID, Solver_Inverse<T> solver, List<Integer> args, int base, int input) {
-
-		// Store reference to solver
-		this.solver = solver;
-		this.ID = ID;
-		this.argList = args;
-		//this.argString = "[" + argList.get(0) + "]";
-		this.op = Operation.EQUALS;
-		this.nextID = base;
-	}
-
-
-	@Override
-	public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex) {
-
-		System.out.format("\nEVALUATE PREDICATE %d ...\n",ID);
-		//T predicateResult = solver.getSymbolicModel(ID);
-		T predicateResult = solver.getSymbolicModel(nextConstraint.getID());
-
-		if (!predicateResult.isEmpty()) {
-
-			// place symbolic string from solver string table into output set, position 1
-			outputSet.put(1, predicateResult);
-
-			// call evaluate on the next constraint, source is this inverse constraint
-			// returning false from here means we have an error, as the predicate must 
-			// be satisfiable.
-			return nextConstraint.evaluate(this, 1);
-		}
-
-		System.out.println("ERROR: Predicate has no forward results, UNSAT");
-		return false;
-
-	}
-
 	@Override
 	public Tuple<Boolean, Boolean> evaluate() {
 		printDebug("EVALUATE EQUALS PREDICATE " + ID + " ...");

@@ -16,7 +16,7 @@
       "value" : "r0!:!getStringValue!!"
     },{
       "num" : 0,
-      "actualValue" : "a",
+      "actualValue" : "HelloWorld",
       "incomingEdges" :[
       ],
       "sourceConstraints" : [ ],
