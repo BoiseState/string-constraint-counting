@@ -10,7 +10,6 @@ import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.automatonModel.operations.*;
 
 import java.math.BigInteger;
-import java.util.Collections;
 import java.util.Set;
 import java.util.Stack;
 
@@ -90,8 +89,8 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 		ensureAcyclicModel(containedModel);
 
 		// create any string automata
-		Automaton anyString1 = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
-		Automaton anyString2 = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
+		Automaton anyString1 = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat();
+		Automaton anyString2 = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat();
 
 		// concatenate with contained automaton
 		Automaton contained = getAutomatonFromAcyclicModel(containedModel);
@@ -141,7 +140,7 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 		ensureAcyclicModel(endingModel);
 
 		// create any string automata
-		Automaton anyString = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
+		Automaton anyString = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat();
 
 		// concatenate with ending automaton
 		Automaton end = getAutomatonFromAcyclicModel(endingModel);
@@ -192,7 +191,7 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 		}
 
 		// get any string with length between min and max
-		Automaton minMax = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(min, max);
+		Automaton minMax = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat(min, max);
 
 		// get resulting automaton
 		Automaton result = this.automaton.intersection(minMax);
@@ -253,8 +252,8 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 		Automaton result = automaton;
 		if (!notContained.isEmpty()) {
 			// create any string automata
-			Automaton anyString1 = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
-			Automaton anyString2 = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
+			Automaton anyString1 = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat();
+			Automaton anyString2 = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat();
 
 			// concatenate with not contained automaton
 			Automaton x = anyString1.concatenate(notContained).concatenate(anyString2);
@@ -322,7 +321,7 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 		if (!notEnding.isEmpty()) {
 
 			// create any string automata
-			Automaton anyString = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
+			Automaton anyString = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat();
 
 			// concatenate with not ending automaton
 			Automaton x = anyString.concatenate(notEnding);
@@ -428,7 +427,7 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 		Automaton result = automaton;
 		if (!notStarting.isEmpty()) {
 			// create any string automata
-			Automaton anyString = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
+			Automaton anyString = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat();
 
 			// concatenate with not starts automaton
 			Automaton x = notStarting.concatenate(anyString);
@@ -468,7 +467,7 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 		ensureAcyclicModel(startingModel);
 
 		// create any string automata
-		Automaton anyString = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
+		Automaton anyString = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat();
 
 		// concatenate with contained automaton
 		Automaton start = getAutomatonFromAcyclicModel(startingModel);

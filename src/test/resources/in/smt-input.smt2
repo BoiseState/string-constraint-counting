@@ -1,7 +1,3 @@
-(declare-const s1_18 String)
-(declare-const s2_19 String)
+(declare-const s1_1 String)
 
-(assert (str.contains s1_18 s2_19))
-(assert (not (= (str.len s2_19) 0)))
-
-(check-sat)
+(assert (not (= (str.at s1_1 0) "H")))

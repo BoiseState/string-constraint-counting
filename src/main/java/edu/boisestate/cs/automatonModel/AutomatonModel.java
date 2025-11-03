@@ -52,7 +52,7 @@ public abstract class AutomatonModel<T extends AutomatonModel>
         Automaton result = operation.op(automaton);
 
         // bound resulting automaton to alphabet
-        String charSet = alphabet.getCharSet();
+        String charSet = alphabet.getCharSetString();
         Automaton anyChar = BasicAutomata.makeCharSet(charSet).repeat();
         result = result.intersection(anyChar);
 

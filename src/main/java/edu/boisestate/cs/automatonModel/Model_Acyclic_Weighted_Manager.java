@@ -39,7 +39,7 @@ public class Model_Acyclic_Weighted_Manager extends A_Model_Manager <Model_Acycl
 	@Override
 	public Model_Acyclic_Weighted createAnyString(int min, int max) {
 		//create a symbolic string from min to max
-		String charSet = alphabet.getCharSet();
+		String charSet = alphabet.getCharSetString();
 		AcyclicWeightedAutomaton a  = BasicAcyclicWeightedAutomaton.makeCharSet(charSet);
 		//repeat a from min to max
 		a = a.repeat(min,max);

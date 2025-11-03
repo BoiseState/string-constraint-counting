@@ -111,7 +111,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	// for concrete contained string
 	public Model_Acyclic_Inverse assertContains(Model_Acyclic_Inverse contained, boolean result) {
 		int padding = this.boundLength - contained.boundLength;
-		Automaton pad = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(0, padding);
+		Automaton pad = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat(0, padding);
 		Automaton contains = pad.concatenate(contained.automaton).concatenate(pad);
 		Automaton ret = result ? this.automaton.intersection(contains) : this.automaton.minus(contains);
 		return new Model_Acyclic_Inverse(ret, this.alphabet, calculateBoundLength(ret));
@@ -133,7 +133,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		Automaton contained = getAutomatonFromAcyclicModel(containedModel);
 		if (containedModel.isSingleton()) {
 			int padding = this.boundLength - containedModel.boundLength;
-			Automaton pad = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(0,padding);
+			Automaton pad = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat(0,padding);
 			Automaton x = pad.concatenate(contained).concatenate(pad);
 			Automaton result = this.automaton.intersection(x);
 			return new Model_Acyclic_Inverse(result, this.alphabet, calculateBoundLength(result));
@@ -150,7 +150,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		String example = temp.getShortestExample(true);
 		Automaton ex = BasicAutomata.makeString(example);
 		int padding = this.boundLength - example.length();
-		Automaton pad = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(0, padding);
+		Automaton pad = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat(0, padding);
 		Automaton x = pad.concatenate(ex).concatenate(pad);
 		Automaton result = this.automaton.intersection(x);
 		//validate
@@ -159,7 +159,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 			example = temp.getShortestExample(true);
 			ex = BasicAutomata.makeString(example);
 			padding = this.boundLength - example.length();
-			pad = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(0, padding);
+			pad = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat(0, padding);
 			x = pad.concatenate(ex).concatenate(pad);
 			result = this.automaton.intersection(x);
 		}
@@ -227,7 +227,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 		// create any string automata
 		Automaton anyString =
-				BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(0, boundDiff);
+				BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat(0, boundDiff);
 
 		// concatenate with ending automaton
 		Automaton end = getAutomatonFromAcyclicModel(endingModel);
@@ -278,7 +278,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		}
 
 		// get any string with length between min and max
-		Automaton minMax = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(min, max);
+		Automaton minMax = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat(min, max);
 
 		// get resulting automaton
 		Automaton result = this.automaton.intersection(minMax);
@@ -404,10 +404,10 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 //        if (!notContained.isEmpty()) {
 		// create any string automata
 		Automaton anyString1 =
-				BasicAutomata.makeCharSet(this.alphabet.getCharSet())
+				BasicAutomata.makeCharSet(this.alphabet.getCharSetString())
 						.repeat();
 		Automaton anyString2 =
-				BasicAutomata.makeCharSet(this.alphabet.getCharSet())
+				BasicAutomata.makeCharSet(this.alphabet.getCharSetString())
 						.repeat();
 
 		// concatenate with not contained automaton
@@ -491,7 +491,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 		// create any string automata
 		Automaton anyString =
-				BasicAutomata.makeCharSet(this.alphabet.getCharSet())
+				BasicAutomata.makeCharSet(this.alphabet.getCharSetString())
 						.repeat(0, boundDiff);
 
 		// concatenate with not ending automaton
@@ -721,7 +721,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 //		if (!notStarting.isEmpty()) {
 		// create any string automata
 		Automaton anyString =
-				BasicAutomata.makeCharSet(this.alphabet.getCharSet())
+				BasicAutomata.makeCharSet(this.alphabet.getCharSetString())
 						.repeat(0, boundDiff);
 
 		// concatenate with not starts automaton
@@ -773,7 +773,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 		// create any string automata
 		Automaton anyString =
-				BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(0, boundDiff);
+				BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat(0, boundDiff);
 
 		// concatenate with contained automaton
 		Automaton start = getAutomatonFromAcyclicModel(startingModel);
@@ -1275,7 +1275,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 		// TODO: need to actaully evaluate pre and suff given index choice and find choice. i.e. or result may be empty
 
-		Automaton prefix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat(index, index);
+		Automaton prefix = Automaton.makeCharSet(this.alphabet.getCharSetString()).repeat(index, index);
 		if (index != 0) { // find is at least of length 1, so length of result would be at least index + 1
 			findAut.getInitialState().setAccept(false);
 			found = findAut.getShortestExample(true);
@@ -1290,7 +1290,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		// TODO: maybe should be doing length checks on everything and then for example adjusting find if index is high enough and find would go out of bounds....
 		// if (index + find.boundLength > bound) {
 		// we would want ot reomve the whoel findAut from find model because we already tried the shortest example. need ot backtrack on index?
-		Automaton suffix = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat(0, bound - index - find.boundLength);
+		Automaton suffix = Automaton.makeCharSet(this.alphabet.getCharSetString()).repeat(0, bound - index - find.boundLength);
 		Automaton result = prefix.concatenate(findAut).concatenate(suffix);
 		if (suffix.isEmpty()) { // i.e. becasuse find is long, it would make result empty
 			result = prefix.concatenate(findAut); // maybe should be making prefix the correct size as well...
@@ -1309,7 +1309,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		// take incoming model and return new model that fills bound lengths from index with anyStrings
 		// create two automaton, one from 0 to index, and one from index to bound length
 
-		String alphabetCharSet = this.alphabet.getCharSet();
+		String alphabetCharSet = this.alphabet.getCharSetString();
 		Automaton start = Automaton.makeCharSet(alphabetCharSet).repeat(index, index);// looks at repeat docs
 		Automaton end = Automaton.makeCharSet(alphabetCharSet).repeat(0, initBound - index);
 		// concatenate the two automata with the incoming model
@@ -2396,7 +2396,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		// nps 5.13.25 - Need to manually concatenate bounds as repeat uses loops
 		int repeat = boundLength - regexString.getBoundLength();
 		// to account for all possibilities add to front and back
-		String charSet = this.alphabet.getCharSet();
+		String charSet = this.alphabet.getCharSetString();
 		Automaton padding = Automaton.makeCharSet(charSet).repeat(0, repeat);
 		Automaton anyPrefixAndSuffix = padding.concatenate(regexAut).concatenate(padding);
 
@@ -2667,7 +2667,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 			contained.setAutomaton(contained.automaton.minus(choice));
 
 			int padding = this.boundLength - example.length();
-			Automaton pad = Automaton.makeCharSet(this.alphabet.getCharSet()).repeat(0, padding);
+			Automaton pad = Automaton.makeCharSet(this.alphabet.getCharSetString()).repeat(0, padding);
 			Automaton anyContaining = pad.concatenate(choice).concatenate(pad);
 
 			check = result ? this.automaton.intersection(anyContaining) : this.automaton.minus(anyContaining);
@@ -2681,9 +2681,38 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	// note that this shuld be the complement within te universe of alphabet and boundLength
 	public Model_Acyclic_Inverse complement() {
 		Automaton comp = this.automaton.clone();
+		Automaton c = this.automaton.clone().complement();
+		Set<Character> alph = this.alphabet.getSymbolSet();
+		// unfortunately because aut are reduced we have to manually create dead/rejecting paths :D
 		for (State s : comp.getStates()) {
 			s.setAccept(!s.isAccept());
+			Set<Character> covered = new HashSet<>();
+			for (Transition t : s.getTransitions()) {
+				char c1 = t.getMin();
+				char c2 = t.getMax();
+				for (char ch = c1; ch <= c2; ch++) {
+					covered.add(ch);
+				}
+			}
+			Set<Character> missing = new HashSet<>(alph);
+			missing.removeAll(covered);
+			// TODO: could optimize using charRanges
+			if (!missing.isEmpty()) {
+				// idk if having self-loop here will matter :D
+				// otherwise would need to figure out how long of an 'any' chain to add
+				State wasDead = new State();
+				wasDead.setAccept(true);
+				// add missing transition to former non-existent dead state
+				for (char ch : missing) {
+					s.addTransition(new Transition(ch, ch, wasDead));
+				}
+				// add self-loop for any remaining length
+				for (char ch : alph) {
+					wasDead.addTransition(new Transition(ch, ch, wasDead));
+				}
+			}
 		}
+		comp.minimize();
 		return new Model_Acyclic_Inverse(comp, this.alphabet, this.boundLength);
 	}
 

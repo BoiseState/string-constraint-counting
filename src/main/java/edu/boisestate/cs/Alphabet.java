@@ -240,7 +240,7 @@ public class Alphabet {
 		return this.symbolSet.size();
 	}
 
-	public String getCharSet() {
+	public String getCharSetString() {
 
 		// get char set as string from symbol set
 		StringBuilder charSet = new StringBuilder();
@@ -257,6 +257,6 @@ public class Alphabet {
 	}
 
     public String toString() {
-        return this.getCharSet();
+        return this.getCharSetString();
     }
 }

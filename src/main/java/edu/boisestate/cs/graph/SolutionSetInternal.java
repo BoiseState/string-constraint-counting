@@ -103,7 +103,7 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 				} else {
 					firstSolution = firstSolution.intersect(thisSolution);
 				}
-			}
+			}//TODO: else? shuoldnt this mean inconsistent and/or never be null?
 		}
 		if (firstSolution != null) comp = firstSolution.complement();	// :)
 		return firstSolution;

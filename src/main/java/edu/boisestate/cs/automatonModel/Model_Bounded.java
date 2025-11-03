@@ -85,8 +85,8 @@ public class Model_Bounded extends A_Model<Model_Bounded> {
 		ensureUnboundedModel(containedModel);
 
 		// create any string automata
-		Automaton anyString1 = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
-		Automaton anyString2 = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
+		Automaton anyString1 = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat();
+		Automaton anyString2 = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat();
 
 		// concatenate with contained automaton
 		Automaton contained = getAutomatonFromUnboundedModel(containedModel);
@@ -136,7 +136,7 @@ public class Model_Bounded extends A_Model<Model_Bounded> {
 		ensureUnboundedModel(endingModel);
 
 		// create any string automata
-		Automaton anyString = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
+		Automaton anyString = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat();
 
 		// concatenate with ending automaton
 		Automaton end = getAutomatonFromUnboundedModel(endingModel);
@@ -226,8 +226,8 @@ public class Model_Bounded extends A_Model<Model_Bounded> {
 		if (!notContained.isEmpty()) {
 
 			// create any string automata
-			Automaton anyString1 = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
-			Automaton anyString2 = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
+			Automaton anyString1 = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat();
+			Automaton anyString2 = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat();
 
 			// concatenate with not contained automaton
 			Automaton x = anyString1.concatenate(notContained).concatenate(anyString2);
@@ -296,7 +296,7 @@ public class Model_Bounded extends A_Model<Model_Bounded> {
 		if (!notEnding.isEmpty()) {
 
 			// create any string automata
-			Automaton anyString = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
+			Automaton anyString = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat();
 
 			// concatenate with not ending automaton
 			Automaton x = anyString.concatenate(notEnding);
@@ -403,7 +403,7 @@ public class Model_Bounded extends A_Model<Model_Bounded> {
 		Automaton result = automaton;
 		if (!notStarting.isEmpty()) {
 			// create any string automata
-			Automaton anyString = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
+			Automaton anyString = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat();
 
 			// concatenate with not starts automaton
 			Automaton x = notStarting.concatenate(anyString);
@@ -443,7 +443,7 @@ public class Model_Bounded extends A_Model<Model_Bounded> {
 		ensureUnboundedModel(startingModel);
 
 		// create any string automata
-		Automaton anyString = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat();
+		Automaton anyString = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat();
 
 		// concatenate with contained automaton
 		Automaton start = getAutomatonFromUnboundedModel(startingModel);
@@ -762,7 +762,7 @@ public class Model_Bounded extends A_Model<Model_Bounded> {
 		}
 
 		// get any string with length between min and max
-		Automaton minMax = BasicAutomata.makeCharSet(this.alphabet.getCharSet()).repeat(min, max);
+		Automaton minMax = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat(min, max);
 
 		// get resulting automaton
 		Automaton result = this.automaton.intersection(minMax);

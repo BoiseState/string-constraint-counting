@@ -9,7 +9,6 @@ import org.apache.commons.math3.fraction.Fraction;
 import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.automaton.acyclic.WeightedState;
 import edu.boisestate.cs.automaton.acyclic.WeightedTransition;
-import edu.boisestate.cs.util.DotToGraph;
 import edu.boisestate.cs.automaton.acyclic.AcyclicWeightedAutomaton;
 import edu.boisestate.cs.automaton.acyclic.BasicAcyclicWeightedAutomaton;
 import edu.boisestate.cs.automaton.acyclic.BasicAcyclicWeightedOperations;
@@ -113,12 +112,12 @@ public class Model_Acyclic_Weighted extends A_Model<Model_Acyclic_Weighted>{
 			//DotToGraph.outputDotFile(automaton.toDot(), "containsInBase");
 
 			//System.out.println("Max L " + maxLength);
-			AcyclicWeightedAutomaton prefix = BasicAcyclicWeightedAutomaton.makeCharSet(alphabet.getCharSet()).repeat(0, maxLength);
+			AcyclicWeightedAutomaton prefix = BasicAcyclicWeightedAutomaton.makeCharSet(alphabet.getCharSetString()).repeat(0, maxLength);
 			prefix.determinize();
 			//prefix.normalize();
 			//System.out.println("Prefix\n" + prefix);
 			//DotToGraph.outputDotFile(prefix.toDot(), "prefix");
-			AcyclicWeightedAutomaton suffix = BasicAcyclicWeightedAutomaton.makeCharSet(alphabet.getCharSet()).repeat(0, maxLength);
+			AcyclicWeightedAutomaton suffix = BasicAcyclicWeightedAutomaton.makeCharSet(alphabet.getCharSetString()).repeat(0, maxLength);
 			suffix.determinize();
 			//suffix.normalize();
 			//System.out.println("Suffix\n" + suffix);
@@ -251,7 +250,7 @@ public class Model_Acyclic_Weighted extends A_Model<Model_Acyclic_Weighted>{
 			//with  .*
 			//System.out.println("ABC " + alphabet.getCharSet() + " length " + notContaining.getMaxLenght());
 			//System.out.println("Completing");
-			notContaining = notContaining.complete(notContaining.getMaxLenght(), alphabet.getCharSet());
+			notContaining = notContaining.complete(notContaining.getMaxLenght(), alphabet.getCharSetString());
 			
 			//System.out.println("notContaining " + notContaining.getStates().size());
 			//notContaining.determinize();//cannot do it otherwise removes unreachable states that we need
@@ -261,10 +260,10 @@ public class Model_Acyclic_Weighted extends A_Model<Model_Acyclic_Weighted>{
 			//DotToGraph.outputDotFile(automaton.toDot(), "notContainsOtherBase");
 			//System.out.println("Building prefix and suffix");
 			//2. concatenate it with .* on both sides
-			AcyclicWeightedAutomaton prefix = BasicAcyclicWeightedAutomaton.makeCharSet(alphabet.getCharSet()).repeat(0, maxLength);
+			AcyclicWeightedAutomaton prefix = BasicAcyclicWeightedAutomaton.makeCharSet(alphabet.getCharSetString()).repeat(0, maxLength);
 			//System.out.println("prefix " + prefix.getStates().size());
 			//prefix.determinize();
-			AcyclicWeightedAutomaton suffix = BasicAcyclicWeightedAutomaton.makeCharSet(alphabet.getCharSet()).repeat(0, maxLength);
+			AcyclicWeightedAutomaton suffix = BasicAcyclicWeightedAutomaton.makeCharSet(alphabet.getCharSetString()).repeat(0, maxLength);
 			//System.out.println("suffix " + prefix.getStates().size());
 			//suffix.determinize();
 			notContaining = prefix.concatenate(notContaining);
@@ -350,7 +349,7 @@ public class Model_Acyclic_Weighted extends A_Model<Model_Acyclic_Weighted>{
 		//we over-approximate since it could be anything
 		AcyclicWeightedAutomaton ret;
 		if(!notEqualModel.automaton.isEmpty()){
-			AcyclicWeightedAutomaton notEqual = notEqualModel.automaton.complete(automaton.getMaxLenght(), alphabet.getCharSet());
+			AcyclicWeightedAutomaton notEqual = notEqualModel.automaton.complete(automaton.getMaxLenght(), alphabet.getCharSetString());
 			//System.out.println("notEqual \n" + notEqual);
 			ret = automaton.minus(notEqual);
 		} else {

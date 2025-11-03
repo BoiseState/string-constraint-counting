@@ -42,7 +42,7 @@ public class Model_Acyclic_Inverse_Manager extends A_Model_Manager <Model_Acycli
     public Model_Acyclic_Inverse createAnyString(int min, int max) {
 
         // create any string automaton from alphabet
-        String charSet = this.alphabet.getCharSet();
+        String charSet = this.alphabet.getCharSetString();
         Automaton anyChar = BasicAutomata.makeCharSet(charSet);
 
         // create bounded automaton
@@ -56,7 +56,7 @@ public class Model_Acyclic_Inverse_Manager extends A_Model_Manager <Model_Acycli
     public Model_Acyclic_Inverse createAnyString() {
 
         // create any string automaton from alphabet
-        String charSet = this.alphabet.getCharSet();
+        String charSet = this.alphabet.getCharSetString();
         Automaton anyString = BasicAutomata.makeCharSet(charSet).repeat();
 
         // return model from automaton

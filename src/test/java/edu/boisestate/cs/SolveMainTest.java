@@ -29,44 +29,45 @@ public class SolveMainTest {
         System.setOut(originalOut);
     }
 
-//	@Test
-//	public void testSolve() {
-//		restoreStreams();
-//		String[] args = {outPath + "smt-input.smt2", "-s", "inverse", "-v", "2", "-l", "5"};
-//		SolveMain.main(args);
-//	}
+	@Test
+	public void testSolve() {
+		restoreStreams();
+		String[] args = {inPath + "smt-input.smt2", "-s", "inverse", "-v", "2", "-l", "5"};
+		SolveMain.main(args);
+	}
 
 	// friendly reminder generator has bugs and is incomplete :)
-	@Test
-    public void smtQueryPlaygroundTest(){
-        restoreStreams();
-		String jsonOutputPath = inPath + "smt-input.smt2.json";
-        try {
-			// generator takes directory as input and converts smt2 files
-			File file = new File(inPath + "smt-input.smt2");
-			String javaPath = "/usr/lib/jvm/java-21-openjdk-amd64/bin/java";
-            ProcessBuilder pb = new ProcessBuilder(
-					javaPath, "-cp",
-					"/home/nat/Repos/SMT-parser-generator/target/GenJSONs-1.0-SNAPSHOT-jar-with-dependencies.jar",
-					"edu.boisestate.cs.MainJSON",
-					file.getAbsolutePath(),
-					jsonOutputPath
-			);
-//			pb.redirectErrorStream(true);
-            pb.start();
-
-			String[] args = {jsonOutputPath, "-s", "inverse", "-v", "2", "-l", "8"};
-			SolveMain.main(args);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//	@Test
+//    public void smtQueryPlaygroundTest(){
+//        restoreStreams();
+//		String jsonOutputPath = inPath + "smt-input.smt2.json";
+//        try {
+//			// generator takes directory as input and converts smt2 files
+//			File file = new File(inPath + "smt-input.smt2");
+//			String javaPath = "/usr/lib/jvm/java-21-openjdk-amd64/bin/java";
+//            ProcessBuilder pb = new ProcessBuilder(
+//					javaPath, "-cp",
+//					"/home/nat/Repos/SMT-parser-generator/target/GenJSONs-1.0-SNAPSHOT-jar-with-dependencies.jar",
+//					"edu.boisestate.cs.MainJSON",
+//					file.getAbsolutePath(),
+//					jsonOutputPath
+//			);
+////			pb.redirectErrorStream(true);
+//            pb.start();
+//
+//			String[] args = {jsonOutputPath, "-s", "inverse", "-v", "2", "-l", "8"};
+//			SolveMain.main(args);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 	@Test
 	public void testEmptyContains() {
 		in = "emptyContains.smt2";
-		run(in);
+		expect = "emptyContains.txt";
+		runExpected(in, expect);
 	}
 
 	@Test
