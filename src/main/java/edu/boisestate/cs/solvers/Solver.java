@@ -3,7 +3,6 @@ package edu.boisestate.cs.solvers;
 import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.BasicTimer;
 import edu.boisestate.cs.automatonModel.*;
-import edu.boisestate.cs.graph.PrintConstraint;
 import edu.boisestate.cs.util.Tuple;
 
 public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implements I_Solver<T> {
@@ -173,10 +172,10 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 			// start timer
 			BasicTimer.start();
 			// get satisfying base model as temp
-			T tempBaseModel = baseModel.assertNotEndsWith(argModel);
+			T tempBaseModel = baseModel.isSingleton() ? baseModel : baseModel.assertNotEndsWith(argModel);
 
 			// get satisfying arg model
-			T tempArgModel = argModel.assertNotEndsOther(baseModel);
+			T tempArgModel = argModel.isSingleton() ? argModel : argModel.assertNotEndsOther(baseModel);
 
 			// issue with two symbolics
 			if (tempBaseModel.isEmpty()) {
@@ -189,8 +188,8 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 //				System.err.println("Warning, Solver.endsWith(): argModel is empty");
 				tempBaseModel = baseModel.clone();
 				// this will manipulate the tempBaseModel and return its disjunct pair
-				tempArgModel = tempBaseModel.createDisjunct();
-				tempArgModel.removeEmptyString();
+				tempArgModel = tempBaseModel.createDisjoint();
+				tempArgModel = tempArgModel.intersect(argModel);
 			}
 
 			baseModel = tempBaseModel;
@@ -244,7 +243,7 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 					// both models empty so equivalent and need (ideally evenly split) disjunct models
 					tempBaseModel = baseModel.clone();
 					// this will manipulate the tempBaseModel and return its disjunct pair
-					tempArgModel = tempBaseModel.createDisjunct();
+					tempArgModel = tempBaseModel.createDisjoint();
 				} else {
 					tempBaseModel = baseModel.clone();
 				}
@@ -810,8 +809,8 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 				}
 			} else if (tempArgModel.isEmpty()) {
 				tempBaseModel = baseModel.clone();
-				tempArgModel = tempBaseModel.createDisjunct();
-				tempArgModel.removeEmptyString();
+				tempArgModel = tempBaseModel.createDisjoint();
+				tempArgModel = tempArgModel.intersect(argModel);
 			}
 			// set base model from temp
 			baseModel = tempBaseModel;

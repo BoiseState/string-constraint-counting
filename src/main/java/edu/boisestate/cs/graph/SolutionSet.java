@@ -6,9 +6,7 @@ package edu.boisestate.cs.graph;
 import edu.boisestate.cs.automatonModel.A_Model;
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 
-import java.util.ArrayList;
-import java.util.Formatter;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author nat
@@ -25,14 +23,12 @@ public class SolutionSet<T extends A_Model<T>> {
 		public String originalName;
 		public String example;
 		public A_Model<T> model; // model included for debugging i guess
-		public A_Model<T> comp;
 
-		public Solution(int ID, String originalName, String solution, T model, T comp) {
+		public Solution(int ID, String originalName, String solution, T model) {
 			this.ID = ID;
 			this.originalName = originalName.replace("_SYMSTRING", ""); // just for spf
 			this.example = solution;
 			this.model = model;
-			this.comp = comp;
 		}
 
 		public String toString() {
@@ -44,12 +40,12 @@ public class SolutionSet<T extends A_Model<T>> {
 		}
 	}
 
-	private List<Solution> solutions;
+	private LinkedHashMap<String, Solution> solutions;
 	private boolean SAT;
-	private int numInputs;
+	private final int numInputs;
 
 	public SolutionSet(int numInputs) {
-		solutions = new ArrayList<>();
+		solutions = new LinkedHashMap<>();
 		SAT = false;
 		this.numInputs = numInputs;
 	}
@@ -58,16 +54,10 @@ public class SolutionSet<T extends A_Model<T>> {
 		this.SAT = sat;
 	}
 
-	public void add(int id, String originalName, T solution, T comp) {
-		Solution sol = new Solution(id, originalName, solution.getAcceptedStringExample(), solution, comp);
-		for (Solution s : solutions) {
-			if (s.ID == id) {
-				solutions.remove(s);
-				break;
-			}
-		}
-		solutions.add(sol);
-		if (solutions.size() == numInputs) SAT = true;
+	public void add(int id, String originalName, T solution) {
+		Solution sol = new Solution(id, originalName, solution.getAcceptedStringExample(), solution);
+		solutions.put(originalName, sol);
+		SAT = solutions.size() == numInputs;
 	}
 
 	public String getResult() {
@@ -75,8 +65,7 @@ public class SolutionSet<T extends A_Model<T>> {
 		else {
 			StringBuilder sb = new StringBuilder();
 			sb.append("sat,");
-			solutions.sort(null);
-			for (Solution s : solutions) {
+			for (Solution s : solutions.values()) {
 				sb.append("\n").append(s.toString());
 			}
 			return sb.toString();
@@ -84,7 +73,7 @@ public class SolutionSet<T extends A_Model<T>> {
 	}
 
 	public List<Solution> getSolutions() {
-		return solutions;
+		return new ArrayList<>(this.solutions.values());
 	}
 
 	public String toString() {
@@ -92,7 +81,7 @@ public class SolutionSet<T extends A_Model<T>> {
 		sb.append("SAT: ").append(SAT).append("\n");
 		sb.append("Expected Solutions: ").append(numInputs).append("\n");
 		sb.append("Solutions: (").append(solutions.size()).append(")\n");
-		for (Solution s : solutions) {
+		for (Solution s : solutions.values()) {
 			sb.append("\t").append(s.toString()).append("\n");
 		}
 		return sb.toString();
@@ -105,19 +94,15 @@ public class SolutionSet<T extends A_Model<T>> {
 	public SolutionSet<T> clone() {
 		SolutionSet<T> newSet = new SolutionSet<>(this.numInputs);
 		newSet.setSAT(this.SAT);
-		for (Solution s : this.solutions) {
-			Solution newSol = new Solution(s.ID, s.originalName, s.example, s.model.clone(), s.comp.clone());
-			newSet.solutions.add(newSol);
+		newSet.solutions = new LinkedHashMap<>();
+		for (Solution s : this.solutions.values()) {
+			Solution newSol = new Solution(s.ID, s.originalName, s.example, s.model.clone());
+			newSet.solutions.put(s.originalName, newSol);
 		}
 		return newSet;
 	}
 
 	public Solution getSolutionForVar(String originalName) {
-		for (Solution s : solutions) {
-			if (s.originalName.equals(originalName)) {
-				return s;
-			}
-		}
-		return null;
+		return solutions.get(originalName);
 	}
 }

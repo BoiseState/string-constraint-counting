@@ -842,7 +842,7 @@ public class Model_Bounded extends A_Model<Model_Bounded> {
 	public Model_Bounded indexOf(Model_Bounded arg) {return null;}
 
     @Override
-    public Model_Bounded createDisjunct() {return null;}
+    public Model_Bounded createDisjoint() {return null;}
 
 	@Override
 	public void removeEmptyString(){};

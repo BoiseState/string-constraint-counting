@@ -1352,7 +1352,7 @@ public class Model_Acyclic extends A_Model<Model_Acyclic> {
 	@Override
 	public Model_Acyclic indexOf(Model_Acyclic arg) { return null;}
     @Override
-    public Model_Acyclic createDisjunct() {return null;}
+    public Model_Acyclic createDisjoint() {return null;}
 	@Override
 	public void removeEmptyString(){};
 	@Override

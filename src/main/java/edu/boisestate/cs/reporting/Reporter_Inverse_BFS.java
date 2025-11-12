@@ -256,7 +256,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
                 } else {
 					InvConstraintInput ic = (InvConstraintInput<T>) c;
 					// Adding solution complements for caching purposes
-                    solutions.add(c.getID(), ic.getOriginalName(), solution, (T) ic.getComp());
+                    solutions.add(c.getID(), ic.getOriginalName(), solution);
                 }
             }
         }

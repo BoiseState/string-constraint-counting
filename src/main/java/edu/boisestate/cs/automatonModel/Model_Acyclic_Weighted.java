@@ -992,7 +992,7 @@ public class Model_Acyclic_Weighted extends A_Model<Model_Acyclic_Weighted>{
 	@Override
 	public Model_Acyclic_Weighted indexOf(Model_Acyclic_Weighted arg) {return null;	}
     @Override
-    public Model_Acyclic_Weighted createDisjunct() { return null;}
+    public Model_Acyclic_Weighted createDisjoint() { return null;}
 	@Override
 	public void removeEmptyString(){};
 	@Override

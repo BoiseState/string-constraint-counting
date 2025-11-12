@@ -133,7 +133,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		Automaton contained = getAutomatonFromAcyclicModel(containedModel);
 		if (containedModel.isSingleton()) {
 			int padding = this.boundLength - containedModel.boundLength;
-			Automaton pad = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat(0,padding);
+			Automaton pad = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat(0, padding);
 			Automaton x = pad.concatenate(contained).concatenate(pad);
 			Automaton result = this.automaton.intersection(x);
 			return new Model_Acyclic_Inverse(result, this.alphabet, calculateBoundLength(result));
@@ -166,7 +166,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 		result.minimize();
 		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
-
 
 
 ////		int padding = Math.max(0, this.boundLength - containedModel.boundLength);
@@ -301,7 +300,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	@Override
 	public Model_Acyclic_Inverse resolveNotContains(Model_Acyclic_Inverse arg) {
 		Model_Acyclic_Inverse temp = arg.clone();
-		temp.createDisjunct();
+		temp.createDisjoint();
 		return this.assertNotContainsOther(temp);
 	}
 
@@ -513,108 +512,126 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	}
 
 	/**
-	 * Creates a disjunct pair of models from this model.
+	 * Creates a disjoint pair of models from this model.
 	 * Manipulates this model in place and returns the remainder
 	 *
 	 * @return Model_Acyclic_Inverse - the other disjunct model
 	 */
-	public Model_Acyclic_Inverse createDisjunct() {
-		Tuple<Automaton, HashMap<State, State>> a = this.cloneWithMap();
-		Automaton other = a.get1();
-		HashMap<State, State> stateMap = a.get2();
-		LinkedList<State> search = new LinkedList<>();
-		HashSet<State> visited = new HashSet<>();
-		search.add(automaton.getInitialState());
-		boolean found = false;
-		// we'll iterate through the states until there is a branch and split there.
-		while (!search.isEmpty()) {
-			State current = search.removeFirst();
-			List<LogicalTransition> lTs = AutomatonHelper.getLogicalTransitions(current);
-			if (lTs.size() > 1) {
-				// we can branch, so have one model take branch and remove branch from other
-				LogicalTransition branch = lTs.get(0); // also the largest transition
+	public Model_Acyclic_Inverse createDisjoint() {
+		Tuple<Automaton, HashMap<State, State>> cloned = this.cloneWithMap();
+		Automaton other = cloned.get1();
+		HashMap<State, State> stateMap = cloned.get2();
+
+		// Try logical split first (transitions are pre-ordered & non-overlapping)
+		LinkedList<State> queue = new LinkedList<>();
+		queue.add(automaton.getInitialState());
+		boolean logicalSplit = false;
+
+		while (!queue.isEmpty()) {
+			State current = queue.removeFirst();
+			List<LogicalTransition> logical = AutomatonHelper.getLogicalTransitions(current);
+			if (logical.size() > 1) {
+				//take first (largest already by ordering)
+				LogicalTransition branch = logical.get(0);
+				// Remove branch transitions from THIS automaton
 				Set<Transition> currTrans = current.getTransitions();
 				for (Transition t : branch.getTransitions()) {
 					currTrans.remove(t);
 				}
-				// now we've remove transition in current and need to remove all toher transitions from other
-				State onlyDest = stateMap.get(branch.getDestination());
+				// In OTHER automaton keep only that destination
+				State keepDest = stateMap.get(branch.getDestination());
 				Set<Transition> otherTrans = stateMap.get(current).getTransitions();
-				Set<Transition> removals = new HashSet<>();
-				for (Transition t : otherTrans) {
-					if (t.getDest() != onlyDest) {
-						removals.add(t);
-					}
-				}
-				otherTrans.removeAll(removals);
-				found = true;
-				break;
-			}
-			visited.add(current);
-			// if we are here then there was only one branch of transitions i.e. one dest
-			if (current.getTransitions().iterator().hasNext()) {
-				search.add(current.getTransitions().iterator().next().getDest());
-			}
-		}
-		// this means theres only one edge at each state so we will split as soon as we can on character
-		// the logical is also easier
-		if (!found) {
-			printDebug("No Logical Disjunct Pair found, using characters instead");
-			search.add(automaton.getInitialState());
-			Set<Transition> newTrans = new HashSet<>();
-			Set<Transition> otherNewTrans = new HashSet<>();
-			while (!search.isEmpty()) {
-				State current = search.removeFirst();
-				Set<Transition> transitions = current.getTransitions();
-				Set<Transition> otherTransitions = stateMap.get(current).getTransitions();
-				Iterator<Transition> it = transitions.iterator();
-				Iterator<Transition> it2 = otherTransitions.iterator();
-				Transition sample = (Transition) (transitions.toArray()[0]);
-				if (transitions.size() == 1 && sample.getMin() == sample.getMax()) {
-					//no null check as aut is not singleton
-					search.add(sample.getDest());
-					continue;
-				}
-				int charTotal = 0;
-				for (Transition t : transitions) {
-					charTotal += (t.getMax() - t.getMin() + 1);
-				}
-				int charCount = 0;
+				Iterator<Transition> it = otherTrans.iterator();
 				while (it.hasNext()) {
 					Transition t = it.next();
-					Transition ot = it2.next();
-					int charT = t.getMax() - t.getMin() + 1;
-					if (charCount < charTotal / 2) {
-						if (charCount + charT < charTotal / 2) {
-							newTrans.add(t);
-							charCount += charT;
-						} else {
-							int diff = (charTotal / 2) - charCount;
-							Transition newT = new Transition(t.getMin(), (char) (t.getMin() + diff - 1), t.getDest());
-							Transition newOT = new Transition((char) (ot.getMin() + diff), ot.getMax(), ot.getDest());
-							newTrans.add(newT);
-							otherNewTrans.add(newOT);
-							charCount += diff;
-						}
-					} else {
-						otherNewTrans.add(ot);
+					if (t.getDest() != keepDest) {
+						it.remove();
 					}
 				}
-				current.setAccept(false);// if they accept empty need one not to
-				transitions.clear();
-				otherTransitions.clear();
-				transitions.addAll(newTrans);
-				otherTransitions.addAll(otherNewTrans);
+				logicalSplit = true;
+				break;
+			}
+			// Single path continuation (acyclic assumption)
+			if (!current.getTransitions().isEmpty()) {
+				queue.add(current.getTransitions().iterator().next().getDest());
 			}
 		}
-		//sanity check (testing!)
-		// TODO: remove
-		Automaton check = this.automaton.intersection(other);
-		if (!check.isEmpty()) {
-			System.err.println("NOT A DISJUNCT PAIR in createDisjunct");
-			System.exit(1);
+
+		if (!logicalSplit) {
+			printDebug("No logical split found; falling back to character split");
+			// Character range split at first splittable state along path
+			queue.clear();
+			queue.add(automaton.getInitialState());
+			while (!queue.isEmpty()) {
+				State current = queue.removeFirst();
+				Set<Transition> transitions = current.getTransitions();
+				if (transitions.isEmpty()) continue;
+
+				// Skip pure single-char deterministic chain nodes
+				if (transitions.size() == 1) {
+					Transition only = transitions.iterator().next();
+					if (only.getMin() == only.getMax()) {
+						queue.add(only.getDest());
+						continue;
+					}
+				}
+
+				// Prepare aligned lists (clone mapping preserves order by destination grouping assumptions)
+				List<Transition> orig = new ArrayList<>(transitions);
+				List<Transition> clone = new ArrayList<>(stateMap.get(current).getTransitions());
+				// Deterministic sort for alignment
+				orig.sort(Comparator.comparingInt(Transition::getMin));
+				clone.sort(Comparator.comparingInt(Transition::getMin));
+
+				int total = orig.stream().mapToInt(t -> t.getMax() - t.getMin() + 1).sum();
+				int target = total / 2;
+
+				Set<Transition> newThis = new HashSet<>();
+				Set<Transition> newOther = new HashSet<>();
+				int acc = 0;
+				for (int i = 0; i < orig.size(); i++) {
+					Transition a = orig.get(i);
+					Transition b = clone.get(i);
+					int span = a.getMax() - a.getMin() + 1;
+
+					if (acc >= target) {
+						newOther.add(new Transition(b.getMin(), b.getMax(), b.getDest()));
+						continue;
+					}
+					if (acc + span <= target) {
+						newThis.add(new Transition(a.getMin(), a.getMax(), a.getDest()));
+						acc += span;
+					} else {
+						int need = target - acc;
+						char splitHigh = (char) (a.getMin() + need - 1);
+						char otherLow = (char) (splitHigh + 1);
+						// First half to this
+						newThis.add(new Transition(a.getMin(), splitHigh, a.getDest()));
+						// Second half to other
+						newOther.add(new Transition(otherLow, b.getMax(), b.getDest()));
+						acc += need;
+					}
+				}
+
+				// Replace transitions at split point
+				transitions.clear();
+				stateMap.get(current).getTransitions().clear();
+				transitions.addAll(newThis);
+				stateMap.get(current).getTransitions().addAll(newOther);
+				// Avoid both accepting empty at same point
+				current.setAccept(false);
+				break; // single split
+			}
 		}
 
+		// Validation
+		minimize();
+		other.minimize();
+		// TODO: remove this as it could be expensive
+		Automaton overlap = this.automaton.intersection(other);
+		if (!overlap.isEmpty()) {
+			throw new IllegalStateException("createDisjoint produced overlapping languages");
+		}
 		return new Model_Acyclic_Inverse(other, alphabet, boundLength);
 	}
 
@@ -2619,7 +2636,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	@Override
 	public Model_Acyclic_Inverse replaceAll(Model_Acyclic_Inverse regexString, Model_Acyclic_Inverse replacementString) {
 		// assuming prefix seleciton is fairly straightforward calling replaceFirst iteratively shuoldnt be much less efficienct
-		Model_Acyclic_Inverse bruteForce=null;
+		Model_Acyclic_Inverse bruteForce = null;
 		if (debug) {
 			bruteForce = this.replaceAllBruteForce(regexString, replacementString);
 		}
@@ -2636,9 +2653,9 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 			next = result.replaceFirst(regexString, replacementString);
 
 		} while (!result.equals(next));
-		if (bruteForce!=null && bruteForce.equals(result)) {
+		if (bruteForce != null && bruteForce.equals(result)) {
 			printDebug("Brute force and result match");
-		} else if (bruteForce!=null){
+		} else if (bruteForce != null) {
 			System.err.println("Brute force and result do not match");
 			System.err.println("Brute force: " + bruteForce.getFiniteStrings());
 			System.err.println("Result: " + result.getFiniteStrings());
@@ -2656,7 +2673,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	}
 
 	// basically combines assertContainsOther, assertNotContainsOther, assertContainedInOther, and assertNotContainedInOther
-	public Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse> inv_contains(Model_Acyclic_Inverse contained, boolean result) {
+	public Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse> inv_contains(Model_Acyclic_Inverse contained, boolean result) {
 		// choose some contained
 		Automaton check, choice;
 		String example;

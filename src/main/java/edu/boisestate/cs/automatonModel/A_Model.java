@@ -223,7 +223,7 @@ public abstract class A_Model <T extends A_Model <T>> implements Cloneable, I_Mo
 
     public abstract T indexOf(T arg);
 
-    public abstract T createDisjunct();
+    public abstract T createDisjoint();
 
 	public abstract void removeEmptyString();
 
