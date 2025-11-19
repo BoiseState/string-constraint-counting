@@ -10,8 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public class InvConstraintIndexOf<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
-    private final int findID;
     private final int bound;
+	private T inputs = null;// hold index range and manipulate for backtracking/search etc.
 
     public InvConstraintIndexOf(int ID, Solver_Inverse<T> solver, List<Integer> args) {
         this.solver = solver;
@@ -21,7 +21,6 @@ public class InvConstraintIndexOf<T extends A_Model_Inverse<T>> extends A_Inv_Co
         this.outputSet = new HashMap<Integer, T>();
         this.solutionSet = new SolutionSetInternal<T>(ID);
         this.argString = "0:INDEX";
-        this.findID = argList.get(0);
         this.bound = solver.getBound();
     }
 
@@ -29,17 +28,22 @@ public class InvConstraintIndexOf<T extends A_Model_Inverse<T>> extends A_Inv_Co
     public Tuple<Boolean, Boolean> evaluate() {
         Tuple<Boolean, Boolean> ret = new Tuple<>(true, true);
         printDebug("EVALUATE INDEX OF " + ID + " ...");
-        T inputs = incoming();
+		if (inputs == null) {
+			// init
+			inputs = incoming();
+		}
         printDebug("INDEX OF INCOMING: " + inputs.getShortestExampleString());
         if (inputs.isEmpty()) {
             printDebug("INDEX OF INCOMING SET INCONSISTENT");
             ret = new Tuple<>(false, true);
         } else {
             // calls the solver_inverse method which calls the model_acyclic method
-            T findOriginal = solver.getSymbolicModel(findID);
+            T findOriginal = solver.getSymbolicModel(argID);
+			T searchOriginal = solver.getSymbolicModel(nextID);
             T findModel = findOriginal.clone();
-            T inputsOrig = inputs.clone();
-            T resModel = solver.inv_indexOf(inputs, findModel, bound);
+			T searchModel = searchOriginal.clone();
+//            T inputsOrig = inputs.clone();
+            T resModel = solver.inv_indexOf(searchModel, findModel, inputs, bound);
 
             if (resModel == null) {
                 System.err.println("INVERSE INDEX OF FAILED");
@@ -63,10 +67,9 @@ public class InvConstraintIndexOf<T extends A_Model_Inverse<T>> extends A_Inv_Co
                 // similarly we want to check the indexRange/inputs and see if we have exhausted those possibilities.
                 // note i think/hope we shuold have exhausted the specific index search as we don't make choices about hte restul other than based on the find model
                 // however we can't adjust inputs itself for reevaluation, we will need ot grab the prevconstraint output that is responsible
-                inputsOrig.minus(inputs);
 
                 ((A_Inv_Constraint<T>)this.prevConstraint.iterator().next()).setOutput(this,inputs); // this is the prev constraint that is responsible for the inputs
-                if (!findAutOG.isEmpty() || !inputsOrig.isEmpty()) {
+                if (!findAutOG.isEmpty()) {
                     ret = new Tuple<>(true, false);
                 }
                 //otherwise we've exhausted our search

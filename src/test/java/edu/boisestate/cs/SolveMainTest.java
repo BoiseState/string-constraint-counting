@@ -32,7 +32,7 @@ public class SolveMainTest {
 	@Test
 	public void testSolve() {
 		restoreStreams();
-		String[] args = {inPath + "smt-input.smt2.json", "-s", "inverse", "-v", "2", "-l", "5"};
+		String[] args = {inPath + "smt-input.smt2", "-s", "inverse", "-v", "2", "-l", "5", "-d"};
 		SolveMain.main(args);
 	}
 

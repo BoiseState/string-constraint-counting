@@ -253,6 +253,15 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 			baseModel = tempBaseModel;
 			argModel = tempArgModel;
 
+			// ummm so make sure that if they are BOTH singleton that they are different strings
+			if (baseModel.isSingleton() && argModel.isSingleton()) {
+				if (baseModel.equals(argModel)) { // UNSAT
+					// make one empty or both i guess
+					baseModel = null;
+					argModel = null;
+				}
+			}
+
 			// stop timer
 			BasicTimer.stop();
 		}

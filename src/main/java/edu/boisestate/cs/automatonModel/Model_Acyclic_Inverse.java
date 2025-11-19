@@ -110,6 +110,11 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 	// for concrete contained string
 	public Model_Acyclic_Inverse assertContains(Model_Acyclic_Inverse contained, boolean result) {
+		// TODO: instead of just padding. we can check this model for any required paths and then integrate that with our
+		//  contained model instead. would need to find the prefix and suffix around the required path.
+//		Automaton req = getRequiredCharAutomaton(this.automaton, this.alphabet, this.boundLength);
+		// if req not empty check it first.
+		// then if necessary check/enforce for prefix and/or suffix around req NOT TRIVIAL :)
 		int padding = this.boundLength - contained.boundLength;
 		Automaton pad = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat(0, padding);
 		Automaton contains = pad.concatenate(contained.automaton).concatenate(pad);
@@ -515,7 +520,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	 * Creates a disjoint pair of models from this model.
 	 * Manipulates this model in place and returns the remainder
 	 *
-	 * @return Model_Acyclic_Inverse - the other disjunct model
+	 * @return Model_Acyclic_Inverse - the other disjoint model
 	 */
 	public Model_Acyclic_Inverse createDisjoint() {
 		Tuple<Automaton, HashMap<State, State>> cloned = this.cloneWithMap();
@@ -1251,8 +1256,16 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	}
 
 	// so this would take an index (in theory a range) and resolve a model that makes sure that is where find is first located.
-	public Model_Acyclic_Inverse inv_indexOf(Model_Acyclic_Inverse find, int bound) {
-		Automaton indexRange = this.getAutomatonObject();
+
+	/**
+	 * so this shuold manipulate find in place, and use indx to determine where find can be located and return a valid model for this that works..
+	 * @param find
+	 * @param indx
+	 * @param bound
+	 * @return
+	 */
+	public Model_Acyclic_Inverse inv_indexOf(Model_Acyclic_Inverse find, Model_Acyclic_Inverse indx, int bound) {
+		Automaton indexRange = indx.getAutomatonObject();
 		// search for empty possiblity, i.e. no match, i.e. -1 (i.e. 65535 is what we use for that)
 		if (indexRange.isEmpty()) {
 			throw new RuntimeException("Index range is empty in inv_indexOf");
@@ -1271,15 +1284,27 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 		Automaton findAut = find.getAutomatonObject();
 		String found = findAut.getShortestExample(true);// choose a simple find model, TODO: write max and min length helper methods for acyclic automata
+		// if findAut includes empty string than found will be empty string
 
 		// the simplest solution when find is not found is for result to be the empty string, and find to be anything but the empty string
-		if (includesNotFound && !found.isEmpty()) {
+		// issue being that this may not include empty string
+		if (includesNotFound) {
+			// we can not have find in search so just find any string not a substring of search i.e. this
 			indexRange.getInitialState().getTransitions().remove(choice); // remove for possible future use
-			// find can be anyting
-			return new Model_Acyclic_Inverse(BasicAutomata.makeEmptyString(), this.alphabet, 0);
-		} else if (includesNotFound && found.isEmpty()) { // i.e. find has empty
-			findAut.getInitialState().setAccept(false); //remove empty (will still be kept in InvConstraint for later backtrackin gif necessary
-			return new Model_Acyclic_Inverse(BasicAutomata.makeEmptyString(), this.alphabet, 0);
+			if (!found.isEmpty()) { // always find if found is empty string and for now we dont want to deal with properly handling this
+			// TODO: this will be incomplete but we will just try this empty for now
+				if (this.containsString("")){
+					return new Model_Acyclic_Inverse(BasicAutomata.makeEmptyString(), this.alphabet, 0);
+				}
+			}
+			Automaton allSubstrings = performUnaryOperation(this.automaton, new Substring(), this.alphabet);
+			if (allSubstrings.intersection(findAut).isEmpty()){
+				// find is not a substring of this, so no need to search
+				indx.setAutomaton(Automaton.makeEmpty());
+				return this; // no change needed
+			} else {
+
+			}
 		}
 
 		// just create a dummy automaton with find and padding that can be propogated and intersected, we assume it is not a range for now :), otherwise we could iterate and backtrack, yuck
