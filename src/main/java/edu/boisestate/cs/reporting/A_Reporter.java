@@ -254,6 +254,7 @@ while (forwardPropagation && !queue.isEmpty()) {
 			calculateStats(null);
 		} else {
 			System.out.println("unsat");
+			printDebug("* at this bound length: ");
 		}
         //solveInputs();
         

@@ -37,6 +37,10 @@ public class InvConstraintIndexOf<T extends A_Model_Inverse<T>> extends A_Inv_Co
 			}
 			index = (int) inputs.getAutomatonObject().getInitialState().getTransitions().iterator().next().getMin();
 			index-= 48; // ascii offset
+			if (index > 65000) {
+				// treat as not found
+				index = -1;
+			}
 		}
 		printDebug("INDEX OF INCOMING: " + index);
 

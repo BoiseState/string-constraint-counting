@@ -299,6 +299,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 //		}
 
         System.out.println(solutions.getResult());
+		printDebug("*at bound length: " + invSolver.getBound());
 
     }
 

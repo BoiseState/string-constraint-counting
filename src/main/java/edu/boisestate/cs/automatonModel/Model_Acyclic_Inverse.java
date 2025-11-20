@@ -1318,6 +1318,36 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 		// TODO: need to actaully evaluate pre and suff given index choice and find choice. i.e. or result may be empty
 
+		if (index == -1) { // not found
+			Automaton findAut = find.getAutomatonObject();
+			// first try removing all substrings of search from find
+			Automaton allSubstrings = performUnaryOperation(this.automaton, new Substring(), this.alphabet);
+			Automaton invalidFinds = findAut.minus(allSubstrings);
+			if (!invalidFinds.isEmpty()) { // any choice in ether will now work
+				find.setAutomaton(invalidFinds);
+				return this;
+			}
+			// try pinning a find and removing it from search
+			String found = findAut.getShortestExample(true);
+			Automaton findChoice = BasicAutomata.makeString(found);
+			Automaton padding = BasicAutomata.makeCharSet(this.alphabet.getCharSetString()).repeat(0, this.boundLength - found.length());
+			Automaton invalidSearch = this.automaton.minus(padding.concatenate(findChoice).concatenate(padding));
+
+			while (invalidSearch.isEmpty()) { // continue searching find choices
+				findAut = findAut.minus(findChoice);
+				if (findAut.isEmpty()) {
+					return new Model_Acyclic_Inverse(BasicAutomata.makeEmpty(), this.alphabet, 0);
+				}
+				found = findAut.getShortestExample(true);
+				findChoice = BasicAutomata.makeString(found);
+				invalidSearch = this.automaton.minus(padding.concatenate(findChoice).concatenate(padding));
+			}
+			find.setAutomaton(findChoice);
+			find.boundLength = found.length();
+			return new Model_Acyclic_Inverse(invalidSearch, this.alphabet, calculateBoundLength(invalidSearch));
+
+		}
+
 		Automaton findAut = find.getAutomatonObject();
 		// find all substrings starting at index in search(this) and intersect with find
 
@@ -1325,6 +1355,10 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		Automaton substringsAtIndex = performUnaryOperation(fromIndex, new Substring(), this.alphabet);
 		Automaton validFinds = substringsAtIndex.intersection(findAut);
 		String foundChoice = validFinds.getShortestExample(true);
+		if (foundChoice == null) {
+			// quite possible that boundlength just needs to be increased
+			return new Model_Acyclic_Inverse(BasicAutomata.makeEmpty(), this.alphabet, 0);
+		}
 		Automaton findChoice = BasicAutomata.makeString(foundChoice);
 		find.setAutomaton(findChoice);
 		find.boundLength = foundChoice.length();
