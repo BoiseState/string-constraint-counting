@@ -1255,95 +1255,117 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(numRange, this.alphabet, find.boundLength);
 	}
 
+
 	// so this would take an index (in theory a range) and resolve a model that makes sure that is where find is first located.
 
 	/**
 	 * so this shuold manipulate find in place, and use indx to determine where find can be located and return a valid model for this that works..
 	 * @param find
-	 * @param indx
-	 * @param bound
+	 * @param index
+//	 * @param bound
 	 * @return
 	 */
-	public Model_Acyclic_Inverse inv_indexOf(Model_Acyclic_Inverse find, Model_Acyclic_Inverse indx, int bound) {
-		Automaton indexRange = indx.getAutomatonObject();
-		// search for empty possiblity, i.e. no match, i.e. -1 (i.e. 65535 is what we use for that)
-		if (indexRange.isEmpty()) {
-			throw new RuntimeException("Index range is empty in inv_indexOf");
-		}
-		// if find includes the emptyString we can just
-
-		Transition choice = null;
-		boolean includesNotFound = false;
-		for (Transition t : indexRange.getInitialState().getTransitions()) {
-			if (t.getMin() == '\uFFFF') { // i.e. 65535, i guess in theory it could be the max with a range, but thats basicaly impossiblein this frameowkr
-				choice = t;
-				includesNotFound = true;
-				break;
-			}
-		}
-
-		Automaton findAut = find.getAutomatonObject();
-		String found = findAut.getShortestExample(true);// choose a simple find model, TODO: write max and min length helper methods for acyclic automata
-		// if findAut includes empty string than found will be empty string
-
-		// the simplest solution when find is not found is for result to be the empty string, and find to be anything but the empty string
-		// issue being that this may not include empty string
-		if (includesNotFound) {
-			// we can not have find in search so just find any string not a substring of search i.e. this
-			indexRange.getInitialState().getTransitions().remove(choice); // remove for possible future use
-			if (!found.isEmpty()) { // always find if found is empty string and for now we dont want to deal with properly handling this
-			// TODO: this will be incomplete but we will just try this empty for now
-				if (this.containsString("")){
-					return new Model_Acyclic_Inverse(BasicAutomata.makeEmptyString(), this.alphabet, 0);
-				}
-			}
-			Automaton allSubstrings = performUnaryOperation(this.automaton, new Substring(), this.alphabet);
-			if (allSubstrings.intersection(findAut).isEmpty()){
-				// find is not a substring of this, so no need to search
-				indx.setAutomaton(Automaton.makeEmpty());
-				return this; // no change needed
-			} else {
-
-			}
-		}
-
-		// just create a dummy automaton with find and padding that can be propogated and intersected, we assume it is not a range for now :), otherwise we could iterate and backtrack, yuck
-		// TODO: similar to substring/replace algo, needs to allow anystring but a match, and then the findModel, and then anystring at all after.
-		int index = (int) indexRange.getInitialState().getTransitions().iterator().next().getMin();// not sure how this will handle the -1 case tbh.
-		index = index - 48; // proper conversion to int from
-		if (index < 0 || index >= bound) {// not sure how to get the bound length of solving
-			throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for model with bound length " + bound);
-		}
+	public Model_Acyclic_Inverse inv_indexOf(Model_Acyclic_Inverse find, int index) {
+//		Automaton indexRange = indx.getAutomatonObject();
+//		// search for empty possiblity, i.e. no match, i.e. -1 (i.e. 65535 is what we use for that)
+//		if (indexRange.isEmpty()) {
+//			throw new RuntimeException("Index range is empty in inv_indexOf");
+//		}
+//		// if find includes the emptyString we can just
+//
+//		Transition choice = null;
+//		boolean includesNotFound = false;
+//		for (Transition t : indexRange.getInitialState().getTransitions()) {
+//			if (t.getMin() == '\uFFFF') { // i.e. 65535, i guess in theory it could be the max with a range, but thats basicaly impossiblein this frameowkr
+//				choice = t;
+//				includesNotFound = true;
+//				break;
+//			}
+//		}
+//
+//		Automaton findAut = find.getAutomatonObject();
+//		String found = findAut.getShortestExample(true);// choose a simple find model, TODO: write max and min length helper methods for acyclic automata
+//		// if findAut includes empty string than found will be empty string
+//
+//		// the simplest solution when find is not found is for result to be the empty string, and find to be anything but the empty string
+//		// issue being that this may not include empty string
+//		if (includesNotFound) {
+//			// we can not have find in search so just find any string not a substring of search i.e. this
+//			indexRange.getInitialState().getTransitions().remove(choice); // remove for possible future use
+//			if (!found.isEmpty()) { // always find if found is empty string and for now we dont want to deal with properly handling this
+//			// TODO: this will be incomplete but we will just try this empty for now
+//				if (this.containsString("")){
+//					return new Model_Acyclic_Inverse(BasicAutomata.makeEmptyString(), this.alphabet, 0);
+//				}
+//			}
+//			Automaton allSubstrings = performUnaryOperation(this.automaton, new Substring(), this.alphabet);
+//			if (allSubstrings.intersection(findAut).isEmpty()){
+//				// find is not a substring of this, so no need to search
+//				indx.setAutomaton(Automaton.makeEmpty());
+//				return this; // no change needed
+//			} else {
+//
+//			}
+//		}
+//
+//		// just create a dummy automaton with find and padding that can be propogated and intersected, we assume it is not a range for now :), otherwise we could iterate and backtrack, yuck
+//		// TODO: similar to substring/replace algo, needs to allow anystring but a match, and then the findModel, and then anystring at all after.
+//		int index = (int) indexRange.getInitialState().getTransitions().iterator().next().getMin();// not sure how this will handle the -1 case tbh.
+//		index = index - 48; // proper conversion to int from
+//		if (index < 0 || index >= bound) {// not sure how to get the bound length of solving
+//			throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for model with bound length " + bound);
+//		}
 
 		// TODO: need to actaully evaluate pre and suff given index choice and find choice. i.e. or result may be empty
 
-		Automaton prefix = Automaton.makeCharSet(this.alphabet.getCharSetString()).repeat(index, index);
-		if (index != 0) { // find is at least of length 1, so length of result would be at least index + 1
-			findAut.getInitialState().setAccept(false);
-			found = findAut.getShortestExample(true);
-		} else {
-			prefix = BasicAutomata.makeEmptyString();
-		}
-		findAut = BasicAutomata.makeString(found);
-		find.boundLength = found.length();
-		// remove find from prefix, as it would otherwise have been found earlier
-		// dont think this is proper, i.e. we do really need ot be like enumerating pairs of result/find
-		if (index > 0) prefix = prefix.minus(findAut);
-		// TODO: maybe should be doing length checks on everything and then for example adjusting find if index is high enough and find would go out of bounds....
-		// if (index + find.boundLength > bound) {
-		// we would want ot reomve the whoel findAut from find model because we already tried the shortest example. need ot backtrack on index?
-		Automaton suffix = Automaton.makeCharSet(this.alphabet.getCharSetString()).repeat(0, bound - index - find.boundLength);
-		Automaton result = prefix.concatenate(findAut).concatenate(suffix);
-		if (suffix.isEmpty()) { // i.e. becasuse find is long, it would make result empty
-			result = prefix.concatenate(findAut); // maybe should be making prefix the correct size as well...
-		}
+		Automaton findAut = find.getAutomatonObject();
+		// find all substrings starting at index in search(this) and intersect with find
+
+		Automaton fromIndex = performUnaryOperation(this.automaton, new PreciseSuffix(index), this.alphabet);
+		Automaton substringsAtIndex = performUnaryOperation(fromIndex, new Substring(), this.alphabet);
+		Automaton validFinds = substringsAtIndex.intersection(findAut);
+		String foundChoice = validFinds.getShortestExample(true);
+		Automaton findChoice = BasicAutomata.makeString(foundChoice);
+		find.setAutomaton(findChoice);
+		find.boundLength = foundChoice.length();
+
+		// now constrcut result based on that...
+
+		Automaton prefix = performUnaryOperation(this.automaton, new PrecisePrefix(index), this.alphabet);
+		Automaton suffix = performUnaryOperation(fromIndex, new PreciseSuffix(foundChoice.length()), this.alphabet);
+
+		Automaton result = prefix.concatenate(findChoice).concatenate(suffix);
 		result.minimize();
+		return new Model_Acyclic_Inverse(result, this.alphabet, calculateBoundLength(result));
+		// technically need to pin either find or search... find will be quicker?
 
-		if (result.isEmpty()) {
-			throw new RuntimeException("Resulting automaton is empty in inv_indexOf");
-		}
-
-		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
+//		Automaton prefix = Automaton.makeCharSet(this.alphabet.getCharSetString()).repeat(index, index);
+//		if (index != 0) { // find is at least of length 1, so length of result would be at least index + 1
+//			findAut.getInitialState().setAccept(false);
+//			found = findAut.getShortestExample(true);
+//		} else {
+//			prefix = BasicAutomata.makeEmptyString();
+//		}
+//		findAut = BasicAutomata.makeString(found);
+//		find.boundLength = found.length();
+//		// remove find from prefix, as it would otherwise have been found earlier
+//		// dont think this is proper, i.e. we do really need ot be like enumerating pairs of result/find
+//		if (index > 0) prefix = prefix.minus(findAut);
+//		// TODO: maybe should be doing length checks on everything and then for example adjusting find if index is high enough and find would go out of bounds....
+//		// if (index + find.boundLength > bound) {
+//		// we would want ot reomve the whoel findAut from find model because we already tried the shortest example. need ot backtrack on index?
+//		Automaton suffix = Automaton.makeCharSet(this.alphabet.getCharSetString()).repeat(0, bound - index - find.boundLength);
+//		Automaton result = prefix.concatenate(findAut).concatenate(suffix);
+//		if (suffix.isEmpty()) { // i.e. becasuse find is long, it would make result empty
+//			result = prefix.concatenate(findAut); // maybe should be making prefix the correct size as well...
+//		}
+//		result.minimize();
+//
+//		if (result.isEmpty()) {
+//			throw new RuntimeException("Resulting automaton is empty in inv_indexOf");
+//		}
+//
+//		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
 	}
 
 	//TODO: init bound could still be too short if we've say done concatenation, would want nextConstraint bound

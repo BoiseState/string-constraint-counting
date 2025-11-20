@@ -51,7 +51,7 @@ public interface I_Model_Inverse<T extends I_Model_Inverse<T>> {
 
 	T inv_charAt(int index, int initialBound);
 
-	T inv_indexOf(T find, T index, int bound);
+	T inv_indexOf(T find, int index);
 	/**
 	 * 
 	 * Returns new model with strings from input model removed.
