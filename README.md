@@ -33,11 +33,7 @@ It takes one argument, the input file to be solved. Note that this script does n
 **Examples:**
 
 ```bash
-./run ../benchmarks/a-str/real/beasties01.smt2.json
-```
-or
-```bash
-./run ../benchmarks/smt/automatark/instance00022.smt2
+./run graphs/benchmarks/concat_isEmpty_equals_contains_l2_d2_bench.json
 ```
 
 ## Additional Information
