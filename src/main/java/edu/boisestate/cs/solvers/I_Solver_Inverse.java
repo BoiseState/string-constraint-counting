@@ -2,12 +2,12 @@ package edu.boisestate.cs.solvers;
 
 import java.util.List;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 //import edu.boisestate.cs.graph.I_Inv_Constraint;
 import edu.boisestate.cs.util.Quadruple;
 import edu.boisestate.cs.util.Tuple;
 
-public interface I_Solver_Inverse<T extends A_Model_Inverse<T>> {
+public interface I_Solver_Inverse{
 	
 	
 //	public void pushInvConstraint(I_Inv_Constraint constraint);
@@ -20,13 +20,13 @@ public interface I_Solver_Inverse<T extends A_Model_Inverse<T>> {
 	
 //	void inv_append(int id, int base, int arg, int start, int end);
 
-	T inv_append(int id, int base, int arg);
+	Model_Acyclic_Inverse inv_append(int id, int base, int arg);
 
 	void inv_contains(boolean result, int base, int arg);
 
 //	void inv_deleteCharAt(int id, int base, int loc);
 
-	T inv_delete(T input, int start, int end);
+	Model_Acyclic_Inverse inv_delete(Model_Acyclic_Inverse input, int start, int end);
 
 //	Quadruple<T,T,T,T> inv_insert(T input, T base, T arg, int start);
 
@@ -34,11 +34,11 @@ public interface I_Solver_Inverse<T extends A_Model_Inverse<T>> {
 
 	void inv_replaceCharFindKnown(int id, int base, char find);
 
-	T inv_replaceCharKnown(T input, char find, char replace);
+	Model_Acyclic_Inverse inv_replaceCharKnown(Model_Acyclic_Inverse input, char find, char replace);
 
-	T inv_replaceFirst(T input, T find, T replace);
+	Model_Acyclic_Inverse inv_replaceFirst(Model_Acyclic_Inverse input, Model_Acyclic_Inverse find, Model_Acyclic_Inverse replace);
 
-	T inv_replaceAll(T input, T find, T replace);
+	Model_Acyclic_Inverse inv_replaceAll(Model_Acyclic_Inverse input, Model_Acyclic_Inverse find, Model_Acyclic_Inverse replace);
 
 	void inv_replaceCharReplaceKnown(int id, int base, char replace);
 
@@ -48,7 +48,7 @@ public interface I_Solver_Inverse<T extends A_Model_Inverse<T>> {
 
 	void inv_replaceStrings(int id, int base, int argOne, int argTwo);
 
-	T inv_reverse(T input);
+	Model_Acyclic_Inverse inv_reverse(Model_Acyclic_Inverse input);
 
 	void inv_setCharAt(int id, int base, int arg, int offset);
 
@@ -56,18 +56,18 @@ public interface I_Solver_Inverse<T extends A_Model_Inverse<T>> {
 
 	void inv_substring(int id, int base, int start);
 
-	T inv_substring(T input, int start, int end);
+	Model_Acyclic_Inverse inv_substring(Model_Acyclic_Inverse input, int start, int end);
 
-	T inv_substring(T input, int start);
+	Model_Acyclic_Inverse inv_substring(Model_Acyclic_Inverse input, int start);
 	
-	T inv_setLength(T input, int length);
+	Model_Acyclic_Inverse inv_setLength(Model_Acyclic_Inverse input, int length);
 	
 	
-	T inv_toLowerCase(T input);
+	Model_Acyclic_Inverse inv_toLowerCase(Model_Acyclic_Inverse input);
 
-	T inv_toUpperCase(T input);
+	Model_Acyclic_Inverse inv_toUpperCase(Model_Acyclic_Inverse input);
 
-	T inv_trim(T input);
+	Model_Acyclic_Inverse inv_trim(Model_Acyclic_Inverse input);
 
 	/**
 	 * Performs base.inv_concatenate(arg), stores result as symbolic string id
@@ -80,7 +80,7 @@ public interface I_Solver_Inverse<T extends A_Model_Inverse<T>> {
 	 */
 //	void inv_append(int id, int input, int arg, int base);
 
-	public List<Tuple<T, T>> inv_concat_sym_set(int id, int input, int arg, int base); 
-	public void setSymString(int id, T stringModel);
+	public List<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>> inv_concat_sym_set(int id, int input, int arg, int base); 
+	public void setSymString(int id, Model_Acyclic_Inverse stringModel);
 
 }

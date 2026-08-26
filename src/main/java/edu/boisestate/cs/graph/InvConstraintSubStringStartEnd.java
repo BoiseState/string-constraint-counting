@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.solvers.*;
 import edu.boisestate.cs.util.Tuple;
 
@@ -15,26 +15,26 @@ import edu.boisestate.cs.util.Tuple;
  * @author Marlin Roberts, 2020-2021
  *
  */
-public class InvConstraintSubStringStartEnd<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
+public class InvConstraintSubStringStartEnd extends A_Inv_Constraint {
 
 
 	private int start,end;
 
-	public InvConstraintSubStringStartEnd (int ID, Solver_Inverse<T> solver, List<Integer> args) {
+	public InvConstraintSubStringStartEnd (int ID, Solver_Inverse solver, List<Integer> args) {
 
 		// Store reference to solver
 		this.solver = solver;
 		this.ID = ID;
 		this.argList = args;
 		this.op = Operation.SUBSTR_STRT_END;
-		this.outputSet = new HashMap<Integer,T>();
-		this.solutionSet = new SolutionSetInternal<T>(ID);
+		this.outputSet = new HashMap<Integer,Model_Acyclic_Inverse>();
+		this.solutionSet = new SolutionSetInternal(ID);
 		this.argString = "0:START 1:END";
 		this.start = argList.get(0);
 		this.end = argList.get(1);
 	}
 
-	public InvConstraintSubStringStartEnd (int ID, Solver_Inverse<T> solver, List<Integer> args, int base, int input) {
+	public InvConstraintSubStringStartEnd (int ID, Solver_Inverse solver, List<Integer> args, int base, int input) {
 
 		// Store reference to solver
 		this.solver = solver;
@@ -50,14 +50,14 @@ public class InvConstraintSubStringStartEnd<T extends A_Model_Inverse<T>> extend
 
 
 	@Override
-	public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex) {
+	public boolean evaluate(I_Inv_Constraint inputConstraint, int sourceIndex) {
 
 		System.out.format("EVALUATE SUBSTRING %d ...\n",ID);
 
-		T inputModel = inputConstraint.output(sourceIndex);
+		Model_Acyclic_Inverse inputModel = inputConstraint.output(sourceIndex);
 
 		// perform inverse function on output from the input constraint at given index
-		T resModel = solver.inv_substring(inputModel, start, end);
+		Model_Acyclic_Inverse resModel = solver.inv_substring(inputModel, start, end);
 
 		// intersect result with forward analysis results from previous constraint
 		resModel = solver.intersect(resModel, nextConstraint.getID());
@@ -94,14 +94,14 @@ public class InvConstraintSubStringStartEnd<T extends A_Model_Inverse<T>> extend
 //		System.out.format("EVALUATE SUBSTRING %d ...\n",ID);
 		Tuple<Boolean, Boolean>  ret = new Tuple<Boolean,Boolean>(true, true);
 
-		T inputs = incoming();
+		Model_Acyclic_Inverse inputs = incoming();
 		if(inputs.isEmpty()) {
 			printDebug("SUBSTRING SOLUTION INCOMING SET INCONSISTENT");
 //			System.out.println("SUBSTRING SOLUTION INCOMING SET INCONSISTENT...");
 			ret = new Tuple<Boolean,Boolean>(false, true);
 		} else {
 			// perform inverse function on output from the input constraint at given index
-			T resModel = solver.inv_substring(inputs, start, end);
+			Model_Acyclic_Inverse resModel = solver.inv_substring(inputs, start, end);
 
 			// intersect result with forward analysis results from previous constraint
 			resModel = solver.intersect(resModel, nextConstraint.getID());

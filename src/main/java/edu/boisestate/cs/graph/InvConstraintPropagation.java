@@ -6,7 +6,7 @@ package edu.boisestate.cs.graph;
 import java.util.HashMap;
 import java.util.List;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 //import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
@@ -15,7 +15,7 @@ import edu.boisestate.cs.util.Tuple;
  * @author Marlin Roberts, 2020-2021
  *
  */
-public class InvConstraintPropagation<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
+public class InvConstraintPropagation extends A_Inv_Constraint {
 
     // This will hold a reference to the containing solver.
     // This allows the constraint access to the solver functions and string tables.
@@ -33,30 +33,30 @@ public class InvConstraintPropagation<T extends A_Model_Inverse<T>> extends A_In
     //private String argString;
 
 
-    public InvConstraintPropagation(int ID, Solver_Inverse<T> solver) {
+    public InvConstraintPropagation(int ID, Solver_Inverse solver) {
 
         // Store reference to solver
         this.solver = solver;
         this.ID = ID;
         //this.argID = argID;
-        this.outputSet = new HashMap<Integer, T>();
+        this.outputSet = new HashMap<Integer, Model_Acyclic_Inverse>();
         //this.argString = "[" + argList.get(0) + "]";
         this.op = Operation.PROPAGATION;
     }
 
 
-    public InvConstraintPropagation(int ID, Solver_Inverse<T> solver, int argID) {
+    public InvConstraintPropagation(int ID, Solver_Inverse solver, int argID) {
 
         // Store reference to solver
         this.solver = solver;
         this.ID = ID;
         this.argID = argID;
-        this.outputSet = new HashMap<Integer, T>();
+        this.outputSet = new HashMap<Integer, Model_Acyclic_Inverse>();
         //this.argString = "[" + argList.get(0) + "]";
         this.op = Operation.PROPAGATION;
     }
 
-    public InvConstraintPropagation(int ID, Solver_Inverse<T> solver, List<Integer> args) {
+    public InvConstraintPropagation(int ID, Solver_Inverse solver, List<Integer> args) {
 
         // Store reference to solver
         this.solver = solver;
@@ -66,7 +66,7 @@ public class InvConstraintPropagation<T extends A_Model_Inverse<T>> extends A_In
         this.op = Operation.PROPAGATION;
     }
 
-    public InvConstraintPropagation(int ID, Solver_Inverse<T> solver, List<Integer> args, int base, int input) {
+    public InvConstraintPropagation(int ID, Solver_Inverse solver, List<Integer> args, int base, int input) {
 
         // Store reference to solver
         this.solver = solver;
@@ -79,11 +79,11 @@ public class InvConstraintPropagation<T extends A_Model_Inverse<T>> extends A_In
 
 
     @Override
-    public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex) {
+    public boolean evaluate(I_Inv_Constraint inputConstraint, int sourceIndex) {
 
         System.out.format("\nEVALUATE PROPAGATE %d ...\n", ID);
         //T predicateResult = solver.getSymbolicModel(ID);
-        T propagateResult = solver.getSymbolicModel(nextConstraint.getID());
+        Model_Acyclic_Inverse propagateResult = solver.getSymbolicModel(nextConstraint.getID());
 
         if (!propagateResult.isEmpty()) {
 
@@ -107,7 +107,7 @@ public class InvConstraintPropagation<T extends A_Model_Inverse<T>> extends A_In
 //        System.out.format("\nBFS EVALUATE PREDICATE %d ...\n", ID);
         Tuple<Boolean, Boolean> ret = new Tuple<Boolean, Boolean>(true, true);
         //T predicateResult = solver.getSymbolicModel(ID);
-        T predicateResult = solver.getSymbolicModel(nextConstraint.getID());
+        Model_Acyclic_Inverse predicateResult = solver.getSymbolicModel(nextConstraint.getID());
 //	System.out.println("solver " + solver);
         //System.out.println("nextConstr " + nextConstraint.getID());
         //System.out.println("predicate " + predicateResult.getFiniteStrings());

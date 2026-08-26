@@ -5,19 +5,19 @@ import java.util.List;
 import java.util.Map;
 //import java.util.Stack;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
-import edu.boisestate.cs.automatonModel.A_Model_Manager;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse_Manager;
 //import edu.boisestate.cs.graph.I_Inv_Constraint;
 //import edu.boisestate.cs.graph.I_Inv_Constraint;
 import edu.boisestate.cs.util.Quadruple;
 import edu.boisestate.cs.util.Tuple;
 
 
-public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> implements I_Solver_Inverse<T>{
+public class Solver_Inverse extends Solver implements I_Solver_Inverse{
 
    // protected final A_Model_Manager<T> modelManager;
 	
-    protected Map<Integer, T> invStringMap = new HashMap<>();
+    protected Map<Integer, Model_Acyclic_Inverse> invStringMap = new HashMap<>();
     private boolean reduceToShortest = true;
     //private static int ARG_OFFSET = 1000;	// TODO: REMOVE symbolic arguments are stored in the symbolic string table with this offset
     //private Stack<I_Inv_Constraint> constraintStack; // REMOVE
@@ -26,7 +26,7 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> impl
      * Constructor with modelManager
      * @param modelManager
      */
-    public Solver_Inverse(A_Model_Manager<T> modelManager) {
+    public Solver_Inverse(Model_Acyclic_Inverse_Manager modelManager) {
         super(modelManager);
         //constraintStack = new Stack<I_Inv_Constraint>(); // TODO: REMOVE
         // initialize factory from parameter
@@ -38,7 +38,7 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> impl
      * @param modelManager
      * @param initialBound
      */
-    public Solver_Inverse(A_Model_Manager<T> modelManager, int initialBound) {
+    public Solver_Inverse(Model_Acyclic_Inverse_Manager modelManager, int initialBound) {
         super(modelManager,initialBound);
         //constraintStack = new Stack<I_Inv_Constraint>(); // TODO: REMOVE
         // initialize factory from parameter
@@ -55,7 +55,7 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> impl
 	}
 
 	@Override
-	public T getModel(int id) {
+	public Model_Acyclic_Inverse getModel(int id) {
 		return symbolicStringMap.get(id);
 	}
 
@@ -66,7 +66,7 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> impl
 		
 	}
 
-	public T getSymbolicModel (int id) {
+	public Model_Acyclic_Inverse getSymbolicModel (int id) {
 		return invStringMap.get(id);
 	}
 
@@ -77,7 +77,7 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> impl
 //	}
 
 	/**
-	 * r3 version returns T
+	 * r3 version returns Model_Acyclic_Inverse
 	 * 
 	 * 03/18/2021 MJR
 	 * 
@@ -86,11 +86,11 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> impl
 	 * @param arg - symbolic string to use as argument
 	 */
 	@Override
-	public T inv_append(int id, int input, int arg) {
+	public Model_Acyclic_Inverse inv_append(int id, int input, int arg) {
 		
-		T inputModel = invStringMap.get(input);
-		T argModel = invStringMap.get(arg);
-		T resModel = inputModel.inv_concatenate(argModel);
+		Model_Acyclic_Inverse inputModel = invStringMap.get(input);
+		Model_Acyclic_Inverse argModel = invStringMap.get(arg);
+		Model_Acyclic_Inverse resModel = inputModel.inv_concatenate(argModel);
 		//invStringMap.put(id, resModel);
 		return resModel;
 	}
@@ -134,15 +134,15 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> impl
 
 	/**
 	 * R3 Version 
-	 * Returns result T
+	 * Returns result Model_Acyclic_Inverse
 	 * 
 	 * 03/18/2021 MJR
 	 */
 	@Override
-	public T inv_delete(T input, int start, int end) {
+	public Model_Acyclic_Inverse inv_delete(Model_Acyclic_Inverse input, int start, int end) {
 		
 		//T baseModel = invStringMap.get(base);
-		T resModel = input.inv_delete(start, end);
+		Model_Acyclic_Inverse resModel = input.inv_delete(start, end);
 		//invStringMap.put(id, resultModel);
 		return resModel;
 		
@@ -174,18 +174,18 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> impl
 
 	/**
 	 * R3 Version 
-	 * Returns result T
+	 * Returns result Model_Acyclic_Inverse
 	 * 
 	 * 03/18/2021 MJR
 	 */
 	@Override
-	public T inv_replaceCharKnown(T input, char find, char replace) {
+	public Model_Acyclic_Inverse inv_replaceCharKnown(Model_Acyclic_Inverse input, char find, char replace) {
 		//T baseModel = invStringMap.get(base);
 		//T resModel = baseModel.inv_replace(find, replace);
 		//invStringMap.put(id, resModel);
 		
 		//T baseModel = invStringMap.get(base);
-		T resModel = input.inv_replace(find, replace);
+		Model_Acyclic_Inverse resModel = input.inv_replace(find, replace);
 		//T resModel = input.inv_replace(replace, find);
 		//invStringMap.put(id, resultModel);
 		return resModel;
@@ -195,15 +195,15 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> impl
 
 	// calls the Model Acyclic method
 	@Override
-	public T inv_replaceFirst(T input, T find, T replace) {
-		T resModel = input.inv_replaceFirst(find, replace);
+	public Model_Acyclic_Inverse inv_replaceFirst(Model_Acyclic_Inverse input, Model_Acyclic_Inverse find, Model_Acyclic_Inverse replace) {
+		Model_Acyclic_Inverse resModel = input.inv_replaceFirst(find, replace);
 		return resModel;
 
 	}
 
 	@Override
-	public T inv_replaceAll(T input, T find, T replace) {
-		T resModel = input.inv_replaceAll(find, replace);
+	public Model_Acyclic_Inverse inv_replaceAll(Model_Acyclic_Inverse input, Model_Acyclic_Inverse find, Model_Acyclic_Inverse replace) {
+		Model_Acyclic_Inverse resModel = input.inv_replaceAll(find, replace);
 		return resModel;
 	}
 
@@ -234,14 +234,14 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> impl
 	
 	/**
 	 * R3 Version 
-	 * Returns result T
+	 * Returns result Model_Acyclic_Inverse
 	 * 
 	 * 03/18/2021 MJR
 	 */
 	@Override 
-	public T inv_reverse(T input) {
+	public Model_Acyclic_Inverse inv_reverse(Model_Acyclic_Inverse input) {
 		
-		T resultModel = input.reverse();
+		Model_Acyclic_Inverse resultModel = input.reverse();
 		return resultModel;
 		
 	}
@@ -266,60 +266,60 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> impl
 
 	/**
 	 * R3 Version 
-	 * Returns result T
+	 * Returns result Model_Acyclic_Inverse
 	 * 
 	 * 03/18/2021 MJR
 	 */
 	@Override
-	public T inv_substring(T input, int start, int end) {
+	public Model_Acyclic_Inverse inv_substring(Model_Acyclic_Inverse input, int start, int end) {
 		
 		//T baseModel = invStringMap.get(base);
-		T resModel = input.inv_substring(start, end);
+		Model_Acyclic_Inverse resModel = input.inv_substring(start, end);
 		//invStringMap.put(id, resultModel);
 		return resModel;
 	}
 
 	/**
 	 * R3 Version 
-	 * Returns result T
+	 * Returns result Model_Acyclic_Inverse
 	 * 
 	 * 03/18/2021 MJR
 	 */
 	@Override
-	public T inv_substring(T input, int start) {
+	public Model_Acyclic_Inverse inv_substring(Model_Acyclic_Inverse input, int start) {
 		
 		//T baseModel = invStringMap.get(base);
-		T resModel = input.inv_substring(start);
+		Model_Acyclic_Inverse resModel = input.inv_substring(start);
 		//invStringMap.put(id, resultModel);
 		return resModel;
 	}
 	
 	/**
 	 * R3 Version Performs base.inv_toLowercase
-	 * Returns result T
+	 * Returns result Model_Acyclic_Inverse
 	 * 
 	 * 03/18/2021 MJR
 	 */
 	@Override
-	public T inv_toLowerCase(T input) {
+	public Model_Acyclic_Inverse inv_toLowerCase(Model_Acyclic_Inverse input) {
 		
 		//T baseModel = invStringMap.get(base);
-		T resModel = input.inv_toLowercase();
+		Model_Acyclic_Inverse resModel = input.inv_toLowercase();
 		//invStringMap.put(id, resModel);
 		return resModel;
 	}
 
 	/**
 	 * R3 Version Performs base.inv_toUppercase
-	 * Returns result T
+	 * Returns result Model_Acyclic_Inverse
 	 * 
 	 * 03/31/2021 MJR
 	 */
 	@Override
-	public T inv_toUpperCase(T input) {
+	public Model_Acyclic_Inverse inv_toUpperCase(Model_Acyclic_Inverse input) {
 		
 		//T baseModel = invStringMap.get(base);
-		T resModel = input.inv_toUppercase();
+		Model_Acyclic_Inverse resModel = input.inv_toUppercase();
 		//invStringMap.put(id, resModel);
 		return resModel;
 		
@@ -327,21 +327,21 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> impl
 
 	/**
 	 * R3 Version Performs base.inv_trim
-	 * Returns result T
+	 * Returns result Model_Acyclic_Inverse
 	 * 
 	 * 06/21/2021 MJR
 	 */
 	@Override
-	public T inv_trim(T input) {
+	public Model_Acyclic_Inverse inv_trim(Model_Acyclic_Inverse input) {
 
-		T resModel = input.inv_trim();
+		Model_Acyclic_Inverse resModel = input.inv_trim();
 		return resModel;
 		
 	}
 	
 	
 	public void showStrings(int id) {
-		T baseModel = invStringMap.get(id);
+		Model_Acyclic_Inverse baseModel = invStringMap.get(id);
 		if (baseModel.getFiniteStrings() != null) {
 //			for (String s : baseModel.getFiniteStrings()) {
 //			System.out.println(s);
@@ -379,20 +379,20 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> impl
 			invStringMap.put(id, symbolicStringMap.get(id).clone());
 		}
 		
-		T prevString = invStringMap.get(prevID).clone();
+		Model_Acyclic_Inverse prevString = invStringMap.get(prevID).clone();
 		invStringMap.put(predID, prevString);
 
 	}
 	
 	public void duplicateString(int source, int dest) {
-		T destString = invStringMap.get(source).clone();
+		Model_Acyclic_Inverse destString = invStringMap.get(source).clone();
 		invStringMap.put(dest, destString);
 	}
 	
 	public void reduceStringToShortest(int id) {
 		
 		if (reduceToShortest) {
-			T shortestString = invStringMap.get(id);
+			Model_Acyclic_Inverse shortestString = invStringMap.get(id);
 			shortestString = shortestString.getShortestExampleModel();
 			invStringMap.put(id, shortestString);	
 		}
@@ -405,15 +405,15 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> impl
 	
 	// TODO: REMOVE
 	public void intersectPrevious(int current, int previous) {
-		T previousModel = invStringMap.get(previous);
-		T currentModel = invStringMap.get(current);
+		Model_Acyclic_Inverse previousModel = invStringMap.get(previous);
+		Model_Acyclic_Inverse currentModel = invStringMap.get(current);
 		currentModel = currentModel.intersect(previousModel);
 		invStringMap.put(current, currentModel);
 	}
 	
-	public T intersect(T currentModel, int previous) {
-		T previousModel = invStringMap.get(previous);
-		T resModel = currentModel.intersect(previousModel);
+	public Model_Acyclic_Inverse intersect(Model_Acyclic_Inverse currentModel, int previous) {
+		Model_Acyclic_Inverse previousModel = invStringMap.get(previous);
+		Model_Acyclic_Inverse resModel = currentModel.intersect(previousModel);
 
 		return resModel;
 	}
@@ -434,36 +434,36 @@ public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> impl
 
 	
 	@Override // TODO: REMOVE 
-	public List<Tuple<T, T>> inv_concat_sym_set(int id, int input, int arg, int base) {
+	public List<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>> inv_concat_sym_set(int id, int input, int arg, int base) {
 		
-		T inputModel = invStringMap.get(input);
-		T argModel = invStringMap.get(arg);
-		T baseModel = invStringMap.get(base);
+		Model_Acyclic_Inverse inputModel = invStringMap.get(input);
+		Model_Acyclic_Inverse argModel = invStringMap.get(arg);
+		Model_Acyclic_Inverse baseModel = invStringMap.get(base);
 		
-		List<Tuple<T,T>> results = inputModel.inv_concatenate_sym_set(baseModel, argModel);
+		List<Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse>> results = inputModel.inv_concatenate_sym_set(baseModel, argModel);
 
 		return results;
 	}
 	
 	@Override
-	public void setSymString(int id, T stringModel) {
+	public void setSymString(int id, Model_Acyclic_Inverse stringModel) {
 		invStringMap.put(id, stringModel);
 		
 	}
 
 	@Override
-	public T inv_setLength(T input, int length) {
+	public Model_Acyclic_Inverse inv_setLength(Model_Acyclic_Inverse input, int length) {
 		
-		T resModel = input.inv_setLength(length);
+		Model_Acyclic_Inverse resModel = input.inv_setLength(length);
 		//invStringMap.put(id, resultModel);
 		return resModel;
 	}
 
-	public T inv_charAt(T input, int index, int bound) {
+	public Model_Acyclic_Inverse inv_charAt(Model_Acyclic_Inverse input, int index, int bound) {
 		return input.inv_charAt(index, bound);
 	}
 
-	public T inv_indexOf(T input, T find, int index) {
+	public Model_Acyclic_Inverse inv_indexOf(Model_Acyclic_Inverse input, Model_Acyclic_Inverse find, int index) {
 		return input.inv_indexOf(find, index);
 	}
 

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
 
@@ -17,7 +17,7 @@ import edu.boisestate.cs.util.Tuple;
  * @author Marlin Roberts, 2020-2021
  *
  */
-public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
+public class InvConstraintEquals extends A_Inv_Constraint {
 
 	// This will hold a reference to the containing solver.
 	// This allows the constraint access to the solver functions and string tables.
@@ -35,7 +35,7 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 	//private String argString;
 
 	//to keep the initial value
-	private T inputs = null;
+	private Model_Acyclic_Inverse inputs = null;
 
 	//the result of equals to evaluate to: true or false;
 	private boolean result;
@@ -46,16 +46,16 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 	//set up a couple of data structures
 	//one model maps to a list of outputs
 	//when
-	private Map<T, List<Tuple<T,T>>> mapInOut = null;
+	private Map<Model_Acyclic_Inverse, List<Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse>>> mapInOut = null;
 
 
-	public InvConstraintEquals (int ID, Solver_Inverse<T> solver, boolean  result) {
+	public InvConstraintEquals (int ID, Solver_Inverse solver, boolean  result) {
 
 		// Store reference to solver
 		this.solver = solver;
 		this.ID = ID;
 		//this.argID = argID;
-		this.outputSet = new HashMap<Integer,T>();
+		this.outputSet = new HashMap<Integer,Model_Acyclic_Inverse>();
 		//this.argString = "[" + argList.get(0) + "]";
 		this.op = Operation.EQUALS;
 		this.result = result;
@@ -129,9 +129,9 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 						// parse concrete value and propogate back valid model
 						String concrStr = solver.getSymbolicModel(nextID).getShortestExampleString();
 						int len = Integer.parseInt(concrStr);
-						T lenModel = solver.modelManager.createAnyString(len,len);
+						Model_Acyclic_Inverse lenModel = solver.modelManager.createAnyString(len,len);
 						if (!result) {
-							T all = solver.modelManager.createAnyString();
+							Model_Acyclic_Inverse all = solver.modelManager.createAnyString();
 							all.minus(lenModel);
 							lenModel = all;
 						}
@@ -142,9 +142,9 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 						// parse concrete value and propogate back valid model
 						String concrStr = solver.getSymbolicModel(argID).getShortestExampleString();
 						int len = Integer.parseInt(concrStr);
-						T lenModel = solver.modelManager.createAnyString(len,len);
+						Model_Acyclic_Inverse lenModel = solver.modelManager.createAnyString(len,len);
 						if (!result) {
-							T all = solver.modelManager.createAnyString(0, inputs.getBoundLength());
+							Model_Acyclic_Inverse all = solver.modelManager.createAnyString(0, inputs.getBoundLength());
 							all.minus(lenModel);
 							lenModel = all;
 						}
@@ -166,7 +166,7 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 				if(result) {
 					//expected result is true
 					//cannot do any optimization since it is relational
-					T input = inputs.getShortestExampleModel();
+					Model_Acyclic_Inverse input = inputs.getShortestExampleModel();
 //					T suggestNext = this.getSuggestion(nextConstraint);
 //					T suggestArg = this.getSuggestion(argConstraint);
 //					if (suggestNext != null) {
@@ -199,7 +199,7 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 //					System.out.println("Not equals");
 
 					//argument model
-					T input2 = solver.getSymbolicModel(argConstraint.getID()).clone();
+					Model_Acyclic_Inverse input2 = solver.getSymbolicModel(argConstraint.getID()).clone();
 					//if both have no common strings: intersection is empty
 //					boolean common = !solver.intersect(inputs, argID).isEmpty();
 //					printDebug("Target and args have common strings? " + common);
@@ -217,16 +217,16 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 
 						if(partition == 0 /*mapInOut == null*/) {
 							//create partition of different subsets
-							T input1;
+							Model_Acyclic_Inverse input1;
 							//output for a given subset of inputs
-							List<Tuple<T,T>> currOutput = new ArrayList<Tuple<T,T>>();
+							List<Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse>> currOutput = new ArrayList<Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse>>();
 
-							mapInOut = new HashMap<T, List<Tuple<T,T>>>();
+							mapInOut = new HashMap<Model_Acyclic_Inverse, List<Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse>>>();
 							//the first partition considers an entire target
 							//so no need to remove input1 from inputs
 							//case 1 the common string are in the first but not in the second
 							input1 = inputs.clone();
-							T input2Copy = input2.clone();
+							Model_Acyclic_Inverse input2Copy = input2.clone();
 							input2Copy.minus(input1);
 							if(!input2Copy.isEmpty()) {
 								currOutput.add(new Tuple(input1, input2Copy ));
@@ -242,12 +242,12 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 						}
 
 						if (partition == 1) {
-							List<Tuple<T,T>> currOutput = new ArrayList<Tuple<T,T>>();
-							T input1 = inputs.clone();
-							T input1Copy = input1.clone();
+							List<Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse>> currOutput = new ArrayList<Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse>>();
+							Model_Acyclic_Inverse input1 = inputs.clone();
+							Model_Acyclic_Inverse input1Copy = input1.clone();
 							input1Copy.minus(input2);
 							if(!input1Copy.isEmpty()) {
-								currOutput = new ArrayList<Tuple<T,T>>();
+								currOutput = new ArrayList<Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse>>();
 								currOutput.add(new Tuple(input1Copy, input2 ));
 //								System.out.println("input1Copy " + input1Copy.getFiniteStrings());
 //								System.out.println("inpu2 " + input2.getFiniteStrings());
@@ -301,9 +301,9 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 						//if map was not null and has become one,
 						//then process the first value
 
-						Entry<T, List<Tuple<T,T>>> entry = mapInOut.entrySet().iterator().next();
+						Entry<Model_Acyclic_Inverse, List<Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse>>> entry = mapInOut.entrySet().iterator().next();
 
-						Tuple<T,T> values = entry.getValue().get(0);
+						Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse> values = entry.getValue().get(0);
 
 						outputSet.put(1, values.get1());
 						outputSet.put(2, values.get2());
@@ -346,7 +346,7 @@ public class InvConstraintEquals<T extends A_Model_Inverse<T>> extends A_Inv_Con
 							//single values has the smallest number of strings in
 							//its example set.
 
-							T input1 = inputs.getShortestExampleModel();
+							Model_Acyclic_Inverse input1 = inputs.getShortestExampleModel();
 							//remove it from the set
 							inputs.minus(input1);
 							//create a copy of the full model

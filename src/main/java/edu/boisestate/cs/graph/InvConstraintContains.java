@@ -3,7 +3,7 @@
  */
 package edu.boisestate.cs.graph;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
 
@@ -13,12 +13,12 @@ import java.util.List;
 /**
  * @author Marlin Roberts, 2020-2021
  */
-public class InvConstraintContains<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
+public class InvConstraintContains extends A_Inv_Constraint {
     private boolean result;
-	private T arg1;
-	private T arg2;
+	private Model_Acyclic_Inverse arg1;
+	private Model_Acyclic_Inverse arg2;
 
-    public InvConstraintContains(int ID, Solver_Inverse<T> solver, boolean result) {
+    public InvConstraintContains(int ID, Solver_Inverse solver, boolean result) {
         this.solver = solver;
         this.ID = ID;
 		this.result = result;
@@ -40,9 +40,9 @@ public class InvConstraintContains<T extends A_Model_Inverse<T>> extends A_Inv_C
 		}
 
 		// arg2 is manipulated in place to keep track of remaining choices
-		Tuple<T,T> choice = arg1.inv_contains(arg2, result);
-		T sup = choice.get1();
-		T sub = choice.get2();
+		Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse> choice = arg1.inv_contains(arg2, result);
+		Model_Acyclic_Inverse sup = choice.get1();
+		Model_Acyclic_Inverse sub = choice.get2();
 
 		outputSet.put(1, sup);
 		outputSet.put(2, sub);

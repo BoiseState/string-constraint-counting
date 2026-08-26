@@ -2,13 +2,13 @@ package edu.boisestate.cs.graph;
 
 import java.util.Set;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.util.Tuple;
 //import edu.boisestate.cs.solvers.*;
 
-public interface I_Inv_Constraint<T extends A_Model_Inverse<T>> {
+public interface I_Inv_Constraint{
 	
-	public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex);
+	public boolean evaluate(I_Inv_Constraint inputConstraint, int sourceIndex);
 	/**
 	 * A second version of evaluate to be used in BFS algorithm
 	 * Returns false if the node needs to backtracked because:
@@ -21,26 +21,26 @@ public interface I_Inv_Constraint<T extends A_Model_Inverse<T>> {
 //	public boolean fallback();
 	
 	
-	public T output(Integer index);
-	public T output(I_Inv_Constraint<T> constraint);
+	public Model_Acyclic_Inverse output(Integer index);
+	public Model_Acyclic_Inverse output(I_Inv_Constraint constraint);
 	
 	public void setDebug(boolean debug);
 	
-	public void setArg(I_Inv_Constraint<T> constraint);
+	public void setArg(I_Inv_Constraint constraint);
 	
-	public void setArg2(I_Inv_Constraint<T> constraint);
+	public void setArg2(I_Inv_Constraint constraint);
 
 	public int getArgID();
 	
-	public void setNext(I_Inv_Constraint<T> constraint);
+	public void setNext(I_Inv_Constraint constraint);
 	
 	public int getNextID();
 	
-	public void setPrev(Set<I_Inv_Constraint<T>> constraint);
+	public void setPrev(Set<I_Inv_Constraint> constraint);
 	
 	public Set<Integer> getPrevID();
 	
-	public T getSolution();
+	public Model_Acyclic_Inverse getSolution();
 //	public int getPrevID();
 	
 //	public void setNextID(int nextID);

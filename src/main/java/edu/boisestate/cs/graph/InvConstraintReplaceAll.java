@@ -1,24 +1,24 @@
 package edu.boisestate.cs.graph;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
 
 import java.util.HashMap;
 import java.util.List;
 
-public class InvConstraintReplaceAll<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
+public class InvConstraintReplaceAll extends A_Inv_Constraint {
 
-    private final T find, replace;
+    private final Model_Acyclic_Inverse find, replace;
     // these could/can be symbolics based on regexes but currently not implemented to take symbolic as arg.
 
-    public InvConstraintReplaceAll(int id, Solver_Inverse<T> invSolver, List<Integer> args) {
+    public InvConstraintReplaceAll(int id, Solver_Inverse invSolver, List<Integer> args) {
         this.solver = invSolver;
         this.ID = id;
         this.argList = args;
         this.op = Operation.REPLACE_ALL;
-        this.outputSet = new HashMap<Integer, T>();
-        this.solutionSet = new SolutionSetInternal<T>(id);
+        this.outputSet = new HashMap<Integer, Model_Acyclic_Inverse>();
+        this.solutionSet = new SolutionSetInternal(id);
         this.argString = "0:FIND 1:REPLACE";
         int findId = argList.get(0);
         int replaceId = argList.get(1);
@@ -45,14 +45,14 @@ public class InvConstraintReplaceAll<T extends A_Model_Inverse<T>> extends A_Inv
     public Tuple<Boolean, Boolean> evaluate() {
         Tuple<Boolean, Boolean> ret = new Tuple<>(true, true);
         printDebug("EVALUATE REPLACE ALL " + ID + " ...");
-        T inputs = incoming();
+        Model_Acyclic_Inverse inputs = incoming();
         printDebug("REPLACE ALL INCOMING: " + inputs.getShortestExampleString());
         if(inputs.isEmpty()){
             printDebug("REPLACE ALL INCOMING SET INCONSISTENT");
             ret = new Tuple<>(false, true);
         } else {
             // calls the solver_inverse method which calls the model_acyclic method
-            T resModel = solver.inv_replaceAll(inputs, find, replace);
+            Model_Acyclic_Inverse resModel = solver.inv_replaceAll(inputs, find, replace);
             if (resModel != null) {
                 // add the result to the outputSet
                 // for some reason we use a hashmap that is indexed not by the ID by just by liek 1,2,3? i guess to do with source vs target but still unclear

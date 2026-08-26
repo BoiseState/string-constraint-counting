@@ -5,7 +5,7 @@ package edu.boisestate.cs.graph;
 
 import java.util.*;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 //import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
@@ -14,11 +14,11 @@ import edu.boisestate.cs.util.Tuple;
  * @author marli
  *
  */
-public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements I_Inv_Constraint<T> {
+public abstract class A_Inv_Constraint implements I_Inv_Constraint {
 
 	// This will hold a reference to the containing solver.
 	// This allows the constraint access to the solver functions and string tables.
-	protected Solver_Inverse<T> solver;
+	protected Solver_Inverse solver;
 
 	protected int ID;
 
@@ -32,15 +32,15 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 	public int newConcatChoiceCount = 0;
 	public int newSplitOutputCount = 0;
 
-	protected Set<I_Inv_Constraint<T>> prevConstraint;
-	protected I_Inv_Constraint<T> nextConstraint;
-	protected I_Inv_Constraint<T> argConstraint;
-	protected I_Inv_Constraint<T> arg2Constraint;
+	protected Set<I_Inv_Constraint> prevConstraint;
+	protected I_Inv_Constraint nextConstraint;
+	protected I_Inv_Constraint argConstraint;
+	protected I_Inv_Constraint arg2Constraint;
 
-	protected HashMap<I_Inv_Constraint<T>, T> suggestions = new HashMap();
-	protected SolutionSetInternal<T> solutionSet;
+	protected HashMap<I_Inv_Constraint, Model_Acyclic_Inverse> suggestions = new HashMap();
+	protected SolutionSetInternal solutionSet;
 
-	protected Map<Integer, T> outputSet;
+	protected Map<Integer, Model_Acyclic_Inverse> outputSet;
 
 	protected Operation op;
 
@@ -56,7 +56,7 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 	}
 
 	@Override
-	public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex) {
+	public boolean evaluate(I_Inv_Constraint inputConstraint, int sourceIndex) {
 
 		return false;
 	}
@@ -64,7 +64,7 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 	@Override
 	public Tuple<Boolean, Boolean> evaluate() {
 		Tuple<Boolean, Boolean> ret = new Tuple<Boolean, Boolean>(true, true);
-		T inputs = incoming();
+		Model_Acyclic_Inverse inputs = incoming();
 
 		if (inputs.isEmpty()) {
 			System.out.println("INCOMING SET INCONSISTENT...");
@@ -80,19 +80,19 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 //		}
 //	}
 
-	protected T incoming() {
-		Iterator<I_Inv_Constraint<T>> iter = prevConstraint.iterator();
-		I_Inv_Constraint<T> prev = iter.next();
+	protected Model_Acyclic_Inverse incoming() {
+		Iterator<I_Inv_Constraint> iter = prevConstraint.iterator();
+		I_Inv_Constraint prev = iter.next();
 		//System.out.println("incoming for " + this);
 		//System.out.println("prev " + prev);
-		T inputs = prev.output(this).clone(); //need to close otherwise work on the actual object?
+		Model_Acyclic_Inverse inputs = prev.output(this).clone(); //need to close otherwise work on the actual object?
 //		T suggest = inputs.clone();
 //		I_Inv_Constraint<T> elder = prev;
 		//System.out.println("Inputs " + inputs.getFiniteStrings());
 
 		while (iter.hasNext()) {
 			prev = iter.next();
-			T nextInput = prev.output(this);
+			Model_Acyclic_Inverse nextInput = prev.output(this);
 //			if (nextInput.isSingleton()){
 //				elder = prev;
 //				suggest = nextInput;
@@ -123,13 +123,13 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 //	}
 
 	@Override
-	public T output(Integer index) {
+	public Model_Acyclic_Inverse output(Integer index) {
 		return outputSet.get(index);
 	}
 
 
 	@Override
-	public T output(I_Inv_Constraint<T> childConstraint) {
+	public Model_Acyclic_Inverse output(I_Inv_Constraint childConstraint) {
 		int index = -1;
 		if (childConstraint.equals(nextConstraint)) {
 			index = 1;
@@ -142,7 +142,7 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 			System.err.println("ERROR: output() called with invalid childConstraint");
 			System.exit(1);
 		}
-		T output = outputSet.get(index);
+		Model_Acyclic_Inverse output = outputSet.get(index);
 		if (output == null) { // unless that constraint just hasn't been computed yet
 			System.err.println("ERROR in A_Inv_Constraint.output(): outputSet for" + this + "does not contain constraint: " + childConstraint);
 			System.exit(1);
@@ -150,11 +150,11 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 		return output;
 	}
 
-	public void setOutput(Integer index, T output) {
+	public void setOutput(Integer index, Model_Acyclic_Inverse output) {
 		outputSet.put(index, output);
 	}
 
-	public void setOutput(I_Inv_Constraint<T> childConstraint, T output) {
+	public void setOutput(I_Inv_Constraint childConstraint, Model_Acyclic_Inverse output) {
 		int index = -1;
 		if (childConstraint.equals(nextConstraint)) {
 			index = 1;
@@ -182,27 +182,27 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 	}
 
 	@Override
-	public void setNext(I_Inv_Constraint<T> constraint) {
+	public void setNext(I_Inv_Constraint constraint) {
 		this.nextConstraint = constraint;
 		this.nextID = constraint.getID();
 	}
 
 	@Override
-	public void setArg(I_Inv_Constraint<T> constraint) {
+	public void setArg(I_Inv_Constraint constraint) {
 		this.argConstraint = constraint;
 		this.argID = constraint.getID();
 	}
 
-	public void setArg2(I_Inv_Constraint<T> constraint) {
+	public void setArg2(I_Inv_Constraint constraint) {
 		this.arg2Constraint = constraint;
 		this.arg2ID = constraint.getID();
 	}
 
 	@Override
-	public void setPrev(Set<I_Inv_Constraint<T>> constraints) {
+	public void setPrev(Set<I_Inv_Constraint> constraints) {
 
 		this.prevConstraint = constraints;
-		for (I_Inv_Constraint<T> c : constraints) {
+		for (I_Inv_Constraint c : constraints) {
 			prevIDs.add(c.getID());
 		}
 	}
@@ -249,7 +249,7 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 		return this.prevIDs;
 	}
 
-	public T getSolution() {
+	public Model_Acyclic_Inverse getSolution() {
 		return solutionSet.getSolution();
 
 	}
@@ -261,8 +261,8 @@ public abstract class A_Inv_Constraint<T extends A_Model_Inverse<T>> implements 
 	 */
 	@Override
 	public void update() {
-		Set<I_Inv_Constraint<T>> remove = new HashSet<I_Inv_Constraint<T>>();
-		for (I_Inv_Constraint<T> c : prevConstraint) {
+		Set<I_Inv_Constraint> remove = new HashSet<I_Inv_Constraint>();
+		for (I_Inv_Constraint c : prevConstraint) {
 			if (!prevIDs.contains(c.getID())) {
 				remove.add(c);
 			}

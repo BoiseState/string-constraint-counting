@@ -1,6 +1,6 @@
 package edu.boisestate.cs;
 
-import edu.boisestate.cs.automatonModel.A_Model;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.graph.Operation;
 import edu.boisestate.cs.graph.PrintConstraint;
 import edu.boisestate.cs.solvers.Solver;
@@ -18,10 +18,10 @@ import java.util.Map;
  * @author Scott Kausler
  * @author Marlin Roberts
  */
-public class Parser_2<T extends A_Model<T>> {
+public class Parser_2{
 
 	public static Map<Integer, String> actualVals;
-	Solver<T> solver;
+	Solver solver;
 	private boolean debug;
 	private int maxGraphId;
 
@@ -30,7 +30,7 @@ public class Parser_2<T extends A_Model<T>> {
 	 * @param solver
 	 * @param debug
 	 */
-	public Parser_2(Solver<T> solver, boolean debug) {
+	public Parser_2(Solver solver, boolean debug) {
 
 		// set field from parameter
 		this.solver = solver;
@@ -1356,8 +1356,8 @@ public class Parser_2<T extends A_Model<T>> {
 
 		}
 		// this is a quick and dirty check for forward prop unsat
-		T baseModel = solver.getModel(base);
-		T argModel = solver.getModel(arg);
+		Model_Acyclic_Inverse baseModel = solver.getModel(base);
+		Model_Acyclic_Inverse argModel = solver.getModel(arg);
 		if (!fName.equals("isEmpty") && (baseModel == null || argModel == null)) {
 			return false;
 		}

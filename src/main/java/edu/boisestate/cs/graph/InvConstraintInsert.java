@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.solvers.*;
 import edu.boisestate.cs.util.Quadruple;
 import edu.boisestate.cs.util.Tuple;
@@ -14,32 +14,32 @@ import edu.boisestate.cs.util.Tuple;
  * @author Marlin Roberts, 2020-2021
  *
  */
-public class InvConstraintInsert<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
+public class InvConstraintInsert extends A_Inv_Constraint {
 
     private int start, insertStringID;
 //    private T inputs = null;
 //    private Triple<T,T,T> backtrack = null; // current backtrack state: (currentPrefixSearch, (suffixesToSearch, inputModelSuffixes))
 //    private ArrayList<Tuple<T, T>> outputs = new ArrayList<>();
 //    private HashMap<T, List<Tuple<T, T>>> mapInOut = new HashMap<>();
-    private T IN = null;
-    private HashMap<T,T> prefSuffMap = new HashMap<>();
-    private Tuple<T,T> remaining = null;
+    private Model_Acyclic_Inverse IN = null;
+    private HashMap<Model_Acyclic_Inverse,Model_Acyclic_Inverse> prefSuffMap = new HashMap<>();
+    private Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse> remaining = null;
 
-    public InvConstraintInsert(int ID, Solver_Inverse<T> solver, List<Integer> args) {
+    public InvConstraintInsert(int ID, Solver_Inverse solver, List<Integer> args) {
 
         // Store reference to solver
         this.solver = solver;
         this.ID = ID;
         this.argList = args;
         this.op = Operation.INSERT;
-        this.outputSet = new HashMap<Integer, T>();
+        this.outputSet = new HashMap<Integer, Model_Acyclic_Inverse>();
 //		this.solutionSet = new SolutionSetInternal<T>(ID);
 //		this.argString = "0:START 1:END";
         this.start = argList.get(0);
         this.insertStringID = argList.get(1);
     }
 
-    public InvConstraintInsert(int ID, Solver_Inverse<T> solver, List<Integer> args, int base, int input) {
+    public InvConstraintInsert(int ID, Solver_Inverse solver, List<Integer> args, int base, int input) {
 
         // Store reference to solver
         this.solver = solver;
@@ -72,26 +72,26 @@ public class InvConstraintInsert<T extends A_Model_Inverse<T>> extends A_Inv_Con
         if (remaining!=null){
             // we have found a prefix already and there are remaining suffixes to try
             ret = new Tuple<>(true, false);// continue but add to backtrack as may still be prefixes ot try
-            T insertStringModel = solver.getSymbolicModel(insertStringID);
-            T sourceModel = solver.getSymbolicModel(nextID); // model of source/target from forward analysis
-            T prefix = remaining.get1();
-            T suffix = remaining.get2(); // the suffix to search for a new split
+            Model_Acyclic_Inverse insertStringModel = solver.getSymbolicModel(insertStringID);
+            Model_Acyclic_Inverse sourceModel = solver.getSymbolicModel(nextID); // model of source/target from forward analysis
+            Model_Acyclic_Inverse prefix = remaining.get1();
+            Model_Acyclic_Inverse suffix = remaining.get2(); // the suffix to search for a new split
 
-            Tuple<T,T> candidate = suffix.getPathConsistentPair(insertStringModel,sourceModel);
+            Tuple<Model_Acyclic_Inverse,Model_Acyclic_Inverse> candidate = suffix.getPathConsistentPair(insertStringModel,sourceModel);
             if (candidate == null) { //no consistent pair found
                 printDebug("INSERT RESULT MODEL EMPTY...");
                 ret = new Tuple<>(false, false);// don't continue but add to backtrack?
                 remaining = null;
                 return ret;
             }
-            T insert = candidate.get1();
-            T suff = candidate.get2();
+            Model_Acyclic_Inverse insert = candidate.get1();
+            Model_Acyclic_Inverse suff = candidate.get2();
             if (!suffix.isEmpty()){
                 remaining = new Tuple<>(prefix, suffix); //yet more suffixes to try
             } else {
                 remaining = null; // used up all suffixes for this prefix
             }
-            T resModel = prefix.concatenate(suff);
+            Model_Acyclic_Inverse resModel = prefix.concatenate(suff);
             outputSet.put(1, resModel);
             outputSet.put(2, insert);
             return ret;
@@ -105,12 +105,12 @@ public class InvConstraintInsert<T extends A_Model_Inverse<T>> extends A_Inv_Con
             printDebug("INSERT INCOMING SET INCONSISTENT...");
             ret = new Tuple<>(false, true);
         } else {
-            T insertStringModel = solver.getSymbolicModel(insertStringID);
-            T sourceModel = solver.getSymbolicModel(nextID); // model of source/target from forward analysis
+            Model_Acyclic_Inverse insertStringModel = solver.getSymbolicModel(insertStringID);
+            Model_Acyclic_Inverse sourceModel = solver.getSymbolicModel(nextID); // model of source/target from forward analysis
 
             // this will manipulate IN and pass back candidates for the target and insert
             // will also need to pass back the specific prefix it used?
-            Quadruple<T,T,T,T> candidate = IN.inv_insert(sourceModel, insertStringModel, start);
+            Quadruple<Model_Acyclic_Inverse,Model_Acyclic_Inverse,Model_Acyclic_Inverse,Model_Acyclic_Inverse> candidate = IN.inv_insert(sourceModel, insertStringModel, start);
             if (candidate == null) { // i return null if no candidates found, this isnt exhaustive though
                 printDebug("NO CANDIDATES...");
                 if (!IN.isEmpty()) {

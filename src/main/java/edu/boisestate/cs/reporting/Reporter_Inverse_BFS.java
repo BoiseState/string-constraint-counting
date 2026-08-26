@@ -9,27 +9,26 @@ import edu.boisestate.cs.graph.*;
 import org.jgrapht.DirectedGraph;
 
 import edu.boisestate.cs.Parser_2;
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
 
-public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends A_Reporter<T> {
+public class Reporter_Inverse_BFS extends A_Reporter {
     //this class should also remember all previous constraints, it might be in
     //allConstraints
 
-    protected final Solver_Inverse<T> invSolver;
+    protected final Solver_Inverse invSolver;
     protected Map<Integer, PrintConstraint> allConstraints = new HashMap<>();
-    protected Map<Integer, I_Inv_Constraint<T>> allInverseConstraints = new HashMap<>();
+    protected Map<Integer, I_Inv_Constraint> allInverseConstraints = new HashMap<>();
     protected List<Integer> predicateIDs = new ArrayList<>();
 
     // prefix for output when running inside SPF
     protected static String cid = "[IGEN] ";
 
     //private BufferedWriter out;
-    private SolutionSet<T> solutions;
+    private SolutionSet solutions;
 
-    public Reporter_Inverse_BFS(DirectedGraph<PrintConstraint, SymbolicEdge> graph, Parser_2<T> parser,
-                                Solver_Inverse<T> invSolver, boolean debug) {
+    public Reporter_Inverse_BFS(DirectedGraph<PrintConstraint, SymbolicEdge> graph, Parser_2 parser,
+                                Solver_Inverse invSolver, boolean debug) {
         super(graph, parser, invSolver, debug);    // solver instance variable in A_Reporter available
         this.invSolver = invSolver;                // same solver as inverse solver
 
@@ -43,7 +42,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends A_Report
             }
 
         }
-        this.solutions = new SolutionSet<T>(((InvDefaultDirectedGraph) graph).getNumSymInputs());
+        this.solutions = new SolutionSet(((InvDefaultDirectedGraph) graph).getNumSymInputs());
 //		// TODO Auto-generated constructor stub
 //		try {
 //			out = new BufferedWriter(new FileWriter("./temp/solutions.txt"));
@@ -249,7 +248,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends A_Report
         // ------------------------
 //        processIt.remove();
 
-        new ICGBuilder<T>(graph, allConstraints, allInverseConstraints, invSolver, debug).build();
+        new ICGBuilder(graph, allConstraints, allInverseConstraints, invSolver, debug).build();
         // build the transposed graph of inverse constraints
 //        if (build) {
 ////            buildICG_r3();
@@ -258,7 +257,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends A_Report
 //        }
 
         if (debug) {
-            for (I_Inv_Constraint<T> con : allInverseConstraints.values()) {
+            for (I_Inv_Constraint con : allInverseConstraints.values()) {
                 con.setDebug(true);
             }
         }
@@ -408,7 +407,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends A_Report
         headers.add("DSJ");
         headers.add("IN ID");
         headers.add("IN CT");
-        headers.add("T CT");
+        headers.add("Model_Acyclic_Inverse CT");
         headers.add("F CT");
         headers.add("OLP");
         headers.add("PRE");
@@ -427,7 +426,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends A_Report
 
         printDebug(cid);
         printDebug(cid + "Inverse Constraint Set:");
-        for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
+        for (I_Inv_Constraint c : allInverseConstraints.values()) {
             printDebug(cid + c.toString() + "\t" + allConstraints.get(c.getID()).toString());
         }
         printDebug(cid);
@@ -466,7 +465,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends A_Report
         qID = new TreeSet<Integer>(qIDL);
         printDebug("Q " + qID);
         printDebug(predicateIDs.toString());
-        List<I_Inv_Constraint<T>> q = new ArrayList<I_Inv_Constraint<T>>();
+        List<I_Inv_Constraint> q = new ArrayList<I_Inv_Constraint>();
         Set<Integer> actual = new HashSet<Integer>();
         for (Integer val : qID) {
             q.add(allInverseConstraints.get(val));
@@ -490,7 +489,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends A_Report
         printDebug("actuall " + actual);
         //iterate over all actual nodes and remove them from the parents
         //those nodes that are not there
-        for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
+        for (I_Inv_Constraint c : allInverseConstraints.values()) {
             printDebug(c + "1 " + c.getPrevID());
             c.getPrevID().retainAll(actual);
             c.update();
@@ -509,7 +508,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends A_Report
             int currID = qID.last();
             qID.remove(currID);
             processedID.add(currID);
-            I_Inv_Constraint<T> curr = allInverseConstraints.get(currID);
+            I_Inv_Constraint curr = allInverseConstraints.get(currID);
             printDebug("node: " + curr);
             printDebug("parents are: " + curr.getPrevID());
             //1st true - continue, false - backtrack
@@ -635,13 +634,13 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends A_Report
 
         //for (I_Inv_Constraint<T> i : allInverseConstraints.values())  {
         //those inputs that have been processed
-        for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
+        for (I_Inv_Constraint c : allInverseConstraints.values()) {
             if (c.getOp() == Operation.INIT_SYM) {
-                T solution = c.getSolution();
+                Model_Acyclic_Inverse solution = c.getSolution();
                 if (solution == null || solution.isEmpty()) {
                     printDebug("INPUT SOLUTION SET INCONSISTENT: " + c.getID());
                 } else {
-					InvConstraintInput ic = (InvConstraintInput<T>) c;
+					InvConstraintInput ic = (InvConstraintInput) c;
 					// Adding solution complements for caching purposes
                     solutions.add(c.getID(), ic.getOriginalName(), solution);
                 }
@@ -691,7 +690,7 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends A_Report
     }
 
     @Override
-    public SolutionSet<T> getSolutionSet() {
+    public SolutionSet getSolutionSet() {
         return solutions;
     }
 

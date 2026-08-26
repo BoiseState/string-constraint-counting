@@ -3,8 +3,7 @@
  */
 package edu.boisestate.cs.graph;
 
-import edu.boisestate.cs.automatonModel.A_Model;
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 
 import java.util.*;
 
@@ -15,16 +14,16 @@ import java.util.*;
  * storing and updating the found soutions for output later.
  *
  */
-public class SolutionSet<T extends A_Model<T>> {
+public class SolutionSet{
 
 	public class Solution implements Comparable<Solution> {
 
 		public int ID;
 		public String originalName;
 		public String example;
-		public A_Model<T> model; // model included for debugging i guess
+		public Model_Acyclic_Inverse model; // model included for debugging i guess
 
-		public Solution(int ID, String originalName, String solution, T model) {
+		public Solution(int ID, String originalName, String solution, Model_Acyclic_Inverse model) {
 			this.ID = ID;
 			this.originalName = originalName.replace("_SYMSTRING", ""); // just for spf
 			this.example = solution;
@@ -54,7 +53,7 @@ public class SolutionSet<T extends A_Model<T>> {
 		this.SAT = sat;
 	}
 
-	public void add(int id, String originalName, T solution) {
+	public void add(int id, String originalName, Model_Acyclic_Inverse solution) {
 		Solution sol = new Solution(id, originalName, solution.getAcceptedStringExample(), solution);
 		solutions.put(originalName, sol);
 		SAT = solutions.size() == numInputs;
@@ -91,8 +90,8 @@ public class SolutionSet<T extends A_Model<T>> {
 		return SAT;
 	}
 
-	public SolutionSet<T> clone() {
-		SolutionSet<T> newSet = new SolutionSet<>(this.numInputs);
+	public SolutionSet clone() {
+		SolutionSet newSet = new SolutionSet(this.numInputs);
 		newSet.setSAT(this.SAT);
 		newSet.solutions = new LinkedHashMap<>();
 		for (Solution s : this.solutions.values()) {

@@ -8,8 +8,7 @@ import java.util.List;
 
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.BasicAutomata;
-import edu.boisestate.cs.automatonModel.A_Model;
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 //import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
@@ -17,7 +16,7 @@ import edu.boisestate.cs.util.Tuple;
 /**
  * @author Marlin Roberts, 2020-2021
  */
-public class InvConstraintPredicate<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
+public class InvConstraintPredicate extends A_Inv_Constraint {
 
     // This will hold a reference to the containing solver.
     // This allows the constraint access to the solver functions and string tables.
@@ -36,34 +35,34 @@ public class InvConstraintPredicate<T extends A_Model_Inverse<T>> extends A_Inv_
 
     private boolean result;
 
-    public InvConstraintPredicate(int ID, Solver_Inverse<T> solver) {
+    public InvConstraintPredicate(int ID, Solver_Inverse solver) {
 
         // Store reference to solver
         this.solver = solver;
         this.ID = ID;
         //this.argID = argID;
-        this.outputSet = new HashMap<Integer, T>();
+        this.outputSet = new HashMap<Integer, Model_Acyclic_Inverse>();
         //this.argString = "[" + argList.get(0) + "]";
         this.op = Operation.PREDICATE;
     }
 
-    public InvConstraintPredicate(int ID, Solver_Inverse<T> solver, boolean result) {
+    public InvConstraintPredicate(int ID, Solver_Inverse solver, boolean result) {
         this(ID, solver);
         this.result = result;
     }
 
-    public InvConstraintPredicate(int ID, Solver_Inverse<T> solver, int argID) {
+    public InvConstraintPredicate(int ID, Solver_Inverse solver, int argID) {
 
         // Store reference to solver
         this.solver = solver;
         this.ID = ID;
         this.argID = argID;
-        this.outputSet = new HashMap<Integer, T>();
+        this.outputSet = new HashMap<Integer, Model_Acyclic_Inverse>();
         //this.argString = "[" + argList.get(0) + "]";
         this.op = Operation.PREDICATE;
     }
 
-    public InvConstraintPredicate(int ID, Solver_Inverse<T> solver, List<Integer> args) {
+    public InvConstraintPredicate(int ID, Solver_Inverse solver, List<Integer> args) {
 
         // Store reference to solver
         this.solver = solver;
@@ -73,7 +72,7 @@ public class InvConstraintPredicate<T extends A_Model_Inverse<T>> extends A_Inv_
         this.op = Operation.PREDICATE;
     }
 
-    public InvConstraintPredicate(int ID, Solver_Inverse<T> solver, List<Integer> args, int base, int input) {
+    public InvConstraintPredicate(int ID, Solver_Inverse solver, List<Integer> args, int base, int input) {
 
         // Store reference to solver
         this.solver = solver;
@@ -86,11 +85,11 @@ public class InvConstraintPredicate<T extends A_Model_Inverse<T>> extends A_Inv_
 
 
     @Override
-    public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex) {
+    public boolean evaluate(I_Inv_Constraint inputConstraint, int sourceIndex) {
 
         System.out.format("\nEVALUATE PREDICATE %d ...\n", ID);
         //T predicateResult = solver.getSymbolicModel(ID);
-        T predicateResult = solver.getSymbolicModel(nextConstraint.getID());
+        Model_Acyclic_Inverse predicateResult = solver.getSymbolicModel(nextConstraint.getID());
 
         if (!predicateResult.isEmpty()) {
 
@@ -118,7 +117,7 @@ public class InvConstraintPredicate<T extends A_Model_Inverse<T>> extends A_Inv_
 //		System.out.format("\nBFS EVALUATE PREDICATE %d ...\n",ID);
         Tuple<Boolean, Boolean> ret = new Tuple<Boolean, Boolean>(true, true);
         //T predicateResult = solver.getSymbolicModel(ID);
-        T predicateResult = solver.getSymbolicModel(nextConstraint.getID()); // forward result from target constraint
+        Model_Acyclic_Inverse predicateResult = solver.getSymbolicModel(nextConstraint.getID()); // forward result from target constraint
 //	System.out.println("solver " + solver);
         //System.out.println("nextConstr " + nextConstraint.getID());
         //System.out.println("predicate " + predicateResult.getFiniteStrings());

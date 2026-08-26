@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 //import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
@@ -19,7 +19,7 @@ import edu.boisestate.cs.util.Tuple;
  * @author Marlin Roberts, 2020-2021
  *
  */
-public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Constraint<T> {
+public class InvConstraintInput extends A_Inv_Constraint {
 
 	
 	//private SolutionSet<T> solutionSet;
@@ -28,14 +28,14 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 	private final String originalName;
 	
 	
-	public InvConstraintInput (int ID, Solver_Inverse<T> solver, String originalName) {
+	public InvConstraintInput (int ID, Solver_Inverse solver, String originalName) {
 		
 		// Store reference to solver
 		this.solver = solver;
 		this.ID = ID;
 		this.originalName = originalName;
-		this.outputSet = new HashMap<Integer,T>();
-		this.solutionSet = new SolutionSetInternal<T>(ID);
+		this.outputSet = new HashMap<Integer,Model_Acyclic_Inverse>();
+		this.solutionSet = new SolutionSetInternal(ID);
 		this.op  = Operation.INIT_SYM;
 		this.argString = "[NONE]";
 
@@ -70,11 +70,11 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 	
 	
 	@Override
-	public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex)  {
+	public boolean evaluate(I_Inv_Constraint inputConstraint, int sourceIndex)  {
 		
 		//T example = solver.getSymbolicModel(this.prevConstraint.getID());
 		System.out.format("EVALUATE INPUT %d ...\n",ID);
-		T solution = inputConstraint.output(sourceIndex);
+		Model_Acyclic_Inverse solution = inputConstraint.output(sourceIndex);
 		
 		if (false) {
 			System.out.print("DEBUG " + op.toString() + " " + ID);
@@ -139,7 +139,7 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 //				T nextInput = nextC.output(this);
 //				inputs = inputs.intersect(nextInput);
 //		}
-		T inputs = incoming();
+		Model_Acyclic_Inverse inputs = incoming();
 		
 		//if consistent
 		if(!inputs.isEmpty()) {
@@ -183,7 +183,7 @@ public class InvConstraintInput<T extends A_Model_Inverse<T>>  extends A_Inv_Con
 		return ret;//never backtrack here
 	}
 
-	public T getComp() {
+	public Model_Acyclic_Inverse getComp() {
 		return solutionSet.getComp();
 	}
 

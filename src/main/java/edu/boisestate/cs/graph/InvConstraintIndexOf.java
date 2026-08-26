@@ -1,7 +1,6 @@
 package edu.boisestate.cs.graph;
 
 import dk.brics.automaton.Automaton;
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
@@ -9,16 +8,16 @@ import edu.boisestate.cs.util.Tuple;
 import java.util.HashMap;
 import java.util.List;
 
-public class InvConstraintIndexOf<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
+public class InvConstraintIndexOf extends A_Inv_Constraint {
 	private int index = -1; // not to be confused with \uffff that we use for not found even though java would return -1
 
-	public InvConstraintIndexOf(int ID, Solver_Inverse<T> solver, List<Integer> args) {
+	public InvConstraintIndexOf(int ID, Solver_Inverse solver, List<Integer> args) {
 		this.solver = solver;
 		this.ID = ID;
 		this.argList = args;
 		this.op = Operation.INDEX_OF;
-		this.outputSet = new HashMap<Integer, T>();
-		this.solutionSet = new SolutionSetInternal<T>(ID);
+		this.outputSet = new HashMap<Integer, Model_Acyclic_Inverse>();
+		this.solutionSet = new SolutionSetInternal(ID);
 		this.argString = "0:INDEX";
 	}
 
@@ -28,7 +27,7 @@ public class InvConstraintIndexOf<T extends A_Model_Inverse<T>> extends A_Inv_Co
 		printDebug("EVALUATE INDEX OF " + ID + " ...");
 		if (index == -1) {
 			// init
-			T inputs = incoming();
+			Model_Acyclic_Inverse inputs = incoming();
 			// technically can work with range of indices and not found option
 			// but for now we pin to an index and hope for the best
 			if (inputs.getAutomatonObject().getInitialState().getTransitions().isEmpty()) {
@@ -45,14 +44,14 @@ public class InvConstraintIndexOf<T extends A_Model_Inverse<T>> extends A_Inv_Co
 		printDebug("INDEX OF INCOMING: " + index);
 
 		// calls the solver_inverse method which calls the model_acyclic method
-		T findOriginal = solver.getSymbolicModel(argID);
-		T searchOriginal = solver.getSymbolicModel(nextID);
-		T findModel = findOriginal.clone();
-		T searchModel = searchOriginal.clone();
+		Model_Acyclic_Inverse findOriginal = solver.getSymbolicModel(argID);
+		Model_Acyclic_Inverse searchOriginal = solver.getSymbolicModel(nextID);
+		Model_Acyclic_Inverse findModel = findOriginal.clone();
+		Model_Acyclic_Inverse searchModel = searchOriginal.clone();
 //            T inputsOrig = inputs.clone();
 		// a find choice is made and set in findModel
 		// res is constructed based on that
-		T resModel = solver.inv_indexOf(searchModel, findModel, index);
+		Model_Acyclic_Inverse resModel = solver.inv_indexOf(searchModel, findModel, index);
 
 		if (resModel == null) {
 			System.err.println("INVERSE INDEX OF FAILED");

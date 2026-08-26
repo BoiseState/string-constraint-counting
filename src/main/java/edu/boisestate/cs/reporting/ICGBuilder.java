@@ -1,6 +1,6 @@
 package edu.boisestate.cs.reporting;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.graph.*;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 
@@ -14,20 +14,20 @@ import java.util.Map;
  * Builds the transposed graph of inverse constraints (the ICG) from a forward
  * constraint graph.
  *
- * @param <T> - Automata model that implements inverse operations.
+ * @param <Model_Acyclic_Inverse> - Automata model that implements inverse operations.
  */
-public class ICGBuilder<T extends A_Model_Inverse<T>> {
+public class ICGBuilder{
 
 	private final DirectedGraph<PrintConstraint, SymbolicEdge> graph;
 	private final Map<Integer, PrintConstraint> allConstraints;
-	private final Map<Integer, I_Inv_Constraint<T>> allInverseConstraints;
-	private final Solver_Inverse<T> invSolver;
+	private final Map<Integer, I_Inv_Constraint> allInverseConstraints;
+	private final Solver_Inverse invSolver;
 	private final boolean debug;
 
 	public ICGBuilder(DirectedGraph<PrintConstraint, SymbolicEdge> graph,
 					   Map<Integer, PrintConstraint> allConstraints,
-					   Map<Integer, I_Inv_Constraint<T>> allInverseConstraints,
-					   Solver_Inverse<T> invSolver,
+					   Map<Integer, I_Inv_Constraint> allInverseConstraints,
+					   Solver_Inverse invSolver,
 					   boolean debug) {
 		this.graph = graph;
 		this.allConstraints = allConstraints;
@@ -60,7 +60,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 			String value = pc.getActualVal();
 			List<Integer> argList = pc.getArgList();
 			printDebug("ID " + ID + " op " + op);
-			I_Inv_Constraint<T> newConstraint;
+			I_Inv_Constraint newConstraint;
 
 			switch (op) {
 
@@ -75,7 +75,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 
 				case INIT_CON:
 
-					newConstraint = new InvConstraintConcreteValue<T>(ID, invSolver);
+					newConstraint = new InvConstraintConcreteValue(ID, invSolver);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -86,7 +86,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 
 				case INIT_SYM:
 
-					newConstraint = new InvConstraintInput<T>(ID, invSolver, value);
+					newConstraint = new InvConstraintInput(ID, invSolver, value);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -102,7 +102,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 				case PREDICATE:
 
 					boolean result = value.equals("true") ? true : false;
-					newConstraint = new InvConstraintPredicate<T>(ID, invSolver, result);
+					newConstraint = new InvConstraintPredicate(ID, invSolver, result);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -113,7 +113,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 
 				case EQUALS:
 					boolean output = value.equals("true") ? true : false;
-					newConstraint = new InvConstraintEquals<T>(ID, invSolver, output);
+					newConstraint = new InvConstraintEquals(ID, invSolver, output);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -123,7 +123,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 					break;
 
 				case CONTAINS:
-					newConstraint = new InvConstraintContains<T>(ID, invSolver, value.equals("true"));
+					newConstraint = new InvConstraintContains(ID, invSolver, value.equals("true"));
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -134,7 +134,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 
 				case PROPAGATION:
 
-					newConstraint = new InvConstraintPropagation<T>(ID, invSolver);
+					newConstraint = new InvConstraintPropagation(ID, invSolver);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -145,7 +145,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 
 				case CONCAT_SYM:
 
-					newConstraint = new InvConstraintConcatSym<T>(ID, invSolver);
+					newConstraint = new InvConstraintConcatSym(ID, invSolver);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -158,7 +158,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 
 					// FIX
 					// **** Using symbolic code for now, needs concrete ported to r3
-					newConstraint = new InvConstraintConcatSym<T>(ID, invSolver);
+					newConstraint = new InvConstraintConcatSym(ID, invSolver);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -169,7 +169,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 
 				case TOUPPERCASE:
 
-					newConstraint = new InvConstraintToUpperCase<T>(ID, invSolver);
+					newConstraint = new InvConstraintToUpperCase(ID, invSolver);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -180,7 +180,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 
 				case TOLOWERCASE:
 
-					newConstraint = new InvConstraintToLowerCase<T>(ID, invSolver);
+					newConstraint = new InvConstraintToLowerCase(ID, invSolver);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -192,7 +192,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 				case SUBSTR_STRT_END:
 
 					args = pc.getArgList();
-					newConstraint = new InvConstraintSubStringStartEnd<T>(ID, invSolver, args);
+					newConstraint = new InvConstraintSubStringStartEnd(ID, invSolver, args);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -204,7 +204,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 				case SET_LENGTH:
 
 					args = pc.getArgList();
-					newConstraint = new InvConstraintSetLength<T>(ID, invSolver, args);
+					newConstraint = new InvConstraintSetLength(ID, invSolver, args);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -216,7 +216,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 				case SUBSTRING_START:
 
 					args = pc.getArgList();
-					newConstraint = new InvConstraintSubStringStart<T>(ID, invSolver, args);
+					newConstraint = new InvConstraintSubStringStart(ID, invSolver, args);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -229,7 +229,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 				case DELETE_START_END:
 
 					args = pc.getArgList();
-					newConstraint = new InvConstraintDeleteStartEnd<T>(ID, invSolver, args);
+					newConstraint = new InvConstraintDeleteStartEnd(ID, invSolver, args);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -241,7 +241,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 				case DELETE_CHAR_AT:
 
 					args = pc.getArgList();
-					newConstraint = new InvConstraintDeleteCharAt<T>(ID, invSolver, args);
+					newConstraint = new InvConstraintDeleteCharAt(ID, invSolver, args);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -253,7 +253,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 				case REPLACE_CHAR_CHAR:
 
 					args = pc.getArgList();
-					newConstraint = new InvConstraintReplaceCharChar<T>(ID, invSolver, args);
+					newConstraint = new InvConstraintReplaceCharChar(ID, invSolver, args);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -265,7 +265,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 				case REPLACE_FIRST:
 
 					args = pc.getArgList();
-					newConstraint = new InvConstraintReplaceFirst<T>(ID, invSolver, args);
+					newConstraint = new InvConstraintReplaceFirst(ID, invSolver, args);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -275,7 +275,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 					break;
 				case REPLACE_ALL: // unsure why we need seperate cases for these?
 					args = pc.getArgList();
-					newConstraint = new InvConstraintReplaceAll<T>(ID, invSolver, args);
+					newConstraint = new InvConstraintReplaceAll(ID, invSolver, args);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -285,7 +285,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 					break;
 				case CHAR_AT:
 					args = pc.getArgList();
-					newConstraint = new InvConstraintCharAt<T>(ID, invSolver, args);
+					newConstraint = new InvConstraintCharAt(ID, invSolver, args);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -295,7 +295,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 					break;
 				case INDEX_OF:
 					args = pc.getArgList();
-					newConstraint = new InvConstraintIndexOf<T>(ID, invSolver, args);
+					newConstraint = new InvConstraintIndexOf(ID, invSolver, args);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -304,7 +304,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 
 					break;
 				case TRIM:
-					newConstraint = new InvConstraintTrim<T>(ID, invSolver);
+					newConstraint = new InvConstraintTrim(ID, invSolver);
 					allInverseConstraints.put(ID, newConstraint);
 					if (localDebug) {
 						System.out.println("processed " + op.toString() + "  " + pc.getId());
@@ -312,7 +312,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 					break;
 				case INSERT:
 					args = pc.getArgList();
-					newConstraint = new InvConstraintInsert<T>(ID, invSolver, args);
+					newConstraint = new InvConstraintInsert(ID, invSolver, args);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -321,7 +321,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 
 					break;
 				case REVERSE:
-					newConstraint = new InvConstraintReverse<T>(ID, invSolver);
+					newConstraint = new InvConstraintReverse(ID, invSolver);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -330,7 +330,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 
 					break;
 				case LENGTH:
-					newConstraint = new InvConstraintLength<T>(ID, invSolver);
+					newConstraint = new InvConstraintLength(ID, invSolver);
 					allInverseConstraints.put(ID, newConstraint);
 
 					if (localDebug) {
@@ -357,10 +357,10 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 
 			if (pc.getOp() != Operation.UNDEFINED) {
 				// each print constraint has a corresponding inverse constraint, get a reference to it
-				I_Inv_Constraint<T> invConstraint = allInverseConstraints.get(pc.getId());
+				I_Inv_Constraint invConstraint = allInverseConstraints.get(pc.getId());
 
 				// the next inverse constraint to evaluate is the base of printconstraint
-				I_Inv_Constraint<T> nextConstraint = allInverseConstraints.get(pc.getBase());
+				I_Inv_Constraint nextConstraint = allInverseConstraints.get(pc.getBase());
 				if (nextConstraint != null) {
 					invConstraint.setNext(nextConstraint);
 				}
@@ -424,13 +424,13 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 
 		//populate previous constraints -- need for BFS
 		//get all parents for the particular node
-		for (I_Inv_Constraint<T> p : allInverseConstraints.values()) {
+		for (I_Inv_Constraint p : allInverseConstraints.values()) {
 
-			HashSet<I_Inv_Constraint<T>> invParents = new HashSet<I_Inv_Constraint<T>>();
+			HashSet<I_Inv_Constraint> invParents = new HashSet<I_Inv_Constraint>();
 			for (SymbolicEdge e : graph.outgoingEdgesOf(allConstraints.get(p.getID()))) {
 				PrintConstraint source = (PrintConstraint) e.getATarget();
 				//add to p's incoming set
-				I_Inv_Constraint<T> invSource = allInverseConstraints.get(source.getId());
+				I_Inv_Constraint invSource = allInverseConstraints.get(source.getId());
 				//it could be null since it has not been processed yet
 				if (invSource != null) {
 					invParents.add(allInverseConstraints.get(source.getId()));
@@ -438,7 +438,7 @@ public class ICGBuilder<T extends A_Model_Inverse<T>> {
 
 			}
 			printDebug("Parents  " + p + " are " + invParents);
-			I_Inv_Constraint<T> invP = allInverseConstraints.get(p.getID());
+			I_Inv_Constraint invP = allInverseConstraints.get(p.getID());
 			invP.setPrev(invParents);
 		}
 

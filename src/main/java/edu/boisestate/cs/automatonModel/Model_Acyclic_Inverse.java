@@ -3,6 +3,7 @@ package edu.boisestate.cs.automatonModel;
 import dk.brics.automaton.*;
 import dk.brics.string.stringoperations.*;
 import edu.boisestate.cs.Alphabet;
+import edu.boisestate.cs.MinMaxPair;
 import edu.boisestate.cs.automaton.AutomatonHelper;
 
 import static edu.boisestate.cs.automaton.AutomatonHelper.LogicalTransition;
@@ -17,8 +18,18 @@ import java.util.*;
 /**
  * @author
  */
-public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse> {
+public class Model_Acyclic_Inverse implements Cloneable {
 
+	protected final Alphabet alphabet;
+	protected int boundLength;
+	protected int lowerBoundLength = -1; // uninitialized, used in Model_Acyclic_Inverse and length analysis
+	protected Model_Acyclic_Inverse_Manager modelManager;
+
+	// MJR - Inverse operations may need to widen string to arbitrary size since original length may not be known.
+	// MJR - inv_Substring
+	// MJR - widened string cut back to size when intersected with previous state
+	protected int maxStringPadding = 64;
+	protected boolean debug = false;
 
 	private Automaton automaton;
 
@@ -33,7 +44,8 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	 */
 	protected Model_Acyclic_Inverse(Automaton automaton, Alphabet alphabet, int boundLength) {
 
-		super(alphabet, boundLength);
+		this.alphabet = alphabet;
+		this.boundLength = boundLength;
 
 		this.automaton = automaton;
 
@@ -46,11 +58,152 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	 */
 	protected Model_Acyclic_Inverse(Automaton automaton, Alphabet alphabet) {
 
-		super(alphabet, 0);
+		this.alphabet = alphabet;
+		this.boundLength = 0;
 
 		this.automaton = automaton;
 
 		this.modelManager = new Model_Acyclic_Inverse_Manager(alphabet, 0);
+	}
+
+	public void setDebug(boolean debug) {
+		this.debug = debug;
+	}
+
+	protected void printDebug(String message) {
+		if (debug) System.out.println(message);
+	}
+
+	public int getBoundLength() {
+		return boundLength;
+	}
+
+	public void setBoundLength(int boundLength) {
+		this.boundLength = boundLength;
+	}
+
+	static Automaton performUnaryOperation(Automaton automaton, UnaryOperation operation, Alphabet alphabet) {
+
+		// use operation
+		Automaton result = operation.op(automaton);
+
+		// bound resulting automaton to alphabet
+		String charSet = alphabet.getCharSetString();
+		Automaton anyChar = BasicAutomata.makeCharSet(charSet).repeat();
+		result = result.intersection(anyChar);
+
+		//eas: even so the operation return the minimized automaton
+		//the intersection might mess it up.
+		//no need to call determinize since a minimize does
+		//call that method first - only deterministic FA
+		//can be minimized.
+		result.minimize();
+
+		// return resulting automaton
+		return result;
+	}
+
+	// finds the required character automaton for the given automaton, i.e. searches for any necessary path
+	// of single char transitions and returns a generic automata of length boundLength with that path.
+	static Automaton getRequiredCharAutomaton(Automaton a, Alphabet alphabet, int boundLength) {
+		// if initial state is accepting
+		State initialState = a.getInitialState();
+		if (initialState.isAccept() && initialState.getTransitions().isEmpty()) {
+			return BasicAutomata.makeEmptyString();
+		}
+
+		// initialize required char map
+		Map<Integer, Character> requiredCharMap = new HashMap<>();
+
+		// initialize state set
+		Set<State> states = new TreeSet<>();
+		states.add(initialState);
+
+		// walk automaton up to bound length
+		int accept = -1;
+		for (int i = 0; i < boundLength && accept < 0; i++) {
+			// initialize flag as true
+			boolean isSame = true;
+
+			// initialize current char to unused value
+			char c = Character.MAX_VALUE;
+			Set<State> newStates = new TreeSet<>();
+			for (State s : states) {
+				// if no transitions
+				if (s.getTransitions().size() != 1) {
+					isSame = false;
+					continue;
+				}
+				// check if transition destination is an accepting state
+				for (Transition t : s.getTransitions()) { //s.getTransitions.size == 1
+					newStates.add(t.getDest());
+					if (t.getDest().isAccept()) {
+						accept = i;
+					}
+					// if transitions allow more than one character at length i
+					if (t.getMin() != t.getMax() ||
+						(c != Character.MAX_VALUE && c != t.getMin())) {
+						isSame = false;
+						continue;
+					}
+
+					// set current char to single char from transition
+					c = t.getMin();
+				}
+			}
+
+			// if single char for transition at lenght i
+			if (isSame && c != Character.MAX_VALUE) {
+				requiredCharMap.put(i, c);
+			}
+
+			// update state set
+			states = newStates;
+		}
+
+		// if no required single characters or no accept state found
+		if (requiredCharMap.isEmpty() || accept < 0) {
+			return BasicAutomata.makeEmpty();
+		}
+
+		// initialize initial state and current state variable
+		State initial = new State();
+		State s = initial;
+
+		// create required char automaton
+		int length = boundLength;
+		if (accept >= 0) {
+		   length = accept + 1;
+		} // if accept state wasn't found within bound length then return automaton
+//        else {
+//            return BasicAutomata.makeEmpty();
+//        }
+		for (int i = 0; i < length; i ++) {
+			// create new destination state
+			State dest = new State();
+
+			// if single character at length i
+			if (requiredCharMap.containsKey(i)) {
+				// add single char transition
+				s.addTransition(new Transition(requiredCharMap.get(i), dest));
+			} else {
+				// add transition for all chars in alphabet
+				for (MinMaxPair pair : alphabet.getCharRanges()) {
+					s.addTransition(new Transition(pair.getMin(), pair.getMax(), dest));
+				}
+			}
+
+			// update current state
+			s = dest;
+		}
+
+		// initialize return automaton and set initial and accepting states
+		Automaton returnAutomaton = new Automaton();
+		returnAutomaton.setInitialState(initial);
+		s.setAccept(true);
+
+		// return automaton
+		return returnAutomaton;
 	}
 
 	public String getAutomaton() {
@@ -62,7 +215,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	}
 
 
-	@Override
 	public Model_Acyclic_Inverse assertContainedInOther(Model_Acyclic_Inverse containingModel) {
 		//ensureAcyclicModel(containingModel);
 
@@ -122,7 +274,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(ret, this.alphabet, calculateBoundLength(ret));
 	}
 
-	@Override
 	public Model_Acyclic_Inverse assertContainsOther(Model_Acyclic_Inverse containedModel) {
 		// nps 10-29-25
 		// this should simply check that the assertion is possible givne forward prop
@@ -191,7 +342,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 //		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse assertEmpty() {
 		// get resulting automaton
 		Automaton result = this.automaton.intersection(BasicAutomata.makeEmptyString());
@@ -200,7 +350,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, 0);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse assertEndsOther(Model_Acyclic_Inverse containingModel) {
 		//ensureAcyclicModel(containingModel);
 
@@ -223,7 +372,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	}
 
 
-	@Override
 	public Model_Acyclic_Inverse assertEndsWith(Model_Acyclic_Inverse endingModel) {
 		//ensureAcyclicModel(endingModel);
 
@@ -245,7 +393,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse assertEquals(Model_Acyclic_Inverse equalModel) {
 		//ensureAcyclicModel(equalModel);
 
@@ -259,7 +406,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, Math.min(this.boundLength, equalModel.boundLength));
 	}
 
-	@Override
 	public Model_Acyclic_Inverse assertEqualsIgnoreCase(Model_Acyclic_Inverse equalModel) {
 		//ensureAcyclicModel(equalModel);
 
@@ -274,7 +420,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse assertHasLength(int min, int max) {
 		// check min and max
 		if (min > max) {
@@ -297,12 +442,10 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, newBoundLength);
 	}
 
-	@Override
 	public void removeEmptyString() {
 		this.automaton.getInitialState().setAccept(false);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse resolveNotContains(Model_Acyclic_Inverse arg) {
 		Model_Acyclic_Inverse temp = arg.clone();
 		temp.createDisjoint();
@@ -329,7 +472,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 //
 //		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
 //	}
-	@Override
 	public Model_Acyclic_Inverse assertNotContainedInOther(Model_Acyclic_Inverse notContainingModel) {
 		//ensureAcyclicModel(notContainingModel);
 
@@ -426,7 +568,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse assertNotEmpty() {
 		// get resulting automaton
 		Automaton result = this.automaton.minus(BasicAutomata.makeEmptyString());
@@ -435,7 +576,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse assertNotEndsOther(Model_Acyclic_Inverse notContainingModel) {
 		//ensureAcyclicModel(notContainingModel);
 
@@ -475,7 +615,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	}
 
 
-	@Override
 	public Model_Acyclic_Inverse assertNotEndsWith(Model_Acyclic_Inverse notEndingModel) {
 		//ensureAcyclicModel(notEndingModel);
 
@@ -640,7 +779,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(other, alphabet, boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse assertNotEquals(Model_Acyclic_Inverse notEqualModel) {
 		//ensureAcyclicModel(notEqualModel);
 
@@ -658,7 +796,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse assertNotEqualsIgnoreCase(Model_Acyclic_Inverse notEqualModel) {
 		//ensureAcyclicModel(notEqualModel);
 
@@ -685,7 +822,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse assertNotStartsOther(Model_Acyclic_Inverse notContainingModel) {
 		//ensureAcyclicModel(notContainingModel);
 
@@ -725,7 +861,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	}
 
 
-	@Override
 	public Model_Acyclic_Inverse assertNotStartsWith(Model_Acyclic_Inverse notStartsModel) {
 		//ensureAcyclicModel(notStartsModel);
 
@@ -765,7 +900,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse assertStartsOther(Model_Acyclic_Inverse containingModel) {
 		//ensureAcyclicModel(containingModel);
 
@@ -788,7 +922,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	}
 
 
-	@Override
 	public Model_Acyclic_Inverse assertStartsWith(Model_Acyclic_Inverse startingModel) {
 		//ensureAcyclicModel(startingModel);
 		int boundDiff = this.boundLength - startingModel.calculateMinBoundLength();
@@ -819,7 +952,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 				this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse concatenate(Model_Acyclic_Inverse argModel) {
 		//ensureAcyclicModel(argModel);
 
@@ -841,13 +973,11 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, boundLength);
 	}
 
-	@Override
 	public boolean containsString(String actualValue) {
 		return this.automaton.run(actualValue);
 	}
 
 
-	@Override
 	public Model_Acyclic_Inverse delete(int start, int end) {
 
 		// perform operation
@@ -868,7 +998,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, newBoundLength);
 	}
 
-	@Override
 	public boolean equals(Model_Acyclic_Inverse arg) {
 
 //        // check if arg model is bounded automaton model
@@ -889,12 +1018,10 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 	}
 
-	@Override
 	public String getAcceptedStringExample() {
 		return this.automaton.getShortestExample(true);
 	}
 
-	@Override
 	public Set<String> getFiniteStrings() {
 		// return finite strings from automaton
 		System.out.println("WARNING: calling getFiniteStrings()");
@@ -906,7 +1033,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return automaton.getFiniteStrings(limit);
 	}
 
-	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Model_Acyclic_Inverse: ");
@@ -920,7 +1046,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return sb.toString();
 	}
 
-	@Override
 	public Model_Acyclic_Inverse insert(int offset, Model_Acyclic_Inverse argModel) {
 
 		PreciseInsert insert = new PreciseInsert(offset);
@@ -958,7 +1083,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, newBoundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse intersect(Model_Acyclic_Inverse arg) {
 		//ensureAcyclicModel(arg);
 
@@ -981,7 +1105,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, boundLength);
 	}
 
-	@Override
 	public boolean isEmpty() {
 		/* eas 10-31-18 why, why is EmptyString() ??? */
 		//return this.automaton.isEmptyString();
@@ -990,7 +1113,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 
 	}
 
-	@Override
 	public boolean isSingleton() {
 		// get one finite string, null if more
 		Set<String> strings = this.automaton.getFiniteStrings(1);
@@ -1001,13 +1123,11 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 				strings.iterator().next() != null;
 	}
 
-	@Override
 	public BigInteger modelCount() {
 		// return model count of automaton
 		return StringModelCounter.ModelCount(automaton);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse replace(char find, char replace) {
 		// perform operation
 		Automaton result = performUnaryOperation(automaton, new Replace1(find, replace), this.alphabet);
@@ -1018,7 +1138,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 				this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse replace(String find, String replace) {
 
 		// perform operation
@@ -1033,7 +1152,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, newBoundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse replaceChar() {
 
 		// perform operation
@@ -1045,7 +1163,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 				this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse replaceFindKnown(char find) {
 
 		// perform operation
@@ -1057,7 +1174,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 				this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse replaceReplaceKnown(char replace) {
 
 		// perform operation
@@ -1069,7 +1185,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 				this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse reverse() {
 		// if automaton is empty
 		if (this.automaton.isEmpty()) {
@@ -1083,7 +1198,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse setCharAt(int offset, Model_Acyclic_Inverse argModel) {
 		//ensureAcyclicModel(argModel);
 
@@ -1099,7 +1213,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse setLength(int length) {
 
 		// add null to new alphabet
@@ -1117,7 +1230,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	}
 
 
-	@Override
 	public Model_Acyclic_Inverse substring(int start, int end) {
 		// get resulting automaton
 		Automaton result = performUnaryOperation(automaton, new PreciseSubstring(start, end), this.alphabet);
@@ -1129,7 +1241,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, newBoundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse suffix(int start) {
 
 		// perform operation
@@ -1157,7 +1268,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, newBoundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse toLowercase() {
 
 		// perform operation
@@ -1169,7 +1279,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 				this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse toUppercase() {
 
 		// perform operation
@@ -1181,7 +1290,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 				this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse trim() {
 
 		// perform operation
@@ -1193,7 +1301,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 				this.boundLength);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse charAt(int index) {
 		if (this.boundLength <= index) {
 			throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for model with bound length " + this.boundLength);
@@ -1426,7 +1533,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	 * @author Marlin Roberts
 	 * 05/24/2020
 	 */
-	@Override
 	public Model_Acyclic_Inverse inv_concatenate(Model_Acyclic_Inverse arg) {
 
 		int argLength = arg.getBoundLength();
@@ -1461,7 +1567,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	 * @author Marlin Roberts
 	 * 05/24/2020
 	 */
-	@Override
 	public Model_Acyclic_Inverse inv_concatenate(Model_Acyclic_Inverse base, Model_Acyclic_Inverse arg) {
 
 		//int suffixBound = arg.getBoundLength();			// symbolic, could be any length up to bound
@@ -1523,7 +1628,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	 * @author Marlin Roberts
 	 * 05/24/2020
 	 */
-	@Override
 	public Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse> inv_concatenate_sym(Model_Acyclic_Inverse base, Model_Acyclic_Inverse arg) {
 
 		//int suffixBound = arg.getBoundLength();			// symbolic, could be any length up to bound
@@ -1583,7 +1687,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	 * @author Marlin Roberts
 	 * 05/24/2020
 	 */
-	@Override
 	public Model_Acyclic_Inverse inv_delete(int start, int end) {
 
 		Model_Acyclic_Inverse anyString = modelManager.createAnyString(end - start);
@@ -1718,7 +1821,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	 * @param m2
 	 * @return tuple of prefix and suffix models (note it removes this pair from the underlying model)
 	 */
-	@Override
 	/// i use this from InvConstraintInsert (also is a greedy inv_concatenate_sym_all)
 	public Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse> getPathConsistentPair(Model_Acyclic_Inverse m1, Model_Acyclic_Inverse m2) {
 		Automaton aut1 = m1.getAutomatonObject();
@@ -1942,7 +2044,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	 * @author Marlin Roberts
 	 * 05/24/2020
 	 */
-	@Override
 	public Model_Acyclic_Inverse inv_replace(char find, char replace) {
 		// perform operation
 		Automaton result = performUnaryOperation(automaton, new InverseReplaceCC(find, replace), this.alphabet);
@@ -1952,28 +2053,24 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	}
 
 
-	@Override
 	public Model_Acyclic_Inverse inv_replace(String find, String replace) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 
-	@Override
 	public Model_Acyclic_Inverse inv_replaceChar() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 
-	@Override
 	public Model_Acyclic_Inverse inv_replaceFindKnown(char find) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 
-	@Override
 	public Model_Acyclic_Inverse inv_replaceReplaceKnown(char replace) {
 		// TODO Auto-generated method stub
 		return null;
@@ -1987,7 +2084,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	 * @author Marlin Roberts
 	 * 05/24/2020
 	 */
-	@Override
 	public Model_Acyclic_Inverse inv_reverse() {
 
 		Model_Acyclic_Inverse result = this.reverse();
@@ -2011,7 +2107,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	 * @author Marlin Roberts
 	 * 05/24/2020
 	 */
-	@Override
 	public Model_Acyclic_Inverse inv_substring(int start, int end) {
 
 		// we know the length of the prefix, it is equal to start.
@@ -2027,7 +2122,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return result;
 	}
 
-	@Override
 	public Model_Acyclic_Inverse inv_substring(int start) {
 
 		// we know the length of the prefix, it is equal to start.
@@ -2044,14 +2138,12 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	}
 
 
-	@Override
 	public Model_Acyclic_Inverse inv_setCharAt(int offset, Model_Acyclic_Inverse argModel) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 
-	@Override
 	public Model_Acyclic_Inverse inv_setLength(int length) {
 
 		Model_Acyclic_Inverse suffix = modelManager.createAnyString(0, maxStringPadding);
@@ -2061,7 +2153,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	}
 
 
-	@Override
 	public Model_Acyclic_Inverse inv_suffix(int start) {
 		// TODO Auto-generated method stub
 		return null;
@@ -2075,7 +2166,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	 * @author Marlin Roberts
 	 * 05/24/2020
 	 */
-	@Override
 	public Model_Acyclic_Inverse inv_toLowercase() {
 		// perform operation
 		Automaton result = performUnaryOperation(automaton, new InverseLowerCase(), this.alphabet);
@@ -2092,7 +2182,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	 * @author Marlin Roberts
 	 * 05/24/2020
 	 */
-	@Override
 	public Model_Acyclic_Inverse inv_toUppercase() {
 		// perform operation
 		Automaton result = performUnaryOperation(automaton, new InverseUpperCase(), this.alphabet);
@@ -2102,7 +2191,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	}
 
 
-	@Override
 	public Model_Acyclic_Inverse inv_trim() {
 //
 //		Alphabet padAlphabet = new Alphabet(" ");
@@ -2122,17 +2210,14 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	}
 
 
-	@Override
 	public Automaton getAutomatonObject() {
 		return this.automaton;
 	}
 
-	@Override
 	public String getShortestExampleString() {
 		return this.automaton.getShortestExample(true);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse getShortestModel() {
 		State initial = this.automaton.getInitialState();
 		State exampleStart = new State();
@@ -2156,7 +2241,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(exampleAut, this.alphabet, calculateBoundLength(exampleAut));
 	}
 
-	@Override
 	public Model_Acyclic_Inverse getShortestExampleModel() {
 		return modelManager.createString(this.automaton.getShortestExample(true));
 
@@ -2184,7 +2268,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return new Model_Acyclic_Inverse(result, this.alphabet, boundLength);
 	}
 
-	@Override
 	public List<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>> inv_concatenate_sym_set(Model_Acyclic_Inverse base,
 																							 Model_Acyclic_Inverse arg) {
 
@@ -2234,7 +2317,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return results;
 	}
 
-	@Override
 	public List<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>> inv_concatenate_sym_all(Model_Acyclic_Inverse base,
 																							 Model_Acyclic_Inverse arg) {
 		List<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>> results = new ArrayList<Tuple<Model_Acyclic_Inverse, Model_Acyclic_Inverse>>();
@@ -2389,7 +2471,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	/**
 	 * Removes strings from argument mode from this model.
 	 */
-	@Override
 	public void minus(Model_Acyclic_Inverse model) {
 
 		Automaton remove = model.getAutomatonObject();
@@ -2450,7 +2531,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 	}
 
 	//singletons
-	@Override
 	public Model_Acyclic_Inverse replaceFirst(String find, String replace) {
 		//both charsequence singleton/known
 		Automaton base = this.automaton;
@@ -2700,21 +2780,18 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return result;
 	}
 
-	@Override
 	public Model_Acyclic_Inverse inv_replaceFirst(Model_Acyclic_Inverse find, Model_Acyclic_Inverse replace) {
 		// union of replaceFirst with find/replace swtiched and original
 		Model_Acyclic_Inverse result = this.replaceFirst(replace, find);
 		return result.union(this);
 	}
 
-	@Override
 	public Model_Acyclic_Inverse replaceAll(String find, String replace) {
 		System.err.println("Shuold not be using this replaceAll");
 		System.exit(1);
 		return null;
 	}
 
-	@Override
 	public Model_Acyclic_Inverse replaceAll(Model_Acyclic_Inverse regexString, Model_Acyclic_Inverse replacementString) {
 		// assuming prefix seleciton is fairly straightforward calling replaceFirst iteratively shuoldnt be much less efficienct
 		Model_Acyclic_Inverse bruteForce = null;
@@ -2745,7 +2822,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return result;
 	}
 
-	@Override
 	public Model_Acyclic_Inverse inv_replaceAll(Model_Acyclic_Inverse find, Model_Acyclic_Inverse replace) {
 		// union of replaceAll with find/replace swtiched and original
 		Model_Acyclic_Inverse result = this.replaceAll(replace, find);
@@ -3021,7 +3097,6 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 		return bound;
 	}
 
-	@Override
 	public int getLowerBoundLength() {
 		if (this.lowerBoundLength == -1) {
 			this.lowerBoundLength = calculateMinBoundLength();

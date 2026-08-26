@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.solvers.*;
 import edu.boisestate.cs.util.Tuple;
 
@@ -15,23 +15,23 @@ import edu.boisestate.cs.util.Tuple;
  * @author Marlin Roberts, 2020-2021
  *
  */
-public class InvConstraintTrim<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
+public class InvConstraintTrim extends A_Inv_Constraint {
 	
 	
-	public InvConstraintTrim (int ID, Solver_Inverse<T> solver) {
+	public InvConstraintTrim (int ID, Solver_Inverse solver) {
 		
 		// Store reference to solver
 		this.solver = solver;
 		this.ID = ID;
 		this.op  = Operation.TRIM;
-		this.outputSet = new HashMap<Integer,T>();
-		this.solutionSet = new SolutionSetInternal<T>(ID);
+		this.outputSet = new HashMap<Integer,Model_Acyclic_Inverse>();
+		this.solutionSet = new SolutionSetInternal(ID);
 		this.argString = "[NONE]";
 	}
 	
 	
 	
-	public InvConstraintTrim (int ID, Solver_Inverse<T> solver, List<Integer> args) {
+	public InvConstraintTrim (int ID, Solver_Inverse solver, List<Integer> args) {
 		
 		// Store reference to solver
 		this.solver = solver;
@@ -41,7 +41,7 @@ public class InvConstraintTrim<T extends A_Model_Inverse<T>> extends A_Inv_Const
 		this.argString = "[NONE]";
 	}
 	
-	public InvConstraintTrim (int ID, Solver_Inverse<T> solver, List<Integer> args, int base, int input) {
+	public InvConstraintTrim (int ID, Solver_Inverse solver, List<Integer> args, int base, int input) {
 		
 		// Store reference to solver
 		this.solver = solver;
@@ -57,14 +57,14 @@ public class InvConstraintTrim<T extends A_Model_Inverse<T>> extends A_Inv_Const
 	public Tuple<Boolean,Boolean> evaluate(){
 		Tuple<Boolean,Boolean> ret = new Tuple<>(true, true);
 		printDebug("EVALUATE TRIM " + ID + " ...");
-		T inputModel = incoming();
+		Model_Acyclic_Inverse inputModel = incoming();
 		printDebug("TRIM INCOMING: " + inputModel.getShortestExampleString());
 		if (inputModel.isEmpty()) {
 			printDebug("TRIM INCOMING SET INCONSISTENT");
 			ret = new Tuple<>(false, true);
 		} else {
 			// calls the solver_inverse method which calls the model_acyclic method
-			T resModel = solver.inv_trim(inputModel);
+			Model_Acyclic_Inverse resModel = solver.inv_trim(inputModel);
 
 			if (resModel == null) {
 				System.err.println("INVERSE TRIM FAILED");
@@ -78,14 +78,14 @@ public class InvConstraintTrim<T extends A_Model_Inverse<T>> extends A_Inv_Const
 	}
 	
 	@Override
-	public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex) {
+	public boolean evaluate(I_Inv_Constraint inputConstraint, int sourceIndex) {
 
 		System.out.format("EVALUATE TRIM %d ...\n",ID);
 		
-		T inputModel = inputConstraint.output(sourceIndex);
+		Model_Acyclic_Inverse inputModel = inputConstraint.output(sourceIndex);
 
 		// perform inverse function on output from the input constraint at given index
-		T resModel = solver.inv_trim(inputModel);
+		Model_Acyclic_Inverse resModel = solver.inv_trim(inputModel);
 
 		// intersect result with forward analysis results from previous constraint
 		resModel = solver.intersect(resModel, nextConstraint.getID());

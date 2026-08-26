@@ -5,7 +5,7 @@ package edu.boisestate.cs.graph;
 
 import java.util.*;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 //import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
@@ -15,7 +15,7 @@ import edu.boisestate.cs.util.Tuple;
  * @author Marlin Roberts, 2020-2021
  *
  */
-public class InvConstraintConcreteValue<T extends A_Model_Inverse<T>>  extends A_Inv_Constraint<T> {
+public class InvConstraintConcreteValue extends A_Inv_Constraint {
 
 	
 	//private SolutionSet<T> solutionSet;
@@ -23,13 +23,13 @@ public class InvConstraintConcreteValue<T extends A_Model_Inverse<T>>  extends A
 	//private int solutionIndex = -1;
 	
 	
-	public InvConstraintConcreteValue (int ID, Solver_Inverse<T> solver) {
+	public InvConstraintConcreteValue (int ID, Solver_Inverse solver) {
 		
 		// Store reference to solver
 		this.solver = solver;
 		this.ID = ID;
-		this.outputSet = new HashMap<Integer,T>();
-		this.solutionSet = new SolutionSetInternal<T>(ID);
+		this.outputSet = new HashMap<Integer,Model_Acyclic_Inverse>();
+		this.solutionSet = new SolutionSetInternal(ID);
 		this.op  = Operation.INIT_CON;
 		this.argString = "[NONE]";
 
@@ -63,13 +63,13 @@ public class InvConstraintConcreteValue<T extends A_Model_Inverse<T>>  extends A
 	
 	
 	@Override
-	public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex)  {
+	public boolean evaluate(I_Inv_Constraint inputConstraint, int sourceIndex)  {
 		
 		System.out.format("EVALUATE CONCRETE VALUE %d ...\n",ID);
 		
-		T concrete = solver.getSymbolicModel(ID);
+		Model_Acyclic_Inverse concrete = solver.getSymbolicModel(ID);
 		String test = concrete.getShortestExampleString();
-		T output = inputConstraint.output(sourceIndex);
+		Model_Acyclic_Inverse output = inputConstraint.output(sourceIndex);
 		if (output.containsString(test)) {
 			return true;
 		}
@@ -82,10 +82,10 @@ public class InvConstraintConcreteValue<T extends A_Model_Inverse<T>>  extends A
 		printDebug("EVALUATE CONCRETE VALUE " + ID + "...");
 //		System.out.format("EVALUATE CONCRETE VALUE %d ...\n",ID);
 		
-		T concrete = solver.getSymbolicModel(ID);
+		Model_Acyclic_Inverse concrete = solver.getSymbolicModel(ID);
 		String test = concrete.getShortestExampleString();
-		Iterator<I_Inv_Constraint<T>> iter = (new ArrayList<>(prevConstraint)).iterator();
-		I_Inv_Constraint<T> prev = iter.next();
+		Iterator<I_Inv_Constraint> iter = (new ArrayList<>(prevConstraint)).iterator();
+		I_Inv_Constraint prev = iter.next();
 		//System.out.println("prev " + prev);
 		// TODO: we don't use replaceCC anymore, so can almost def remove
 		// this was def to fix a specific bug, hopefully not relevant anymore
@@ -93,13 +93,13 @@ public class InvConstraintConcreteValue<T extends A_Model_Inverse<T>>  extends A
 			prev = iter.next();
 		}
 
-		T inputs = prev.output(this);
+		Model_Acyclic_Inverse inputs = prev.output(this);
 		
 		while(iter.hasNext()) {
-			I_Inv_Constraint<T> nextC = iter.next();
+			I_Inv_Constraint nextC = iter.next();
 			// issue occurs because of way replaceCC outputSet is handled.
 			if (nextC.getOp() == Operation.REPLACE_CHAR_CHAR) continue;
-			T next = nextC.output(this);
+			Model_Acyclic_Inverse next = nextC.output(this);
 			if (next == null) {
 				System.err.println("NO VALUE FOR CONCRETE EXISTS " + ID );
 				System.exit(1);

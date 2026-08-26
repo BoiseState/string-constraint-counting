@@ -3,8 +3,7 @@ package edu.boisestate.cs.reporting;
 import edu.boisestate.cs.BasicTimer;
 import edu.boisestate.cs.Parser_2;
 import edu.boisestate.cs.Settings;
-import edu.boisestate.cs.automatonModel.A_Model;
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.graph.*;
 //import edu.boisestate.cs.solvers.ExtendedSolver;
 import edu.boisestate.cs.solvers.Solver;
@@ -18,15 +17,15 @@ import java.util.*;
  * 
  * @author 
  *
- * @param <T>
+ * @param <Model_Acyclic_Inverse>
  */
-abstract public class A_Reporter <T extends A_Model<T>> {
-    protected abstract SolutionSet<T> getSolutionSet();
+abstract public class A_Reporter {
+    protected abstract SolutionSet getSolutionSet();
 
     protected final DirectedGraph<PrintConstraint, SymbolicEdge> graph;
-    protected final Parser_2<T> parser;
+    protected final Parser_2 parser;
     protected final boolean debug;
-    protected final Solver<T> solver;
+    protected final Solver solver;
     protected final Map<Integer, String[]> operationsMap;
     protected final Map<Integer, Long> timerMap;
 
@@ -42,8 +41,8 @@ abstract public class A_Reporter <T extends A_Model<T>> {
      * @param debug
      */
     protected A_Reporter (DirectedGraph<PrintConstraint, SymbolicEdge> 	graph,
-                       	   	Parser_2<T> 									parser,
-                       	   	Solver<T> 										solver,
+                       	   	Parser_2 									parser,
+                       	   	Solver 										solver,
                        	   	boolean 										debug) {
 
         this.graph 		= graph;

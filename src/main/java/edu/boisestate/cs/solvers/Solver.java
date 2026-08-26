@@ -8,29 +8,29 @@ import edu.boisestate.cs.BasicTimer;
 import edu.boisestate.cs.automatonModel.*;
 import edu.boisestate.cs.util.Tuple;
 
-public class Solver<T extends A_Model<T>> {
+public class Solver{
 
 	protected Map<Integer, String> concreteStringMap = new HashMap<>();
 	protected int initialBound = -1;
-	protected T last = null;
-	protected T lastArg = null;
+	protected Model_Acyclic_Inverse last = null;
+	protected Model_Acyclic_Inverse lastArg = null;
 	protected int lastArgId = -1;
 	protected int lastId = -1;
-	protected Map<Integer, T> symbolicStringMap = new HashMap<>();
+	protected Map<Integer, Model_Acyclic_Inverse> symbolicStringMap = new HashMap<>();
 
-	public final A_Model_Manager<T> modelManager;
+	public final Model_Acyclic_Inverse_Manager modelManager;
 
 	public int getTempId() {
 		return -1;
 	}
 
-	public Solver(A_Model_Manager<T> modelManager) {
+	public Solver(Model_Acyclic_Inverse_Manager modelManager) {
 
 		// initialize factory from parameter
 		this.modelManager = modelManager;
 	}
 
-	public Solver(A_Model_Manager<T> modelManager,
+	public Solver(Model_Acyclic_Inverse_Manager modelManager,
 				  int initialBound) {
 
 		// initialize bound from parameter value
@@ -61,21 +61,21 @@ public class Solver<T extends A_Model<T>> {
 			   fName.equals("regionMatches");
 	}
 
-	public T getModel(int id) {
+	public Model_Acyclic_Inverse getModel(int id) {
 		return this.symbolicStringMap.get(id);
 	}
 
 	public void append(int id, int base, int arg, int start, int end) {
 
 		// get models
-		T baseModel = this.symbolicStringMap.get(base);
-		T argModel = this.symbolicStringMap.get(arg);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse argModel = this.symbolicStringMap.get(arg);
 
 		// start timer
 		BasicTimer.start();
 
 		// get substring model
-		T substrModel = argModel.substring(start, end);
+		Model_Acyclic_Inverse substrModel = argModel.substring(start, end);
 
 		// append substring model to base model
 		baseModel = baseModel.concatenate(substrModel);
@@ -92,8 +92,8 @@ public class Solver<T extends A_Model<T>> {
 //    	System.out.println(id + " " + base + " " + arg);
 //    	System.out.println("sybmolicStringMap " + symbolicStringMap);
 		// get models
-		T baseModel = this.symbolicStringMap.get(base);
-		T argModel = this.symbolicStringMap.get(arg);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse argModel = this.symbolicStringMap.get(arg);
 		// start timer
 		BasicTimer.start();
 		//System.out.println("bM " + baseModel.getAutomaton().toString() + " aM " + argModel.getAutomaton().toString());
@@ -113,8 +113,8 @@ public class Solver<T extends A_Model<T>> {
 		// here we do a preliminary search if possible and sat test (null models causing Parser_2 to return false)
 
 		// get models
-		T baseModel = this.symbolicStringMap.get(base);
-		T argModel = this.symbolicStringMap.get(arg);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse argModel = this.symbolicStringMap.get(arg);
 
 		// if either argument is concrete we do preliminary searches
 		if (baseModel.isSingleton()){
@@ -163,7 +163,7 @@ public class Solver<T extends A_Model<T>> {
 	public void delete(int id, int base, int start, int end) {
 
 		// get model
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 
 		// start timer
 		BasicTimer.start();
@@ -181,8 +181,8 @@ public class Solver<T extends A_Model<T>> {
 	public void endsWith(boolean result, int base, int arg) {
 
 		// get models
-		T baseModel = this.symbolicStringMap.get(base);
-		T argModel = this.symbolicStringMap.get(arg);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse argModel = this.symbolicStringMap.get(arg);
 
 		if (result) {
 
@@ -202,10 +202,10 @@ public class Solver<T extends A_Model<T>> {
 			// start timer
 			BasicTimer.start();
 			// get satisfying base model as temp
-			T tempBaseModel = baseModel.isSingleton() ? baseModel : baseModel.assertNotEndsWith(argModel);
+			Model_Acyclic_Inverse tempBaseModel = baseModel.isSingleton() ? baseModel : baseModel.assertNotEndsWith(argModel);
 
 			// get satisfying arg model
-			T tempArgModel = argModel.isSingleton() ? argModel : argModel.assertNotEndsOther(baseModel);
+			Model_Acyclic_Inverse tempArgModel = argModel.isSingleton() ? argModel : argModel.assertNotEndsOther(baseModel);
 
 			// issue with two symbolics
 			if (tempBaseModel.isEmpty()) {
@@ -236,8 +236,8 @@ public class Solver<T extends A_Model<T>> {
 	public void equals(boolean result, int base, int arg) {
 
 		// get models
-		T baseModel = this.symbolicStringMap.get(base);
-		T argModel = this.symbolicStringMap.get(arg);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse argModel = this.symbolicStringMap.get(arg);
 //        System.out.println("argModel " + arg + "\n" + argModel.getAutomaton());
 //        System.out.println("result " + result);
 		// perform equals
@@ -259,8 +259,8 @@ public class Solver<T extends A_Model<T>> {
 			// start timer
 			BasicTimer.start();
 
-			T tempBaseModel = baseModel.isSingleton() ? baseModel.clone() : baseModel.assertNotEquals(argModel);
-			T tempArgModel = argModel.isSingleton() ? argModel.clone() : argModel.assertNotEquals(baseModel);
+			Model_Acyclic_Inverse tempBaseModel = baseModel.isSingleton() ? baseModel.clone() : baseModel.assertNotEquals(argModel);
+			Model_Acyclic_Inverse tempArgModel = argModel.isSingleton() ? argModel.clone() : argModel.assertNotEquals(baseModel);
 
 			// if either model is anyString we'll have an empty language
 			// or if one is a subset of the other
@@ -303,8 +303,8 @@ public class Solver<T extends A_Model<T>> {
 	public void equalsIgnoreCase(boolean result, int base, int arg) {
 
 		// get models
-		T baseModel = this.symbolicStringMap.get(base);
-		T argModel = this.symbolicStringMap.get(arg);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse argModel = this.symbolicStringMap.get(arg);
 
 		// perform equals
 		if (result) {
@@ -326,7 +326,7 @@ public class Solver<T extends A_Model<T>> {
 			BasicTimer.start();
 
 			// get satisfying base model as temp
-			T tempModel = baseModel.assertNotEqualsIgnoreCase(argModel);
+			Model_Acyclic_Inverse tempModel = baseModel.assertNotEqualsIgnoreCase(argModel);
 
 			// get satisfying arg model
 			argModel = argModel.assertNotEqualsIgnoreCase(baseModel);
@@ -346,15 +346,15 @@ public class Solver<T extends A_Model<T>> {
 	public String getSatisfiableResult(int id) {
 
 		// get model
-		T model = this.symbolicStringMap.get(id);
+		Model_Acyclic_Inverse model = this.symbolicStringMap.get(id);
 		return model.getAcceptedStringExample();
 	}
 
 	public void insert(int id, int base, int arg, int offset) {
 
 		// get models
-		T baseModel = this.symbolicStringMap.get(base);
-		T argModel = this.symbolicStringMap.get(arg);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse argModel = this.symbolicStringMap.get(arg);
 
 		// start timer
 		BasicTimer.start();
@@ -377,14 +377,14 @@ public class Solver<T extends A_Model<T>> {
 					   int end) {
 
 		// get models
-		T baseModel = this.symbolicStringMap.get(base);
-		T argModel = this.symbolicStringMap.get(arg);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse argModel = this.symbolicStringMap.get(arg);
 
 		// start timer
 		BasicTimer.start();
 
 		// get substring from arg model
-		T substrModel = argModel.substring(start, end);
+		Model_Acyclic_Inverse substrModel = argModel.substring(start, end);
 
 		// perform insert
 		baseModel = baseModel.insert(offset, substrModel);
@@ -399,7 +399,7 @@ public class Solver<T extends A_Model<T>> {
 	public void isEmpty(boolean result, int base) {
 
 		// get model
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 
 		if (result) {
 
@@ -432,7 +432,7 @@ public class Solver<T extends A_Model<T>> {
 	public boolean isSatisfiable(int id) {
 
 		// get model
-		T model = this.symbolicStringMap.get(id);
+		Model_Acyclic_Inverse model = this.symbolicStringMap.get(id);
 		//System.out.println("model " + model + " id " + id);
 		// return true if not empty
 		return !model.isEmpty();
@@ -441,7 +441,7 @@ public class Solver<T extends A_Model<T>> {
 	public boolean isSingleton(int id, String actualValue) {
 
 		// get model
-		T model = this.symbolicStringMap.get(id);
+		Model_Acyclic_Inverse model = this.symbolicStringMap.get(id);
 		//System.out.println("model " + model + " id " + id);
 		//System.out.println(model.getAutomaton() + " val " + actualValue);
 
@@ -452,7 +452,7 @@ public class Solver<T extends A_Model<T>> {
 	public boolean isSingleton(int id) {
 		// System.out.println("singleton " + id);
 		// get model
-		T model = this.symbolicStringMap.get(id);
+		Model_Acyclic_Inverse model = this.symbolicStringMap.get(id);
 
 		// return singleton status
 		return model.isSingleton();
@@ -461,7 +461,7 @@ public class Solver<T extends A_Model<T>> {
 	public boolean isSound(int id, String actualValue) {
 
 		// get model
-		T model = this.symbolicStringMap.get(id);
+		Model_Acyclic_Inverse model = this.symbolicStringMap.get(id);
 		//why do we intersect? Why not just check whether
 		//the automaton accepts the string?
 		//System.out.println("M " + model.getAutomaton() + " id " + id + " val " + actualValue);
@@ -494,7 +494,7 @@ public class Solver<T extends A_Model<T>> {
 		BasicTimer.start();
 
 		// create new automaton model from string
-		T model = this.modelManager.createString(string);
+		Model_Acyclic_Inverse model = this.modelManager.createString(string);
 
 		//System.out.println("newConcreteString " + id + " : " + string + " " + model.getClass());
 		// stop timer
@@ -514,7 +514,7 @@ public class Solver<T extends A_Model<T>> {
 		BasicTimer.start();
 
 		// create new symbolic string
-		T model =
+		Model_Acyclic_Inverse model =
 				this.modelManager.createAnyString(this.initialBound);
 
 		// stop timer
@@ -526,13 +526,13 @@ public class Solver<T extends A_Model<T>> {
 
 	public void propagateSymbolicString(int id, int base) {
 		// get model
-		T model = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse model = this.symbolicStringMap.get(base);
 
 		// start timer
 		BasicTimer.start();
 
 		// clone model
-		T clone = model.clone();
+		Model_Acyclic_Inverse clone = model.clone();
 
 		// stop timer
 		BasicTimer.stop();
@@ -544,7 +544,7 @@ public class Solver<T extends A_Model<T>> {
 	public void replaceCharFindKnown(int id, int base, char find) {
 
 		// get model
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 
 		// start timer
 		BasicTimer.start();
@@ -563,7 +563,7 @@ public class Solver<T extends A_Model<T>> {
 	public void replaceCharKnown(int id, int base, char find, char replace) {
 
 		// get model
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 
 		// start timer
 		BasicTimer.start();
@@ -581,7 +581,7 @@ public class Solver<T extends A_Model<T>> {
 	public void replaceCharReplaceKnown(int id, int base, char replace) {
 
 		// get model
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 
 		// start timer
 		BasicTimer.start();
@@ -599,7 +599,7 @@ public class Solver<T extends A_Model<T>> {
 	public void replaceCharUnknown(int id, int base) {
 
 		// get model
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 
 		// start timer
 		BasicTimer.start();
@@ -632,13 +632,13 @@ public class Solver<T extends A_Model<T>> {
 	 */
 	public void replaceAll(int id, int base, int argOne, int argTwo) {
 		// get models
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 		// nps - 04.16.25 - unsure why this is here
 //    	if (baseModel.getClass() != Model_Acyclic.class)
 //    		return;
 
 		// nps - switched to models: untested as of 4.3.25
-		T arg1, arg2;
+		Model_Acyclic_Inverse arg1, arg2;
 		if (this.concreteStringMap.get(argOne) == null) {
 			arg1 = this.symbolicStringMap.get(argOne);
 		} else {
@@ -677,11 +677,11 @@ public class Solver<T extends A_Model<T>> {
 	 */
 	public void replaceFirst(int id, int base, int argOne, int argTwo) {
 		// get models
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 //    	if (baseModel.getClass() != Model_Acyclic.class)
 //    		return;
 		// nps - tryingot handle concrete and symbolic arguments.
-		T arg1, arg2;
+		Model_Acyclic_Inverse arg1, arg2;
 		if (this.concreteStringMap.get(argOne) == null) {
 			arg1 = this.symbolicStringMap.get(argOne);
 		} else {
@@ -710,7 +710,7 @@ public class Solver<T extends A_Model<T>> {
 	public void replaceStrings(int id, int base, int argOne, int argTwo) {
 
 		// get models
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 		String arg1String = this.concreteStringMap.get(argOne);
 		String arg2String = this.concreteStringMap.get(argTwo);
 
@@ -730,7 +730,7 @@ public class Solver<T extends A_Model<T>> {
 	public void reverse(int id, int base) {
 
 		// get model
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 
 		// start timer
 		BasicTimer.start();
@@ -748,8 +748,8 @@ public class Solver<T extends A_Model<T>> {
 	public void setCharAt(int id, int base, int arg, int offset) {
 
 		// get models
-		T baseModel = this.symbolicStringMap.get(base);
-		T argModel = this.symbolicStringMap.get(arg);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse argModel = this.symbolicStringMap.get(arg);
 
 		// start timer
 		BasicTimer.start();
@@ -767,7 +767,7 @@ public class Solver<T extends A_Model<T>> {
 	public void setLength(int id, int base, int length) {
 
 		// get model
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 
 		// start timer
 		BasicTimer.start();
@@ -789,8 +789,8 @@ public class Solver<T extends A_Model<T>> {
 	public void startsWith(boolean result, int base, int arg) {
 
 		// get models
-		T baseModel = this.symbolicStringMap.get(base);
-		T argModel = this.symbolicStringMap.get(arg);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse argModel = this.symbolicStringMap.get(arg);
 
 		if (result) {
 
@@ -812,10 +812,10 @@ public class Solver<T extends A_Model<T>> {
 			BasicTimer.start();
 
 			// get satisfying base model as temp
-			T tempBaseModel = baseModel.isSingleton() ? baseModel : baseModel.assertNotStartsWith(argModel);
+			Model_Acyclic_Inverse tempBaseModel = baseModel.isSingleton() ? baseModel : baseModel.assertNotStartsWith(argModel);
 
 			// get satisfying arg model
-			T tempArgModel = argModel.isSingleton() ? argModel : argModel.assertNotStartsOther(baseModel);
+			Model_Acyclic_Inverse tempArgModel = argModel.isSingleton() ? argModel : argModel.assertNotStartsOther(baseModel);
 
 			if (tempBaseModel.isEmpty()) {
 				System.err.println("Warning, Solver.startsWith(): base model is empty");
@@ -843,7 +843,7 @@ public class Solver<T extends A_Model<T>> {
 	public void substring(int id, int base, int start) {
 
 		// get model
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 
 		// start timer
 		BasicTimer.start();
@@ -861,7 +861,7 @@ public class Solver<T extends A_Model<T>> {
 	public void substring(int id, int base, int start, int end) {
 
 		// get model
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 
 		// start timer
 		BasicTimer.start();
@@ -879,7 +879,7 @@ public class Solver<T extends A_Model<T>> {
 	public void toLowerCase(int id, int base) {
 
 		// get model
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 
 		// start timer
 		BasicTimer.start();
@@ -897,7 +897,7 @@ public class Solver<T extends A_Model<T>> {
 	public void toUpperCase(int id, int base) {
 
 		// get model
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 
 		// start timer
 		BasicTimer.start();
@@ -915,7 +915,7 @@ public class Solver<T extends A_Model<T>> {
 	public void trim(int id, int base) {
 
 		// get model
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 
 		// start timer
 		BasicTimer.start();
@@ -931,14 +931,14 @@ public class Solver<T extends A_Model<T>> {
 	}
 
 	public void charAt(int id, int base, int index) {
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 		baseModel = baseModel.charAt(index);
 		this.symbolicStringMap.put(id, baseModel);
 	}
 
 	public void indexOf(int id, int base, int find) {
-		T baseModel = this.symbolicStringMap.get(base);
-		T argModel = this.symbolicStringMap.get(find);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse argModel = this.symbolicStringMap.get(find);
 
 		baseModel = baseModel.indexOf(argModel);
 		this.symbolicStringMap.put(id, baseModel);
@@ -991,12 +991,12 @@ public class Solver<T extends A_Model<T>> {
 
 
 	public void length(int id, int base) {
-		T baseModel = this.symbolicStringMap.get(base);
+		Model_Acyclic_Inverse baseModel = this.symbolicStringMap.get(base);
 		int upperBound = baseModel.getBoundLength();
 		int lowerBound = baseModel.getLowerBoundLength();
 		// create anyString with lengths bounds that will act as integer check
 		// TODO: any problem if this somehow isn't interpreted as an integer range?
-		T lenModel = this.modelManager.createString(Integer.toString(lowerBound));
+		Model_Acyclic_Inverse lenModel = this.modelManager.createString(Integer.toString(lowerBound));
 		for (int i = lowerBound + 1; i <= upperBound; i++) {
 			String lenStr = Integer.toString(i);
 			lenModel = lenModel.union(this.modelManager.createString(lenStr));
@@ -1013,7 +1013,7 @@ public class Solver<T extends A_Model<T>> {
 	 *
 	 * @return the symbolic string value represented by the id.
 	 */
-	public T getValue(int id) {
+	public Model_Acyclic_Inverse getValue(int id) {
 		return symbolicStringMap.get(id);
 	}
 

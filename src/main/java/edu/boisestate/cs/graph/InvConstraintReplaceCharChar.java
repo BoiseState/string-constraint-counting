@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import dk.brics.automaton.BasicAutomata;
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.solvers.*;
 import edu.boisestate.cs.util.Tuple;
 
@@ -16,25 +16,25 @@ import edu.boisestate.cs.util.Tuple;
  * @author Marlin Roberts, 2020-2021
  *
  */
-public class InvConstraintReplaceCharChar<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
+public class InvConstraintReplaceCharChar extends A_Inv_Constraint {
 	
 	private int find,replace;
 	
-	public InvConstraintReplaceCharChar (int ID, Solver_Inverse<T> solver, List<Integer> args) {
+	public InvConstraintReplaceCharChar (int ID, Solver_Inverse solver, List<Integer> args) {
 		
 		// Store reference to solver
 		this.solver = solver;
 		this.ID = ID;
 		this.argList = args;
 		this.op = Operation.REPLACE_CHAR_CHAR;
-		this.outputSet = new HashMap<Integer,T>();
-		this.solutionSet = new SolutionSetInternal<T>(ID);
+		this.outputSet = new HashMap<Integer,Model_Acyclic_Inverse>();
+		this.solutionSet = new SolutionSetInternal(ID);
 		this.argString = "0:FIND 1:REPLACE";
 		this.find = argList.get(0);
 		this.replace = argList.get(1);
 	}
 	
-	public InvConstraintReplaceCharChar (int ID, Solver_Inverse<T> solver, List<Integer> args, int base, int input) {
+	public InvConstraintReplaceCharChar (int ID, Solver_Inverse solver, List<Integer> args, int base, int input) {
 		
 		// Store reference to solver
 		this.solver = solver;
@@ -50,15 +50,15 @@ public class InvConstraintReplaceCharChar<T extends A_Model_Inverse<T>> extends 
 	
 	
 	@Override
-	public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex) {
+	public boolean evaluate(I_Inv_Constraint inputConstraint, int sourceIndex) {
 		
 		// solver.inv_replaceCharKnown(ID, prevConstraint.getID(), (char) find, (char) replace);
 		System.out.format("EVALUATE REPLACE CHAR %d ...\n",ID);
 		
-		T inputModel = inputConstraint.output(sourceIndex);
+		Model_Acyclic_Inverse inputModel = inputConstraint.output(sourceIndex);
 
 		// perform inverse function on output from the input constraint at given index
-		T resModel = solver.inv_replaceCharKnown(inputModel, (char) find, (char) replace);
+		Model_Acyclic_Inverse resModel = solver.inv_replaceCharKnown(inputModel, (char) find, (char) replace);
 
 		// intersect result with forward analysis results from previous constraint
 		resModel = solver.intersect(resModel, nextConstraint.getID());
@@ -94,7 +94,7 @@ public class InvConstraintReplaceCharChar<T extends A_Model_Inverse<T>> extends 
 		Tuple<Boolean,Boolean> ret = new Tuple<Boolean,Boolean>(true, true);
 		printDebug("EVALUATE REPLACE CHAR " + ID + " ...");
 //		System.out.format("EVALUATE TREPLACE CHAR %d ...\n",ID);
-		T inputs = incoming();
+		Model_Acyclic_Inverse inputs = incoming();
 		
 		if(inputs.isEmpty()) {
 			printDebug("REPLACE CHAR INCOMING SET INCONSISTENT");
@@ -103,7 +103,7 @@ public class InvConstraintReplaceCharChar<T extends A_Model_Inverse<T>> extends 
 		} else {
 			//done performing intersection 
 			// perform inverse function on output from the input constraint at given index
-			T resModel = solver.inv_replaceCharKnown(inputs, (char) find, (char) replace);
+			Model_Acyclic_Inverse resModel = solver.inv_replaceCharKnown(inputs, (char) find, (char) replace);
 //			System.out.println("resModel " + resModel.getFiniteStrings());
 			
 			// intersect result with forward analysis results from previous constraint

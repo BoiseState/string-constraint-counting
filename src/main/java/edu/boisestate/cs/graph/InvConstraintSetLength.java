@@ -3,14 +3,14 @@ package edu.boisestate.cs.graph;
 import java.util.HashMap;
 import java.util.List;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.solvers.*;
 
 /**
  * @author Marlin Roberts, 2020-2021
  *
  */
-public class InvConstraintSetLength<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
+public class InvConstraintSetLength extends A_Inv_Constraint {
 	
 	// This will hold a reference to the containing solver.
 	// This allows the constraint access to the solver functions and string tables.
@@ -28,21 +28,21 @@ public class InvConstraintSetLength<T extends A_Model_Inverse<T>> extends A_Inv_
 //	private String argString;
 	private int length;
 	
-	public InvConstraintSetLength (int ID, Solver_Inverse<T> solver, List<Integer> args) {
+	public InvConstraintSetLength (int ID, Solver_Inverse solver, List<Integer> args) {
 		
 		// Store reference to solver
 		this.solver = solver;
 		this.ID = ID;
 		this.argList = args;
 		this.op = Operation.SET_LENGTH;
-		this.outputSet = new HashMap<Integer,T>();
-		this.solutionSet = new SolutionSetInternal<T>(ID);
+		this.outputSet = new HashMap<Integer,Model_Acyclic_Inverse>();
+		this.solutionSet = new SolutionSetInternal(ID);
 		this.argString = "0:LENGTH";
 		this.length = argList.get(0);
 		
 	}
 	
-	public InvConstraintSetLength (int ID, Solver_Inverse<T> solver, List<Integer> args, int base, int input) {
+	public InvConstraintSetLength (int ID, Solver_Inverse solver, List<Integer> args, int base, int input) {
 		
 		// Store reference to solver
 		this.solver = solver;
@@ -57,14 +57,14 @@ public class InvConstraintSetLength<T extends A_Model_Inverse<T>> extends A_Inv_
 	
 	
 	@Override
-	public boolean evaluate(I_Inv_Constraint<T> inputConstraint, int sourceIndex) {
+	public boolean evaluate(I_Inv_Constraint inputConstraint, int sourceIndex) {
 		
 		System.out.format("EVALUATE SET_LENGTH %d ...\n",ID);
 		
-		T inputModel = inputConstraint.output(sourceIndex);
+		Model_Acyclic_Inverse inputModel = inputConstraint.output(sourceIndex);
 
 		// perform inverse function on output from the input constraint at given index
-		T resModel = solver.inv_setLength(inputModel, length);
+		Model_Acyclic_Inverse resModel = solver.inv_setLength(inputModel, length);
 
 		// intersect result with forward analysis results from previous constraint
 		resModel = solver.intersect(resModel, nextConstraint.getID());

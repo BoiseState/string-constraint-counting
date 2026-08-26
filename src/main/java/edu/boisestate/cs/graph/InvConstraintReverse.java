@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.solvers.*;
 import edu.boisestate.cs.util.Tuple;
 
@@ -15,23 +15,23 @@ import edu.boisestate.cs.util.Tuple;
  * @author Marlin Roberts, 2020-2021
  *
  */
-public class InvConstraintReverse<T extends A_Model_Inverse<T>> extends A_Inv_Constraint<T> {
+public class InvConstraintReverse extends A_Inv_Constraint {
 	
 	
-	public InvConstraintReverse (int ID, Solver_Inverse<T> solver) {
+	public InvConstraintReverse (int ID, Solver_Inverse solver) {
 		
 		// Store reference to solver
 		this.solver = solver;
 		this.ID = ID;
 		this.op  = Operation.REVERSE;
-		this.outputSet = new HashMap<Integer,T>();
-		this.solutionSet = new SolutionSetInternal<T>(ID);
+		this.outputSet = new HashMap<Integer,Model_Acyclic_Inverse>();
+		this.solutionSet = new SolutionSetInternal(ID);
 		this.argString = "[NONE]";
 	}
 	
 	
 	
-	public InvConstraintReverse (int ID, Solver_Inverse<T> solver, List<Integer> args) {
+	public InvConstraintReverse (int ID, Solver_Inverse solver, List<Integer> args) {
 		
 		// Store reference to solver
 		this.solver = solver;
@@ -41,7 +41,7 @@ public class InvConstraintReverse<T extends A_Model_Inverse<T>> extends A_Inv_Co
 		this.argString = "[NONE]";
 	}
 	
-	public InvConstraintReverse (int ID, Solver_Inverse<T> solver, List<Integer> args, int base, int input) {
+	public InvConstraintReverse (int ID, Solver_Inverse solver, List<Integer> args, int base, int input) {
 		
 		// Store reference to solver
 		this.solver = solver;
@@ -57,7 +57,7 @@ public class InvConstraintReverse<T extends A_Model_Inverse<T>> extends A_Inv_Co
     public Tuple<Boolean,Boolean> evaluate() {
         Tuple<Boolean, Boolean> ret = new Tuple<Boolean, Boolean>(true, true);
         printDebug("EVALUATE REVERSE " + ID + " ...");
-        T inputModel = incoming();
+        Model_Acyclic_Inverse inputModel = incoming();
         printDebug("REVERSE INCOMING: " + inputModel.getShortestExampleString());
         if (inputModel.isEmpty()) {
             printDebug("REVERSE INCOMING SET INCONSISTENT...");
@@ -65,7 +65,7 @@ public class InvConstraintReverse<T extends A_Model_Inverse<T>> extends A_Inv_Co
         } else {
             // now starting to not call solver as intermediary
             // just call inv_reverse directly
-            T resModel = inputModel.inv_reverse(); // just calls reverse
+            Model_Acyclic_Inverse resModel = inputModel.inv_reverse(); // just calls reverse
             if (resModel == null) {
                 System.err.println("INVERSE REVERSE FAILED");
                 System.exit(1);

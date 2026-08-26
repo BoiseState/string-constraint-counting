@@ -8,17 +8,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import edu.boisestate.cs.automatonModel.A_Model_Inverse;
+import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 
 /**
  * @author Marlin Roberts
  *
  */
-public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
+public class SolutionSetInternal{
 
-	Map<Integer,T> solutions;
-	HashSet<T> sols;
-	T comp;
+	Map<Integer,Model_Acyclic_Inverse> solutions;
+	HashSet<Model_Acyclic_Inverse> sols;
+	Model_Acyclic_Inverse comp;
 	int ID;
 	
 	/**
@@ -31,7 +31,7 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 		
 		this.ID = ID;
 		sols = new HashSet<>();
-		solutions = new HashMap<Integer,T>();
+		solutions = new HashMap<Integer,Model_Acyclic_Inverse>();
 	}
 	
 	/**
@@ -39,15 +39,15 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 	 * @param incomingEdge - ID of incoming edge
 	 * @param solution - Automata example
 	 */
-	public void setSolution (Integer incomingEdge, T solution) {
+	public void setSolution (Integer incomingEdge, Model_Acyclic_Inverse solution) {
 		solutions.put(incomingEdge, solution);
 	}
 
-	public void addSolution(T solution) {
+	public void addSolution(Model_Acyclic_Inverse solution) {
 		sols.add(solution);
 	}
 
-	public void remSolution(T solution) {
+	public void remSolution(Model_Acyclic_Inverse solution) {
 		sols.remove(solution);
 	}
 
@@ -69,7 +69,7 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 	 * @param incomingEdge ID
 	 * @return Automata example for single incoming edge
 	 */
-	public T getSolution (Integer incomingEdge) {
+	public Model_Acyclic_Inverse getSolution (Integer incomingEdge) {
 
 		if (solutions.containsKey(incomingEdge)) {
 			return solutions.get(incomingEdge);
@@ -81,9 +81,9 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 	 * Gets intersection of solutions for all incoming edges
 	 * @return Automata example for all incoming edges
 	 */
-	public T getSolution () {
+	public Model_Acyclic_Inverse getSolution () {
 		
-		T firstSolution = null;
+		Model_Acyclic_Inverse firstSolution = null;
 		
 //		for (Integer ID: solutions.keySet()) {
 //			T thisSolution = solutions.get(ID);
@@ -96,7 +96,7 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 //			}
 //		}
 
-		for (T thisSolution: sols) {
+		for (Model_Acyclic_Inverse thisSolution: sols) {
 			if (thisSolution != null) {
 				if (firstSolution == null) {
 					firstSolution = thisSolution.clone();
@@ -109,7 +109,7 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 		return firstSolution;
 	}
 
-	public T getComp() {
+	public Model_Acyclic_Inverse getComp() {
 		return comp;
 	}
 	
@@ -138,7 +138,7 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 //			}
 //		}
 
-		T firstSolution = getSolution();
+		Model_Acyclic_Inverse firstSolution = getSolution();
 
 		if (firstSolution != null) {
 			if (firstSolution.isEmpty()) {
@@ -158,7 +158,7 @@ public class SolutionSetInternal<T extends A_Model_Inverse<T>>  {
 		StringBuilder output = new StringBuilder();
 		Formatter fm = new Formatter (output);
 		
-		T solution = this.getSolution();
+		Model_Acyclic_Inverse solution = this.getSolution();
 		
 		fm.format("\nINPUT:      [%d]\n", ID);
 		fm.format("EDGES:      [%d]\n", solutions.size());

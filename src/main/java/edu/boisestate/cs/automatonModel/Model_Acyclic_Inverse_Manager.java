@@ -9,18 +9,26 @@ import edu.boisestate.cs.Alphabet;
 //import java.math.BigInteger;
 //import java.util.Set;
 
-public class Model_Acyclic_Inverse_Manager extends A_Model_Manager <Model_Acyclic_Inverse> {
+public class Model_Acyclic_Inverse_Manager {
+
+    protected Alphabet alphabet;
+    protected int initialBoundLength;
 
     private final int boundLength;
-    
+
+    public Alphabet getAlphabet() {
+        return this.alphabet;
+    }
+
     /**
-     * 
+     *
      * @param alphabet
      * @param boundLength
      */
    public Model_Acyclic_Inverse_Manager(Alphabet alphabet, int boundLength) {
-           	
-       	super(alphabet,boundLength);
+
+       	this.alphabet = alphabet;
+       	this.initialBoundLength = boundLength;
         this.alphabet = alphabet;
         this.boundLength = boundLength;
 
@@ -33,12 +41,21 @@ public class Model_Acyclic_Inverse_Manager extends A_Model_Manager <Model_Acycli
 //                new Model_Acyclic_Manager(alphabet, initialBoundLength);
 //    }
 
-    @Override
+    /**
+     * Create a new symbolic string from 0 to up to a certain length
+     * @param initialBound the upper bound of the lenght (inlcusive)
+     * @return
+     */
     public Model_Acyclic_Inverse createAnyString(int initialBound) {
         return this.createAnyString(0, initialBound);
     }
 
-    @Override
+    /**
+     * Creates a symbolic string with length from min to max (both inclusive)
+     * @param min
+     * @param max
+     * @return
+     */
     public Model_Acyclic_Inverse createAnyString(int min, int max) {
 
         // create any string automaton from alphabet
@@ -52,7 +69,10 @@ public class Model_Acyclic_Inverse_Manager extends A_Model_Manager <Model_Acycli
         return new Model_Acyclic_Inverse(acyclicAutomaton, this.alphabet, this.boundLength);
     }
 
-    @Override
+    /**
+     * A string with no upper bound - for unbounded models
+     * @return
+     */
     public Model_Acyclic_Inverse createAnyString() {
 
         // create any string automaton from alphabet
@@ -63,7 +83,11 @@ public class Model_Acyclic_Inverse_Manager extends A_Model_Manager <Model_Acycli
         return new Model_Acyclic_Inverse(anyString, this.alphabet);
     }
 
-    @Override
+    /**
+     * Create a new automaton model from a concrete string
+     * @param string
+     * @return
+     */
     public Model_Acyclic_Inverse createString(String string) {
     	
     	// check for null string, set to empty. 
