@@ -40,6 +40,8 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.FileInputStream;
 import java.util.*;
 
 //import javax.swing.plaf.synth.SynthSeparatorUI;
@@ -67,6 +69,7 @@ public class SolveMain {
 
 		// Check if input is SMT2 file and convert if needed
 		String graphFilePath = settings.getGraphFilePath();
+    System.out.println("Input graph file: " + graphFilePath);
 		if (graphFilePath.endsWith(".smt2")) {
 			try {
 				graphFilePath = convertSmt2ToJson(graphFilePath);
@@ -77,6 +80,32 @@ public class SolveMain {
 				return;
 			}
 		}
+    if (graphFilePath.endsWith(".ser")) {
+      try { ObjectInputStream ois = new ObjectInputStream(new FileInputStream(graphFilePath));
+        AStrBenchmarkBundle bundle = (AStrBenchmarkBundle) ois.readObject();
+        ois.close();
+        InvDefaultDirectedGraph graph = bundle.graph;
+        String alphabetString = bundle.alphabetString;
+        printDebug("alpha:" + alphabetString);
+        StringBuilder alph = new StringBuilder();
+        for (int i = 0; i<alphabetString.length(); i++) {
+          char c = alphabetString.charAt(i);
+          alph.append(c);
+          alph.append(",");
+        }
+        alph.deleteCharAt(alph.length() - 1);
+
+        alpha = new Alphabet(alph.toString());
+        initialBound = bundle.bound;
+        reduce = true;
+        debug = settings.getDebug();
+        printDebug("Loaded Serialized Graph: alpha: " + alpha + ", bound: " + initialBound);
+        run_Acyclic_Inverse_r3(graph);
+        return;
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
 
 		inputFile = settings.getGraphFilePath();
 			
@@ -733,7 +762,7 @@ public class SolveMain {
 	    tempJson.deleteOnExit();
 
 	    String javaPath = System.getProperty("java.home") + "/bin/java";
-	    String jarPath = "lib/GenJSONs-1.0-SNAPSHOT-jar-with-dependencies.jar";
+	    String jarPath = "bin/lib/GenJSONs-1.0-SNAPSHOT-jar-with-dependencies.jar";
 
 	    ProcessBuilder pb = new ProcessBuilder(
 	        javaPath, "-cp", jarPath,

@@ -149,7 +149,7 @@ public class Model_Acyclic_Inverse extends A_Model_Inverse<Model_Acyclic_Inverse
 			return new Model_Acyclic_Inverse(result, this.alphabet, this.boundLength);
 		}
 		// otherwise construct own choice
-		Automaton temp = this.clone().automaton;
+		Automaton temp = containedModel.clone().automaton;
 		// TODO: fix to allow backtracking
 		temp.getInitialState().setAccept(false); // remove empty workaround :(
 		String example = temp.getShortestExample(true);
