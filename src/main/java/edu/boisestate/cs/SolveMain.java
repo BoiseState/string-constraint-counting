@@ -69,7 +69,6 @@ public class SolveMain {
 
 		// Check if input is SMT2 file and convert if needed
 		String graphFilePath = settings.getGraphFilePath();
-    System.out.println("Input graph file: " + graphFilePath);
 		if (graphFilePath.endsWith(".smt2")) {
 			try {
 				graphFilePath = convertSmt2ToJson(graphFilePath);
@@ -762,7 +761,7 @@ public class SolveMain {
 	    tempJson.deleteOnExit();
 
 	    String javaPath = System.getProperty("java.home") + "/bin/java";
-	    String jarPath = "bin/lib/GenJSONs-1.0-SNAPSHOT-jar-with-dependencies.jar";
+	    String jarPath = "lib/GenJSONs-1.0-SNAPSHOT-jar-with-dependencies.jar";
 
 	    ProcessBuilder pb = new ProcessBuilder(
 	        javaPath, "-cp", jarPath,
