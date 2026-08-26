@@ -1086,8 +1086,7 @@ public class Model_Acyclic_Inverse implements Cloneable {
 	public Model_Acyclic_Inverse intersect(Model_Acyclic_Inverse arg) {
 		//ensureAcyclicModel(arg);
 
-		// cast arg model
-		Model_Acyclic_Inverse argModel = (Model_Acyclic_Inverse) arg;
+		Model_Acyclic_Inverse argModel = arg;
 
 		// get intersection of automata
 		Automaton result = this.automaton.intersection(argModel.automaton);
