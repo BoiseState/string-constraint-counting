@@ -8,21 +8,19 @@ import edu.boisestate.cs.graph.*;
 //import edu.boisestate.cs.solvers.ExtendedSolver;
 import edu.boisestate.cs.solvers.Solver;
 
-import org.jgrapht.DirectedGraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
 
 import java.util.*;
 
 /**
- * 
- * @author 
  *
- * @param <Model_Acyclic_Inverse>
+ * @author
+ *
  */
 abstract public class A_Reporter {
     protected abstract SolutionSet getSolutionSet();
 
-    protected final DirectedGraph<PrintConstraint, SymbolicEdge> graph;
+    protected final InvDefaultDirectedGraph graph;
     protected final Parser_2 parser;
     protected final boolean debug;
     protected final Solver solver;
@@ -34,13 +32,13 @@ abstract public class A_Reporter {
 //    protected ArrayList<PrintConstraint> toProcess;
 //    protected Iterator<PrintConstraint> processIt;
     /**
-     * 
+     *
      * @param graph
      * @param parser
      * @param solver
      * @param debug
      */
-    protected A_Reporter (DirectedGraph<PrintConstraint, SymbolicEdge> 	graph,
+    protected A_Reporter (InvDefaultDirectedGraph 	graph,
                        	   	Parser_2 									parser,
                        	   	Solver 										solver,
                        	   	boolean 										debug) {

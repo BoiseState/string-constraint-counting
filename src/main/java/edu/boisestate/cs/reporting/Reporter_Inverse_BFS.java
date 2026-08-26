@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 
 import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.graph.*;
-import org.jgrapht.DirectedGraph;
 
 import edu.boisestate.cs.Parser_2;
 import edu.boisestate.cs.solvers.Solver_Inverse;
@@ -27,7 +26,7 @@ public class Reporter_Inverse_BFS extends A_Reporter {
     //private BufferedWriter out;
     private SolutionSet solutions;
 
-    public Reporter_Inverse_BFS(DirectedGraph<PrintConstraint, SymbolicEdge> graph, Parser_2 parser,
+    public Reporter_Inverse_BFS(InvDefaultDirectedGraph graph, Parser_2 parser,
                                 Solver_Inverse invSolver, boolean debug) {
         super(graph, parser, invSolver, debug);    // solver instance variable in A_Reporter available
         this.invSolver = invSolver;                // same solver as inverse solver
@@ -42,7 +41,7 @@ public class Reporter_Inverse_BFS extends A_Reporter {
             }
 
         }
-        this.solutions = new SolutionSet(((InvDefaultDirectedGraph) graph).getNumSymInputs());
+        this.solutions = new SolutionSet(graph.getNumSymInputs());
 //		// TODO Auto-generated constructor stub
 //		try {
 //			out = new BufferedWriter(new FileWriter("./temp/solutions.txt"));
@@ -442,13 +441,13 @@ public class Reporter_Inverse_BFS extends A_Reporter {
         printDebug("Solving using BFS");
         //create a queue of all dependent predicates
         // get covering set of predicates that will process all nodes and inputs
-        ArrayList<PrintConstraint> toProcess = ((InvDefaultDirectedGraph) graph).getNecessaryPredicates();
+        ArrayList<PrintConstraint> toProcess = graph.getNecessaryPredicates();
         for (PrintConstraint c : toProcess) {
             predicateIDs.add(c.getId());
         }
 
         printDebug(predicateIDs.toString());
-        InvDefaultDirectedGraph eGraph = (InvDefaultDirectedGraph) graph;
+        InvDefaultDirectedGraph eGraph = graph;
 
         TreeSet<Integer> qID = new TreeSet<Integer>();
         //predicateIDs have the last predicate is the current constraint predicate

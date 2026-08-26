@@ -4,8 +4,6 @@ import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.graph.*;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 
-import org.jgrapht.DirectedGraph;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,18 +11,16 @@ import java.util.Map;
 /**
  * Builds the transposed graph of inverse constraints (the ICG) from a forward
  * constraint graph.
- *
- * @param <Model_Acyclic_Inverse> - Automata model that implements inverse operations.
  */
-public class ICGBuilder{
+public class ICGBuilder {
 
-	private final DirectedGraph<PrintConstraint, SymbolicEdge> graph;
+	private final InvDefaultDirectedGraph graph;
 	private final Map<Integer, PrintConstraint> allConstraints;
 	private final Map<Integer, I_Inv_Constraint> allInverseConstraints;
 	private final Solver_Inverse invSolver;
 	private final boolean debug;
 
-	public ICGBuilder(DirectedGraph<PrintConstraint, SymbolicEdge> graph,
+	public ICGBuilder(InvDefaultDirectedGraph graph,
 					   Map<Integer, PrintConstraint> allConstraints,
 					   Map<Integer, I_Inv_Constraint> allInverseConstraints,
 					   Solver_Inverse invSolver,

@@ -102,7 +102,7 @@ public class SolveMain {
 			debug = settings.getDebug();
 			if (debug)printHeader(inputFile, initialBound, "Inverse", "Inverse", "Acyclic");
 			reduce = true;
-			InvDefaultDirectedGraph graph = (InvDefaultDirectedGraph) loadGraph(inputFile);
+			InvDefaultDirectedGraph graph = loadGraph(inputFile);
 			printDebug("==========================================" + "GRAPH STATS" + "==========================================");
 			printDebug("NUM CONSTRAINTS:\t" + graph.vertexSet().size());
 			printDebug("NUM PREDICATES:\t\t" + graph.getPredicates().size());
@@ -121,7 +121,7 @@ public class SolveMain {
 	/*
 	 * loadGraph for jsa and inverse solvers
 	 */
-	private static DirectedGraph<PrintConstraint, SymbolicEdge> loadGraph(String graphPath) {
+	private static InvDefaultDirectedGraph loadGraph(String graphPath) {
 		// initialize variables
 
 		// init null graph object
@@ -268,7 +268,7 @@ public class SolveMain {
 	/*
 	 * Run inverse solver
 	 */
-	private static void run_Acyclic_Inverse_r3(DirectedGraph<PrintConstraint, SymbolicEdge> graph) {
+	private static void run_Acyclic_Inverse_r3(InvDefaultDirectedGraph graph) {
 		Model_Acyclic_Inverse_Manager mFactory 					= new Model_Acyclic_Inverse_Manager(alpha, initialBound);
 		Solver_Inverse mSolver 		= new Solver_Inverse(mFactory,	initialBound);
 		Parser_2 mParser 				= new Parser_2(mSolver, debug);
