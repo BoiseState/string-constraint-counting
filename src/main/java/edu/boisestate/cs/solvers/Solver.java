@@ -1,16 +1,30 @@
 package edu.boisestate.cs.solvers;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.BasicTimer;
 import edu.boisestate.cs.automatonModel.*;
 import edu.boisestate.cs.util.Tuple;
 
-public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implements I_Solver<T> {
+public class Solver<T extends A_Model<T>> {
+
+	protected Map<Integer, String> concreteStringMap = new HashMap<>();
+	protected int initialBound = -1;
+	protected T last = null;
+	protected T lastArg = null;
+	protected int lastArgId = -1;
+	protected int lastId = -1;
+	protected Map<Integer, T> symbolicStringMap = new HashMap<>();
 
 	public final A_Model_Manager<T> modelManager;
 
+	public int getTempId() {
+		return -1;
+	}
+
 	public Solver(A_Model_Manager<T> modelManager) {
-		super();
 
 		// initialize factory from parameter
 		this.modelManager = modelManager;
@@ -18,18 +32,39 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 
 	public Solver(A_Model_Manager<T> modelManager,
 				  int initialBound) {
-		super(initialBound);
+
+		// initialize bound from parameter value
+		this.initialBound = initialBound;
 
 		// initialize factory from parameter
 		this.modelManager = modelManager;
 	}
 
-	@Override
+	/**
+	 * Checks if the parameter containsString a predicate method.
+	 *
+	 * @param string
+	 *         The name of the method to be checked.
+	 *
+	 * @return true if the parameter is a predicate.
+	 */
+	public static boolean containsBoolFunction(String string) {
+		String fName = string.split("!!")[0];
+		return fName.equals("equals") ||
+			   fName.equals("contains") ||
+			   fName.equals("contentEquals") ||
+			   fName.equals("endsWith") ||
+			   fName.equals("startsWith") ||
+			   fName.equals("equalsIgnoreCase") ||
+			   fName.equals("matches") ||
+			   fName.equals("isEmpty") ||
+			   fName.equals("regionMatches");
+	}
+
 	public T getModel(int id) {
 		return this.symbolicStringMap.get(id);
 	}
 
-	@Override
 	public void append(int id, int base, int arg, int start, int end) {
 
 		// get models
@@ -52,7 +87,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, baseModel);
 	}
 
-	@Override
 	public void append(int id, int base, int arg) {
 
 //    	System.out.println(id + " " + base + " " + arg);
@@ -75,7 +109,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, baseModel);
 	}
 
-	@Override
 	public void contains(boolean result, int base, int arg) {
 		// here we do a preliminary search if possible and sat test (null models causing Parser_2 to return false)
 
@@ -121,14 +154,12 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(arg, argModel);
 	}
 
-	@Override
 	public void deleteCharAt(int id, int base, int loc) {
 
 		// delegate to delete method with start and end based on loc
 		this.delete(id, base, loc, loc + 1);
 	}
 
-	@Override
 	public void delete(int id, int base, int start, int end) {
 
 		// get model
@@ -147,7 +178,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, baseModel);
 	}
 
-	@Override
 	public void endsWith(boolean result, int base, int arg) {
 
 		// get models
@@ -203,7 +233,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(arg, argModel);
 	}
 
-	@Override
 	public void equals(boolean result, int base, int arg) {
 
 		// get models
@@ -271,7 +300,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(arg, argModel);
 	}
 
-	@Override
 	public void equalsIgnoreCase(boolean result, int base, int arg) {
 
 		// get models
@@ -315,7 +343,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(arg, argModel);
 	}
 
-	@Override
 	public String getSatisfiableResult(int id) {
 
 		// get model
@@ -323,7 +350,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		return model.getAcceptedStringExample();
 	}
 
-	@Override
 	public void insert(int id, int base, int arg, int offset) {
 
 		// get models
@@ -343,7 +369,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, baseModel);
 	}
 
-	@Override
 	public void insert(int id,
 					   int base,
 					   int arg,
@@ -371,7 +396,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, baseModel);
 	}
 
-	@Override
 	public void isEmpty(boolean result, int base) {
 
 		// get model
@@ -405,7 +429,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(base, baseModel);
 	}
 
-	@Override
 	public boolean isSatisfiable(int id) {
 
 		// get model
@@ -415,7 +438,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		return !model.isEmpty();
 	}
 
-	@Override
 	public boolean isSingleton(int id, String actualValue) {
 
 		// get model
@@ -427,7 +449,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		return model.containsString(actualValue) && model.isSingleton();
 	}
 
-	@Override
 	public boolean isSingleton(int id) {
 		// System.out.println("singleton " + id);
 		// get model
@@ -437,7 +458,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		return model.isSingleton();
 	}
 
-	@Override
 	public boolean isSound(int id, String actualValue) {
 
 		// get model
@@ -469,7 +489,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 
 	}
 
-	@Override
 	public void newConcreteString(int id, String string) {
 		// start timer
 		BasicTimer.start();
@@ -490,7 +509,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.concreteStringMap.put(id, string);
 	}
 
-	@Override
 	public void newSymbolicString(int id) {
 		// start timer
 		BasicTimer.start();
@@ -506,7 +524,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, model);
 	}
 
-	@Override
 	public void propagateSymbolicString(int id, int base) {
 		// get model
 		T model = this.symbolicStringMap.get(base);
@@ -524,7 +541,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, clone);
 	}
 
-	@Override
 	public void replaceCharFindKnown(int id, int base, char find) {
 
 		// get model
@@ -544,7 +560,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 
 	}
 
-	@Override
 	public void replaceCharKnown(int id, int base, char find, char replace) {
 
 		// get model
@@ -563,7 +578,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 
 	}
 
-	@Override
 	public void replaceCharReplaceKnown(int id, int base, char replace) {
 
 		// get model
@@ -582,7 +596,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, baseModel);
 	}
 
-	@Override
 	public void replaceCharUnknown(int id, int base) {
 
 		// get model
@@ -602,7 +615,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 
 	}
 
-	@Override
 	public String replaceEscapes(String value) {
 
 		// all unicode characters supported
@@ -695,7 +707,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, baseModel);
 	}
 
-	@Override
 	public void replaceStrings(int id, int base, int argOne, int argTwo) {
 
 		// get models
@@ -716,7 +727,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, baseModel);
 	}
 
-	@Override
 	public void reverse(int id, int base) {
 
 		// get model
@@ -735,7 +745,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, baseModel);
 	}
 
-	@Override
 	public void setCharAt(int id, int base, int arg, int offset) {
 
 		// get models
@@ -755,7 +764,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, baseModel);
 	}
 
-	@Override
 	public void setLength(int id, int base, int length) {
 
 		// get model
@@ -774,12 +782,10 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, baseModel);
 	}
 
-	@Override
 	public void shutDown() {
 		// nothing needed
 	}
 
-	@Override
 	public void startsWith(boolean result, int base, int arg) {
 
 		// get models
@@ -834,7 +840,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(arg, argModel);
 	}
 
-	@Override
 	public void substring(int id, int base, int start) {
 
 		// get model
@@ -853,7 +858,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, baseModel);
 	}
 
-	@Override
 	public void substring(int id, int base, int start, int end) {
 
 		// get model
@@ -872,7 +876,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, baseModel);
 	}
 
-	@Override
 	public void toLowerCase(int id, int base) {
 
 		// get model
@@ -891,7 +894,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, baseModel);
 	}
 
-	@Override
 	public void toUpperCase(int id, int base) {
 
 		// get model
@@ -910,7 +912,6 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 		this.symbolicStringMap.put(id, baseModel);
 	}
 
-	@Override
 	public void trim(int id, int base) {
 
 		// get model
@@ -1001,5 +1002,84 @@ public class Solver<T extends A_Model<T>> extends A_Solver_Extended<T> implement
 			lenModel = lenModel.union(this.modelManager.createString(lenStr));
 		}
 		this.symbolicStringMap.put(id, lenModel);
+	}
+
+	/**
+	 * Used to get the value currently stored in the symbolic string map for the
+	 * given id.
+	 *
+	 * @param id
+	 *         id used to get the value to return.
+	 *
+	 * @return the symbolic string value represented by the id.
+	 */
+	public T getValue(int id) {
+		return symbolicStringMap.get(id);
+	}
+
+	/**
+	 * Used to check if the values involved are capable of being used in the
+	 * coming operations. For example, in EStranger, the time required to solve
+	 * constraints grows as more transitions appear in the automata.
+	 *
+	 * @param base
+	 *         representation of calling string
+	 * @param arg
+	 *         representation of argument string
+	 *
+	 * @return boolean value indicating if the symbolic values can be used in
+	 * the coming operations.
+	 */
+	public boolean isValidState(int base, int arg) {
+		return true;
+	}
+
+	/**
+	 * Remove a symbolic string that won't be used anymore.
+	 *
+	 * @param id
+	 *         represents string that won't be used anymore.
+	 */
+	public void remove(int id) {
+		if (symbolicStringMap != null && symbolicStringMap.containsKey(id)) {
+			symbolicStringMap.remove(id);
+		}
+	}
+
+	/**
+	 * Used to undo the last predicate applied. Useful for checking if the
+	 * branch is satisfiable without actually applying the predicate.
+	 */
+	public void revertLastPredicate() {
+		if (last == null) {
+			throw new IllegalStateException();
+		}
+		symbolicStringMap.put(lastId, last);
+		last = null;
+		lastId = -1;
+
+		if (lastArg != null) {
+			symbolicStringMap.put(lastArgId, lastArg);
+			lastArg = null;
+			lastArgId = -1;
+		}
+
+	}
+
+	/**
+	 * Sets the last base and argument for reverting the last predicate.
+	 *
+	 * @param base
+	 *         id of the current base.
+	 * @param arg
+	 *         id of the current arg
+	 */
+	public void setLast(int base, int arg) {
+		last = symbolicStringMap.get(base);
+		lastId = base;
+		if (arg > 0) {
+			lastArg = symbolicStringMap.get(arg);
+			lastArgId = arg;
+		}
 	}
 }

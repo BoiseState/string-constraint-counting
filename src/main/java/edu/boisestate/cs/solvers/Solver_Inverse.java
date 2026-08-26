@@ -13,7 +13,7 @@ import edu.boisestate.cs.util.Quadruple;
 import edu.boisestate.cs.util.Tuple;
 
 
-public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver_Count<T> implements I_Solver_Inverse<T>{
+public class Solver_Inverse<T extends A_Model_Inverse<T>> extends Solver<T> implements I_Solver_Inverse<T>{
 
    // protected final A_Model_Manager<T> modelManager;
 	
