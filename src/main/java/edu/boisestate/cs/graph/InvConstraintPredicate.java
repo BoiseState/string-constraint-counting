@@ -11,7 +11,6 @@ import dk.brics.automaton.BasicAutomata;
 import edu.boisestate.cs.automatonModel.A_Model;
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 //import edu.boisestate.cs.solvers.Solver_Inverse;
-import edu.boisestate.cs.automatonModel.AutomatonModel;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
 
