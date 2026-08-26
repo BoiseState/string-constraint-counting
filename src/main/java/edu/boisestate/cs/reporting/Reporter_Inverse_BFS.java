@@ -13,16 +13,36 @@ import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
 
-public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter_Inverse<T> {
+public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends A_Reporter<T> {
     //this class should also remember all previous constraints, it might be in
     //allConstraints
+
+    protected final Solver_Inverse<T> invSolver;
+    protected Map<Integer, PrintConstraint> allConstraints = new HashMap<>();
+    protected Map<Integer, I_Inv_Constraint<T>> allInverseConstraints = new HashMap<>();
+    protected List<Integer> predicateIDs = new ArrayList<>();
+
+    // prefix for output when running inside SPF
+    protected static String cid = "[IGEN] ";
 
     //private BufferedWriter out;
     private SolutionSet<T> solutions;
 
     public Reporter_Inverse_BFS(DirectedGraph<PrintConstraint, SymbolicEdge> graph, Parser_2<T> parser,
                                 Solver_Inverse<T> invSolver, boolean debug) {
-        super(graph, parser, invSolver, debug);
+        super(graph, parser, invSolver, debug);    // solver instance variable in A_Reporter available
+        this.invSolver = invSolver;                // same solver as inverse solver
+
+        // this saves the set of constraints as references so that we can use access them later
+        // while building the inverse constraints. There are some graphs that have inputs stored twice,
+        // once with outgoing edges and once with no incoming/outgoing edges. The conditional avoids
+        // adding references to the latter.
+        for (PrintConstraint p : graph.vertexSet()) {
+            if (!((graph.inDegreeOf(p) == 0) & (graph.outDegreeOf(p) == 0))) {
+                allConstraints.put(p.getId(), p);
+            }
+
+        }
         this.solutions = new SolutionSet<T>(((InvDefaultDirectedGraph) graph).getNumSymInputs());
 //		// TODO Auto-generated constructor stub
 //		try {
@@ -31,6 +51,373 @@ public class Reporter_Inverse_BFS<T extends A_Model_Inverse<T>> extends Reporter
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
+    }
+
+    /*
+     * called when forward analysis reaches predicate, computes stats and inputs
+     */
+    @Override
+    protected void calculateStats(PrintConstraint constraint) { // nps: constraint isn't actually used. backprop is all handled in BFS subclass
+
+        // get constraint info as variables
+//        Map<String, Integer> sourceMap = constraint.getSourceMap();
+//        StringBuilder stats = new StringBuilder();
+//        String actualVal = constraint.getActualVal();
+//        int base = sourceMap.get("t");
+//        long tTime, fTime, inMCTime, tMCTime, fMCTime = 0;
+
+        // get id of second symbolic string if it exists
+//        int arg = -1;
+//        if (sourceMap.get("s1") != null) {
+//            arg = sourceMap.get("s1");
+//        }
+
+        // initialize boolean flags
+//        boolean isSingleton = false;
+//        boolean trueSat = false;
+//        boolean falseSat = false;
+
+        // determine if symbolic strings are singletons
+//        boolean argIsSingleton = false;
+//        if(arg != -1) {
+//        	argIsSingleton = solver.isSingleton(sourceMap.get("s1"));
+//        }
+//        if (solver.isSingleton(base, actualVal) &&
+//            (sourceMap.get("s1") == null || argIsSingleton)) {
+//            isSingleton = true;
+//        }
+
+//        long initialCount = this.invSolver.getModelCount(base);
+//        inMCTime = BasicTimer.getRunTime();
+
+        // store symbolic string values
+//        solver.setLast(base, arg);
+
+        // test if true branch is SAT
+//        parser.assertBooleanConstraint(true, constraint);
+//        tTime = BasicTimer.getRunTime();
+//        if (solver.isSatisfiable(base)) {
+//            trueSat = true;
+//        }
+
+//        long trueModelCount = this.invSolver.getModelCount(base);
+//        tMCTime = BasicTimer.getRunTime();
+
+        // revert symbolic string values
+//        solver.revertLastPredicate();
+
+        // store symbolic string values
+//        solver.setLast(base, arg);
+
+        // test if false branch is SAT
+//        parser.assertBooleanConstraint(false, constraint);
+//        fTime = BasicTimer.getRunTime();
+//        if (solver.isSatisfiable(base)) {
+//            falseSat = true;
+//        }
+
+//        long falseModelCount = this.invSolver.getModelCount(base);
+//        fMCTime = BasicTimer.getRunTime();
+
+        // revert symbolic string values
+//        solver.revertLastPredicate();
+
+        // if actual execution did not produce either true or false
+//        if (!actualVal.equals("true") && !actualVal.equals("false")) {
+//            System.err.println("warning constraint detected without true/false value");
+//            return;
+//        }
+
+        // determine result of actual execution
+//        boolean result = true;
+//        if (actualVal.equals("false")) {
+//            result = false;
+//        }
+
+        // branches disjoint?
+//        parser.assertBooleanConstraint(result, constraint);
+
+
+        // update accumulated timer for base
+//        long prevTime = 0;
+//        if (timerMap.containsKey(base)) {
+//            prevTime = timerMap.get(base);
+//        }
+//        long lastTime = BasicTimer.getRunTime();
+//        timerMap.put(base, lastTime + prevTime);
+
+        // update accumulated timer for arg
+//        prevTime = 0;
+//        if (timerMap.containsKey(arg)) {
+//            prevTime = timerMap.get(arg);
+//        }
+//        timerMap.put(arg, lastTime + prevTime);
+
+
+        // store symbolic string values
+//        solver.setLast(base, arg);
+
+//        parser.assertBooleanConstraint(!result, constraint);
+
+        // set yes or no for disjoint branches
+//        String disjoint = "yes";
+//        if (solver.isSatisfiable(base)) {
+//            disjoint = "no";
+//        }
+
+        // set yes or no for disjoint branches
+//        long overlap = this.invSolver.getModelCount(base);
+
+        // revert symbolic string values
+//        solver.revertLastPredicate();
+
+        // get accumulated time
+//        long accTime = 0;
+//        if (timerMap.containsKey(base)) {
+//            accTime = timerMap.get(base);
+//        }
+
+        // get constraint function name
+//        String constName = constraint.getSplitValue().split("!!")[0];
+
+        // add boolean operation to operation list
+//        addBooleanOperation(base, arg, constName, constraint.getId(), argIsSingleton);
+
+        // get operations
+//        String[] opsArray = this.operationsMap.get(base);
+//        String ops = joinStrings(Arrays.asList(opsArray), "\t -> \t");
+//
+//        // gather column data in list
+//        List<String> columns = new ArrayList<>();
+//        // id
+//        columns.add(String.valueOf(constraint.getId()));
+//        // actual value
+//        columns.add(String.format("%s", constraint.getActualVal()));
+//        // is singleton?
+//        columns.add(String.valueOf(isSingleton));
+//        // true sat?
+//        columns.add(String.valueOf(trueSat));
+//        // false sat?
+//        columns.add(String.valueOf(falseSat));
+//        // disjoint?
+//        columns.add(String.format(disjoint));
+//        // id of initial model
+//        columns.add(String.valueOf(base));
+//        // initial model count
+////        columns.add(String.valueOf(initialCount));
+//        // true model count
+////        columns.add(String.valueOf(trueModelCount));
+//        // false model count
+////        columns.add(String.valueOf(falseModelCount));
+//        // overlap count
+////        columns.add(String.valueOf(overlap));
+//        // previous operations
+//        columns.add(ops);
+//
+//        // generate row string
+//        String row = joinStrings(columns, "\t");
+//
+//        // output row
+//        printDebug(cid + row);
+
+        // --------------------------------------------------------------------------------------------
+        // The process for solving the inputs needed to reach the current predicate location starts here.
+        // --------------------------------------------------------------------------------------------
+
+        // initialize our copy of the symbolic string map as it is right now
+        //invSolver.initStringMap();
+        //invSolver.initStringMapAccum();
+        // we will rebuild all constraints, since this is a new path
+//        allInverseConstraints.clear();
+
+        // clear previous input solutions
+        //inputSolutions.clear();
+
+        // save this predicate ID so we can grab the new inverse constraint
+        // from the allInverseConstraints container later
+//        int predID = constraint.getId();
+
+//        predicateIDs.add(predID);
+
+        // this stops any backprop from happening until forward prop has finished
+        // also currently only works on a necessary subset though the soundness should be confirmed
+        // ------------------------ Traversal Optimization?
+//		if (!toProcess.contains(constraint)){
+////			printDebug("SKIPPING PROCESSING PREDICATE " + predID);
+//			return;
+//		}
+        // ------------------------
+//        processIt.remove();
+
+        new ICGBuilder<T>(graph, allConstraints, allInverseConstraints, invSolver, debug).build();
+        // build the transposed graph of inverse constraints
+//        if (build) {
+////            buildICG_r3();
+//            solutions = new SolutionSet<>(((InvDefaultDirectedGraph) graph).getNumSymInputs());
+//            build = false; // only building once and keeping the inverse constaints from before, which may be wrong
+//        }
+
+        if (debug) {
+            for (I_Inv_Constraint<T> con : allInverseConstraints.values()) {
+                con.setDebug(true);
+            }
+        }
+
+        solveInputs();
+
+        // output finalized inverse constraints for debug
+//        if (true) {
+//        	System.out.println(cid);
+//        	System.out.println(cid + "Inverse Constraint Set:");
+//        	for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
+//        		System.out.println(cid + c.toString() + "\t" + allConstraints.get(c.getID()).toString());
+//        	}
+//        	System.out.println(cid);
+//        }
+
+        // get a reference to the predicate inverse constraint
+        // I_Inv_Constraint<T> predicate = allInverseConstraints.get(predicateID);
+
+        // ********************************
+        // The call that starts it all ....
+        //predicate.evaluate(null, 0);
+        // ********************************
+
+        // check for SAT here ...
+
+        // TODO: consolidate solutions from inside sink nodes into a example set
+        // then either output solutions or write them to a file
+        // THIS CODE DOES NOT CURRENTLY DO ANYTHING ....
+
+        // indicate if output going to file ..
+//        if (solutionFile != "") {
+//        	printDebug(cid + "Outputting to example file: " + solutionFile);
+//
+//        	// Code to output json example file here ...
+//        	// A set of SPF inputs
+//        	SPFInputSet SPFInputs = new SPFInputSet();
+//
+//        	// set this to reporter SAT ...
+//        	SPFInputs.SAT = true;
+//
+//        	// for every solutionset, get possible strings, select one, add it to SPFInputSet
+////        	for (SolutionSet<T> ss : inputSolutions.values()) {
+////        		SPFInput SPFInput = new SPFInput();
+////        		SPFInput.ID = ss.getID();
+////        		SPFInput.input = ss.getSolution().getShortestExampleString();
+////        		SPFInputs.inputSet.add(SPFInput);
+////            }
+//
+//        	for (Integer i : inputSolution.keySet()) {
+//        		SPFInput SPFInput = new SPFInput();
+//        		SPFInput.ID = i;
+//        		SPFInput.input = inputSolution.get(i).getShortestExampleString();
+//        		SPFInputs.inputSet.add(SPFInput);
+//        	}
+//
+//        	ObjectMapper mapper = new ObjectMapper();
+//        	mapper.enable(SerializationFeature.INDENT_OUTPUT);
+//
+//        	try {
+//        		mapper.writeValue(new File(solutionFile), SPFInputs);
+//        	} catch (JsonGenerationException e1) {
+//        		System.err.println(cid + "Error Generating JSON ...");
+//        	} catch (JsonMappingException e1) {
+//        		System.err.println(cid + "Error Mapping JSON ...");
+//        	} catch (IOException e1) {
+//        		System.err.println(cid + "Error Writing JSON File ...");
+//        		// return false;
+//        	}
+//
+//        }
+
+        // output all input solutions
+
+//        for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
+//            if (c.getOp() == Operation.INIT_SYM) {
+//                if (c.getSolution() == null) {
+//                    System.out.println("\nFAILURE: Failed to get example to one or more inputs...");
+//                    System.out.println("\nSOLUTION TIME ms: 0");
+//                    return;
+//                } else {
+//
+//                }
+//            }
+//        }
+
+        // ------------------------------------------------------------------------------------
+        // The input example process stops here.
+        // ------------------------------------------------------------------------------------
+
+
+//        if (toProcess.isEmpty()) {
+//            printDebug("DONE PROCESSING\n");
+//            printDebug(solutions.toString());
+//            System.out.println(solutions.getSolutions());
+//        }
+
+//        if (debug) { //printing of solutions done each iteration just print unsat/sat
+//            if (toProcess.isEmpty()) {//processing is done
+//                System.out.println("DONE PROCESSING\n");
+//                if (inputSolution.size() != ((InvDefaultDirectedGraph) graph).getNumSymInputs()) {
+//                    System.out.println("error in solutions set");
+//                    System.out.println("expected: " + ((InvDefaultDirectedGraph) graph).getNumSymInputs());
+//                    System.out.println("actual: " + inputSolution.size());
+//                    for (Integer id : inputSolution.keySet()) {
+//                        System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
+//                    }
+//                    System.out.println("unsat");
+//                } else {
+//                    System.out.println("sat,");
+//                    for (Integer id : inputSolution.keySet()) {
+//                        System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
+//                    }
+//                }
+//            }
+//        } else {
+//            if (toProcess.isEmpty()) { //done
+//                if (inputSolution.size() != ((InvDefaultDirectedGraph) graph).getNumSymInputs())
+//                    System.out.println("unsat");
+//                else {
+//                    System.out.println("sat,");
+//                    for (Integer id : inputSolution.keySet()) {
+//                        System.out.println(id + ": \"" + inputSolution.get(id).getShortestExampleString() + "\"");
+//                    }
+////					for (I_Inv_Constraint<T> c : allInverseConstraints.values()) {
+////						if (c.getOp() == Operation.INIT_SYM){
+////							System.out.println(c.getID() + ": \"" + c.output(0).getShortestExampleString() + "\"");
+////                        }
+////                    }
+//                }
+//            }
+//        }
+
+
+    }
+
+    @Override
+    protected void outputHeader() {
+
+        // gather headers in list
+        List<String> headers = new ArrayList<>();
+        headers.add("ID");
+        headers.add("ACT");
+        headers.add("SING");
+        headers.add("TSAT");
+        headers.add("FSAT");
+        headers.add("DSJ");
+        headers.add("IN ID");
+        headers.add("IN CT");
+        headers.add("T CT");
+        headers.add("F CT");
+        headers.add("OLP");
+        headers.add("PRE");
+
+        // generate headers string
+        String header = joinStrings(headers, "\t");
+
+        // output header
+        printDebug(cid + header);
     }
 
     @Override

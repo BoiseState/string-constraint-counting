@@ -16,7 +16,6 @@ import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse_Manager;
 import edu.boisestate.cs.graph.InvDefaultDirectedGraph;
 import edu.boisestate.cs.graph.PrintConstraint;
 import edu.boisestate.cs.graph.SymbolicEdge;
-import edu.boisestate.cs.reporting.Reporter_Inverse;
 import edu.boisestate.cs.reporting.Reporter_Inverse_BFS;
 import edu.boisestate.cs.solvers.*;
 import org.jgrapht.DirectedGraph;
@@ -273,7 +272,7 @@ public class SolveMain {
 		Model_Acyclic_Inverse_Manager mFactory 					= new Model_Acyclic_Inverse_Manager(alpha, initialBound);
 		Solver_Inverse<Model_Acyclic_Inverse> mSolver 		= new Solver_Inverse<Model_Acyclic_Inverse>(mFactory,	initialBound);
 		Parser_2<Model_Acyclic_Inverse> mParser 				= new Parser_2<Model_Acyclic_Inverse>(mSolver, debug);
-		Reporter_Inverse<Model_Acyclic_Inverse> mReporter 	= new Reporter_Inverse_BFS<Model_Acyclic_Inverse>(graph, mParser, mSolver, debug); //new Reporter_Inverse<Model_Acyclic_Inverse>(graph, mParser, mSolver, debug);
+		Reporter_Inverse_BFS<Model_Acyclic_Inverse> mReporter 	= new Reporter_Inverse_BFS<Model_Acyclic_Inverse>(graph, mParser, mSolver, debug); //new Reporter_Inverse<Model_Acyclic_Inverse>(graph, mParser, mSolver, debug);
 		////Reporter_Inverse<Model_Acyclic_Inverse> mReporter 	= new Reporter_Inverse<Model_Acyclic_Inverse>(graph, mParser, mSolver, debug);
 		mSolver.setReduce(reduce);
 		mReporter.run();
