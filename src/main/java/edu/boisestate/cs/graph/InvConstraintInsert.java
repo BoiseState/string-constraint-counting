@@ -8,7 +8,6 @@ import java.util.List;
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 import edu.boisestate.cs.solvers.*;
 import edu.boisestate.cs.util.Quadruple;
-import edu.boisestate.cs.util.Triple;
 import edu.boisestate.cs.util.Tuple;
 
 /**
