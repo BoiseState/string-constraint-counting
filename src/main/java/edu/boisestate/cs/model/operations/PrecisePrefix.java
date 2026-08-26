@@ -1,7 +1,7 @@
 /**
  * An extended EJSA operation for a more precise prefix operation.
  */
-package edu.boisestate.cs.automatonModel.operations;
+package edu.boisestate.cs.model.operations;
 
 import dk.brics.automaton.*;
 import dk.brics.string.charset.CharSet;

@@ -1,14 +1,13 @@
-package edu.boisestate.cs.automatonModel;
+package edu.boisestate.cs.model;
 
 import dk.brics.automaton.*;
 import dk.brics.string.stringoperations.*;
 import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.MinMaxPair;
-import edu.boisestate.cs.automaton.AutomatonHelper;
 
-import static edu.boisestate.cs.automaton.AutomatonHelper.LogicalTransition;
+import static edu.boisestate.cs.model.AutomatonHelper.LogicalTransition;
 
-import edu.boisestate.cs.automatonModel.operations.*;
+import edu.boisestate.cs.model.operations.*;
 import edu.boisestate.cs.util.Quadruple;
 import edu.boisestate.cs.util.Tuple;
 

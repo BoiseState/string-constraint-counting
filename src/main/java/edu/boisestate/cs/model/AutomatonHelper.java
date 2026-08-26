@@ -1,4 +1,4 @@
-package edu.boisestate.cs.automaton;
+package edu.boisestate.cs.model;
 
 import dk.brics.automaton.State;
 import dk.brics.automaton.Transition;

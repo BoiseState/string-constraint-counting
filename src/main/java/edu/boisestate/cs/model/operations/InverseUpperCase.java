@@ -2,7 +2,7 @@
  * InverseLowerString.java
  * Mar 17, 2020
  */
-package edu.boisestate.cs.automatonModel.operations;
+package edu.boisestate.cs.model.operations;
 
 //package dk.brics.string.stringoperations;
 
@@ -16,22 +16,20 @@ import java.util.ArrayList;
 import java.util.Set;
 
 /**
- * Automaton operation for {@link String#replace(char, char)}.
+ * Automaton operation for {@link String#toUpperCase()}.
  */
-public class InverseReplaceCC extends UnaryOperation {
-	char c, d;
+public class InverseUpperCase extends UnaryOperation {
+
     /**
      * Constructs new operation object.
      */
-    public InverseReplaceCC(char c, char d) {
-        this.c = c;
-        this.d = d;
+    public InverseUpperCase() {
     }
 
     /**
      * Automaton operation.
-     * Constructs new automaton as copy of <tt>a</tt> where all <tt>c</tt> transitions are
-     * replaced by <tt>d</tt> transitions.
+     * Constructs new automaton as copy of <tt>a</tt> where all characters in all transitions are
+     * converted to lower case, except that Sigma transitions are left unchanged.
      *
      * @param a input automaton
      * @return resulting automaton
@@ -45,14 +43,10 @@ public class InverseReplaceCC extends UnaryOperation {
                 char min = t.getMin();
                 char max = t.getMax();
                 State dest = t.getDest();
-                if (min <= d && d <= max) {
-                   //transitions.remove(t);
-                    transitions.add(new Transition(c, dest));
-                    if (min < d) {
-                        transitions.add(new Transition(min, (char) (d - 1), dest));
-                    }
-                    if (d < max) {
-                        transitions.add(new Transition((char) (d + 1), max, dest));
+                if (min != Character.MIN_VALUE || max != Character.MAX_VALUE) {
+                    //transitions.remove(t);
+                    for (int c = min; c <= max; c++) {
+                        transitions.add(new Transition(Character.toLowerCase((char) c), dest));
                     }
                 }
             }
@@ -65,36 +59,27 @@ public class InverseReplaceCC extends UnaryOperation {
 
     @Override
     public String toString() {
-        return "InverseReplaceCC[" + c + "," + d + "]";
+        return "toLowerCase";
     }
 
     @Override
     public int getPriority() {
-        return 3;
+        return 2;
     }
 
     @Override
     public CharSet charsetTransfer(CharSet a) {
-        if (a.contains(c)) {
-            return a.remove(c).add(d);
-        } else {
-            return a;
-        }
+        return a.toLowerCase();
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode() + c + d;
+        return getClass().hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof InverseReplaceCC) {
-        	InverseReplaceCC o = (InverseReplaceCC) obj;
-            return c == o.c && d == o.d;
-        } else {
-            return false;
-        }
+        return obj instanceof ToLowerCase;
     }
 }
 

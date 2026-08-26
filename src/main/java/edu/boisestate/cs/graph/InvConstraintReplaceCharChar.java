@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import dk.brics.automaton.BasicAutomata;
-import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
+import edu.boisestate.cs.model.Model_Acyclic_Inverse;
 import edu.boisestate.cs.solvers.*;
 import edu.boisestate.cs.util.Tuple;
 

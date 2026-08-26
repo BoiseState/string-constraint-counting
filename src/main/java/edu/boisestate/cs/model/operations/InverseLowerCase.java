@@ -2,7 +2,7 @@
  * InverseLowerString.java
  * Mar 17, 2020
  */
-package edu.boisestate.cs.automatonModel.operations;
+package edu.boisestate.cs.model.operations;
 
 //package dk.brics.string.stringoperations;
 

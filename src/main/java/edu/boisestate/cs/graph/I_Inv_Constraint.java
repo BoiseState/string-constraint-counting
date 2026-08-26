@@ -2,7 +2,7 @@ package edu.boisestate.cs.graph;
 
 import java.util.Set;
 
-import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
+import edu.boisestate.cs.model.Model_Acyclic_Inverse;
 import edu.boisestate.cs.util.Tuple;
 //import edu.boisestate.cs.solvers.*;
 

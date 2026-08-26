@@ -11,8 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.boisestate.cs.Settings.ReportType;
 import edu.boisestate.cs.Settings.SolverType;
-import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
-import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse_Manager;
+import edu.boisestate.cs.model.Model_Acyclic_Inverse;
+import edu.boisestate.cs.model.Model_Acyclic_Inverse_Manager;
 import edu.boisestate.cs.graph.InvDefaultDirectedGraph;
 import edu.boisestate.cs.graph.PrintConstraint;
 import edu.boisestate.cs.graph.SymbolicEdge;

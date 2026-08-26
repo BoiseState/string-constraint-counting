@@ -5,7 +5,7 @@ import java.util.Map;
 
 import edu.boisestate.cs.Alphabet;
 import edu.boisestate.cs.BasicTimer;
-import edu.boisestate.cs.automatonModel.*;
+import edu.boisestate.cs.model.*;
 import edu.boisestate.cs.util.Tuple;
 
 public class Solver{

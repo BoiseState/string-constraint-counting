@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
+import edu.boisestate.cs.model.Model_Acyclic_Inverse;
 import edu.boisestate.cs.graph.*;
 
 import edu.boisestate.cs.Parser_2;

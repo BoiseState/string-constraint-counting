@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
+import edu.boisestate.cs.model.Model_Acyclic_Inverse;
 import edu.boisestate.cs.solvers.*;
 
 /**

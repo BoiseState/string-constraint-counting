@@ -1,10 +1,10 @@
-package edu.boisestate.cs.automatonModel;
+package edu.boisestate.cs.model;
 
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.BasicAutomata;
 //import dk.brics.string.stringoperations.*;
 import edu.boisestate.cs.Alphabet;
-//import edu.boisestate.cs.automatonModel.operations.*;
+//import edu.boisestate.cs.model.operations.*;
 
 //import java.math.BigInteger;
 //import java.util.Set;

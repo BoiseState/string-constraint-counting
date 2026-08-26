@@ -3,7 +3,7 @@ package edu.boisestate.cs.reporting;
 import edu.boisestate.cs.BasicTimer;
 import edu.boisestate.cs.Parser_2;
 import edu.boisestate.cs.Settings;
-import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
+import edu.boisestate.cs.model.Model_Acyclic_Inverse;
 import edu.boisestate.cs.graph.*;
 //import edu.boisestate.cs.solvers.ExtendedSolver;
 import edu.boisestate.cs.solvers.Solver;

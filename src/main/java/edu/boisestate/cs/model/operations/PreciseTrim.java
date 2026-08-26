@@ -1,4 +1,4 @@
-package edu.boisestate.cs.automatonModel.operations;
+package edu.boisestate.cs.model.operations;
 
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.State;

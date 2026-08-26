@@ -1,6 +1,6 @@
 package edu.boisestate.cs.graph;
 
-import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
+import edu.boisestate.cs.model.Model_Acyclic_Inverse;
 import edu.boisestate.cs.solvers.Solver_Inverse;
 import edu.boisestate.cs.util.Tuple;
 
