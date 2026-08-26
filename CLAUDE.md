@@ -28,26 +28,24 @@ the jar and copies it into a sibling `../SPF/jpf-symbc/lib/MAS.jar` for use by a
 ## Running
 
 ```bash
-./run <graph-file> [debug-flag]
+./run <graph-file> [length] [-d]
 ```
 
-`run` invokes the jar directly with `-s inverse -v 2 -l 2`. Main entry point is
+`run` invokes the jar directly (default length bound 2). Main entry point is
 `edu.boisestate.cs.SolveMain`.
 
 CLI (see `SolveMain -h` / `CommandLine.java`):
 
 ```
-java edu.boisestate.cs.SolveMain <graph-file> [-d] [-l <length>] [-s inverse]
+java edu.boisestate.cs.SolveMain <graph-file> [-d] [-l <length>]
 ```
 
-- `-s inverse` is effectively required for `.json`/`.smt2` input: `Settings` still defaults
-  the solver type to the removed JSA mode, and `SolveMain` only acts on `INVERSE`, so
-  omitting the flag silently does nothing. `-v`/`-r` are still parsed but ignored.
-- `-l` sets the initial length bound for symbolic inputs; `-d` enables debug output.
+- `-l` sets the initial length bound for symbolic inputs (default 15); `-d` enables debug
+  output. The inverse solver is the only mode — there is no solver/reporter selection.
 - Input can be `.json`, `.smt2` (auto-converted to `.json` by shelling out to the bundled
   `GenJSONs` jar), or `.ser` (a serialized `AStrBenchmarkBundle` — pre-built graph, alphabet
-  string, and bound — which bypasses `loadGraph`, ignores `-s`, and runs the inverse solver
-  directly; used for benchmark reproduction).
+  string, and bound — which bypasses `loadGraph` and `-l`, and is used for benchmark
+  reproduction).
 
 `runLengths.sh` retries the inverse solver at increasing `-l` bound until it gets a `sat`
 result (gives up after length 15). Benchmark suites live in `graphs/`.

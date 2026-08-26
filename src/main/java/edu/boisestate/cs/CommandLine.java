@@ -77,78 +77,6 @@ class CommandLine {
             settings.setInitialBoundingLength(boundingLength);
         }
 
-        // process automaton model version option
-        if (commandLine.hasOption("v")) {
-
-            // set initial bounding length from option value
-            String optionValue = commandLine.getOptionValue("v");
-            int version = Integer.parseInt(optionValue);
-            settings.setAutomatonModelVersion(version);
-        }
-
-        // process solver option
-        if (commandLine.hasOption("s")) {
-
-            // get solver choice from option value
-            String optionValue = commandLine.getOptionValue("s");
-            String choice = optionValue.toLowerCase();
-            if (choice.equals("blank")) {
-                settings.setSolverType(Settings.SolverType.BLANK);
-            } else if (choice.equals("concrete")) {
-                settings.setSolverType(Settings.SolverType.CONCRETE);
-            } else if (choice.equals("jsa")) {
-                settings.setSolverType(Settings.SolverType.JSA);
-            } else if (choice.equals("inverse")) { 
-               	settings.setSolverType(Settings.SolverType.INVERSE);
-            } else {
-                String errorMessage = String.format(
-                        "The specified solver \"%s\" is not a recognized " +
-                        "string constraint solver, please use the -h or " +
-                        "--help option to see the valid solvers",
-                        choice);
-                System.err.println(errorMessage);
-                return null;
-            }
-
-//            if (commandLine.hasOption("o")) {
-//                settings.setOld();
-//            }
-        }
-        
-        if (commandLine.hasOption("v")) {
-        	if (settings.getAutomatonModelVersion() > 3 || settings.getAutomatonModelVersion() < 1) {
-                String errorMessage = String.format(
-                        "The specified automata type is invalid " +
-                        "Please use the -h or --help option to see " +
-                        "the valid types");
-                System.err.println(errorMessage);
-                return null;
-        	}
-        }
-
-        // process reporter option
-        if (commandLine.hasOption("r")) {
-
-            // get reporter choice from option value
-            String optionValue = commandLine.getOptionValue("r");
-            String choice = optionValue.toLowerCase();
-
-            if (choice.equals("sat")) {
-                settings.setReportType(Settings.ReportType.SAT);
-            } else if (choice.equals("model-count")) {
-                settings.setReportType(Settings.ReportType.MODEL_COUNT);
-            } else {
-
-                String errorMessage = String.format(
-                        "The specified reporter \"%s\" is not a recognized " +
-                        "reporter, please use the -h or --help option to see " +
-                        "the valid reporters",
-                        choice);
-                System.err.println(errorMessage);
-                return null;
-            }
-        }
-
         // return updated settings object
         return settings;
     }
@@ -170,48 +98,30 @@ class CommandLine {
         StringBuilder header = new StringBuilder();
 
         // description
-        header.append("\nRun string constraint solver on specified control")
-              .append(" flow graph. The default string constraint solver ")
-              .append("is ")
-              .append(Settings.SolverType.DEFAULT)
-              .append(". The default reporter is ")
-              .append(Settings.ReportType.DEFAULT);
+        header.append("\nRun the inverse string constraint solver on the")
+              .append(" specified constraint graph, generating concrete")
+              .append(" satisfying input assignments.");
 
         // section header for options
-        header.append(".\n\nOPTIONS:\n\n");
+        header.append("\n\nOPTIONS:\n\n");
 
         StringBuilder footer = new StringBuilder();
 
         // section header for example usage
         footer.append("\n\nUSAGE EXAMPLES:");
 
-        // first example
+        // example
         footer.append("\n\n")
               .append(padding(4))
               .append(appClass)
               .append(" <PROJECT_ROOT>/graphs/iText02.json")
               .append("\n")
               .append(padding(8))
-              .append("-s jsa -r sat -v 1 -l 10");
+              .append("-l 10 -d");
 
-        // first example explanation
-        footer.append("\n\nRun sat reporter for the iText02.json constraint")
-              .append(" graph file using the JSA solver with bounded")
-              .append(" automata and an initial bounding length of 10.");
-
-        // second example
-        footer.append("\n\n")
-              .append(padding(4))
-              .append(appClass)
-              .append(" <PROJECT_ROOT>/graphs/iText02.json")
-              .append("\n")
-              .append(padding(8))
-              .append("-s concrete -r model-count -l 10");
-
-        // second example explanation
-        footer.append("\n\nRun model count reporter for the iText02.json")
-              .append(" constraint graph file using the Concrete solver with")
-              .append(" an initial bounding length of 10.");
+        // example explanation
+        footer.append("\n\nSolve the iText02.json constraint graph with an")
+              .append(" initial bounding length of 10 and debug output.");
 
         // section header for additional information
         footer.append("\n\nADDITIONAL INFORMATION:");
@@ -242,56 +152,6 @@ class CommandLine {
 
     private static Options createOptions() {
 
-        // solver option
-        Option solver = Option.builder("s")
-                              .longOpt("solver")
-                              .desc("The solver that will be used to solve " +
-                                    "string constraints:\n\n" +
-                                    Settings.SolverType.BLANK +
-                                    " - The blank solver used for testing" +
-                                    ".\n" +
-                                    Settings.SolverType.CONCRETE +
-                                    " - The concrete solver which provides an" +
-                                    " oracle for other solvers.\n" +
-                                    Settings.SolverType.JSA +
-                                    " - The Java String Analyzer solver which" +
-                                    " comes from the dk.brics automaton and " +
-                                    "string libraries.\n" + 
-                                    Settings.SolverType.INVERSE +
-                                    " - Input generation solver. Reporter and" +
-                                    " automata types are ignored with this solver.\n" +
-                                    " \nThe default solver is " +
-                                    Settings.SolverType.DEFAULT +
-                                    "\n")
-                              .hasArg()
-                              .numberOfArgs(1)
-                              .argName("solver")
-                              .build();
-
-        // reporter option
-        Option reporter = Option.builder("r")
-                                .longOpt("reporter")
-                                .desc("The reporter used to gather " +
-                                      "information for each string constraint" +
-                                      ":\n" +
-                                      Settings.ReportType.SAT +
-                                      " - Reports on the satisfiability of " +
-                                      "each string constraint in the " +
-                                      "specified graph\n" +
-                                      Settings.ReportType.MODEL_COUNT +
-                                      " - Reports on the number and percent " +
-                                      "of" +
-                                      " string instances for each branch " +
-                                      "leaving the string constraint, " +
-                                      "includes satisfiability.\n\nThe " +
-                                      "default reporter is " +
-                                      Settings.ReportType.DEFAULT +
-                                      "\n")
-                                .hasArg()
-                                .numberOfArgs(1)
-                                .argName("reporter")
-                                .build();
-
         // debug mode flag
         Option debug = Option.builder("d")
                              .longOpt("debug")
@@ -309,8 +169,7 @@ class CommandLine {
         Option length = Option.builder("l")
                               .longOpt("length")
                               .desc("Initial bounding length of the " +
-                                    "underlying symbolic string, used with " +
-                                    "JSA, inverse and Concrete solvers. " +
+                                    "underlying symbolic string. " +
                                     "Default value is " +
                                     Settings.DEFAULT_BOUNDING_LENGTH + ".")
                               .hasArg()
@@ -318,33 +177,11 @@ class CommandLine {
                               .argName("length")
                               .build();
 
-        // automaton model version option
-        Option modelVersion = Option.builder("v")
-                                    .longOpt("model-version")
-                                    .desc("The version of the automaton model" +
-                                          " used by the JSA string constraint" +
-                                          " solver:\n1 - Bounded Automaton" +
-                                          " Model\n2 - Acyclic Automaton" +
-                                          " Model\n3 - Acyclic Weighted Automaton")
-                                    .hasArg()
-                                    .numberOfArgs(1)
-                                    .argName("version")
-                                    .build();
-
-//        Option old = Option.builder("o")
-//                           .longOpt("old")
-//                           .desc("Runs older version of jsa solver")
-//                           .build();
-
         // add each option to options collection
         Options options = new Options();
         options.addOption(debug);
         options.addOption(help);
         options.addOption(length);
-        options.addOption(modelVersion);
-        options.addOption(solver);
-        options.addOption(reporter);
-//        options.addOption(old);
 
         // return options
         return options;

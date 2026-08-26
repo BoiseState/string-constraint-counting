@@ -1,19 +1,17 @@
 #!/bin/bash
 
 if [ $# -lt 1 ]; then
-	echo "Usage: $0 <file> [debug(-d)]" >&2
+	echo "Usage: $0 <file> [length] [-d]" >&2
 	exit 1
 fi
 
-#if find src -type f -newer target | grep -q .; then
-#    mvn install
-#    status=$?
-#else
-#	status=0
-#fi
-#
-#if [ "$status" -ne 0 ]; then
-#	exit "$status"
-#fi
+file="$1"
+shift
 
-java -cp target/string-constraint-solvers-1.0-SNAPSHOT-jar-with-dependencies.jar edu.boisestate.cs.SolveMain "$1" -s inverse -v 2 -l 2 $2
+len=2
+if [[ "${1:-}" =~ ^[0-9]+$ ]]; then
+	len="$1"
+	shift
+fi
+
+java -cp target/string-constraint-solvers-1.0-SNAPSHOT-jar-with-dependencies.jar edu.boisestate.cs.SolveMain "$file" -l "$len" "$@"

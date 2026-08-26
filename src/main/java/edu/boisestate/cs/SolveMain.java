@@ -9,8 +9,6 @@ package edu.boisestate.cs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.boisestate.cs.Settings.ReportType;
-import edu.boisestate.cs.Settings.SolverType;
 import edu.boisestate.cs.model.Model_Acyclic_Inverse;
 import edu.boisestate.cs.model.Model_Acyclic_Inverse_Manager;
 import edu.boisestate.cs.graph.InvDefaultDirectedGraph;
@@ -90,36 +88,27 @@ public class SolveMain {
     }
 
 		inputFile = settings.getGraphFilePath();
-			
-		inputFile = settings.getGraphFilePath();
 		initialBound = settings.getInitialBoundingLength();
-		
-		/*
-		 * If solver is inverse, we can ignore the reporter and automata types, load the 
-		 * graph and run the acyclic inverse method. 
-		 */
-		if (settings.getSolverType() == SolverType.INVERSE) {
-			debug = settings.getDebug();
-			if (debug)printHeader(inputFile, initialBound, "Inverse", "Inverse", "Acyclic");
-			reduce = true;
-			InvDefaultDirectedGraph graph = loadGraph(inputFile);
-			printDebug("==========================================" + "GRAPH STATS" + "==========================================");
-			printDebug("NUM CONSTRAINTS:\t" + graph.vertexSet().size());
-			printDebug("NUM PREDICATES:\t\t" + graph.getPredicates().size());
-			printDebug("NUM SYMBOLIC INPUTS:\t" + graph.getNumSymInputs());
-			printDebug("MAX CONCRETE STRING LENGTH:\t" + initialBound);
-//			initialBound = graph.boundLengthHeuristic();
-//			printDebug("BOUND LENGTH HEURISTIC:\t" + initialBound);
-			printDebug("========================================================================================================");
-//			initialBound= initialBound + 3;// add some padding
-			run_Acyclic_Inverse_r3(graph);
 
-		}
+		debug = settings.getDebug();
+		if (debug)printHeader(inputFile, initialBound, "Inverse", "Inverse", "Acyclic");
+		reduce = true;
+		InvDefaultDirectedGraph graph = loadGraph(inputFile);
+		printDebug("==========================================" + "GRAPH STATS" + "==========================================");
+		printDebug("NUM CONSTRAINTS:\t" + graph.vertexSet().size());
+		printDebug("NUM PREDICATES:\t\t" + graph.getPredicates().size());
+		printDebug("NUM SYMBOLIC INPUTS:\t" + graph.getNumSymInputs());
+		printDebug("MAX CONCRETE STRING LENGTH:\t" + initialBound);
+//		initialBound = graph.boundLengthHeuristic();
+//		printDebug("BOUND LENGTH HEURISTIC:\t" + initialBound);
+		printDebug("========================================================================================================");
+//		initialBound= initialBound + 3;// add some padding
+		run_Acyclic_Inverse_r3(graph);
 
 	}
 
 	/*
-	 * loadGraph for jsa and inverse solvers
+	 * loadGraph for the inverse solver
 	 */
 	private static InvDefaultDirectedGraph loadGraph(String graphPath) {
 		// initialize variables

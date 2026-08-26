@@ -32,7 +32,7 @@ public class SolveMainTest {
 	@Test
 	public void testSolve() {
 		restoreStreams();
-		String[] args = {inPath + "smt-input.smt2", "-s", "inverse", "-v", "2", "-l", "5", "-d"};
+		String[] args = {inPath + "smt-input.smt2", "-l", "5", "-d"};
 		SolveMain.main(args);
 	}
 
@@ -183,14 +183,14 @@ public class SolveMainTest {
 			assert(false);
 			e.printStackTrace();
 		}
-		String[] args = {inPath + inFile, "-s", "inverse", "-v", "2", "-l", "2"};
+		String[] args = {inPath + inFile, "-l", "2"};
 		SolveMain.main(args);
 		assertEquals(expectedOutput, outContent.toString());
 	}
 
 	private void run(String inFile){
 		restoreStreams();
-		String[] args = {inPath + inFile, "-s", "inverse", "-v", "2", "-l", "2", "-d"};
+		String[] args = {inPath + inFile, "-l", "2", "-d"};
 		SolveMain.main(args);
 	}
 }
