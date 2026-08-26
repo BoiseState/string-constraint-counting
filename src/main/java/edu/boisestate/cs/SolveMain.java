@@ -16,8 +16,6 @@ import edu.boisestate.cs.automatonModel.Model_Acyclic;
 import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse_Manager;
 import edu.boisestate.cs.automatonModel.Model_Acyclic_Manager;
-import edu.boisestate.cs.automatonModel.Model_Acyclic_Weighted;
-import edu.boisestate.cs.automatonModel.Model_Acyclic_Weighted_Manager;
 import edu.boisestate.cs.automatonModel.Model_Bounded;
 import edu.boisestate.cs.automatonModel.Model_Bounded_Manager;
 import edu.boisestate.cs.automatonModel.Model_Concrete_Singleton;
@@ -157,15 +155,6 @@ public class SolveMain {
 
 				}
 
-				if (settings.getAutomatonModelVersion() == 3) {
-					// jsa, weighted, count
-					printHeader(inputFile, initialBound, "JSA", "Model Count", "Acyclic Weighted");
-
-					DirectedGraph<PrintConstraint, SymbolicEdge> graph = loadGraph(inputFile);
-					run_Weighted_Count(graph);
-
-				}
-
 			}
 
 			if (settings.getReportType() == ReportType.SAT) {
@@ -187,17 +176,6 @@ public class SolveMain {
 					run_Acyclic_SAT(graph);
 
 				}
-				//eas: there is not point of having acyclic weighted for SAT - it will have the same
-				//precision as Acyclic but would take much more time - only use for testing purposes
-				if (settings.getAutomatonModelVersion() == 3) {
-					// jsa, weighted, sat
-					printHeader(inputFile, initialBound, "JSA", "SAT", "Acyclic Weighted");
-
-					DirectedGraph<PrintConstraint, SymbolicEdge> graph = loadGraph(inputFile);
-					run_Weighted_SAT(graph);
-
-				}
-
 			}
 
 		} else if (settings.getSolverType() == SolverType.CONCRETE) {
@@ -716,29 +694,6 @@ public class SolveMain {
 		Reporter_SAT<Model_Acyclic> mReporter = new Reporter_SAT<Model_Acyclic>(graph, mParser, mSolver, debug);
 		mReporter.run();
 	}
-	
-	/*
-	 * Solver = jsa, Automata = acyclic weighted, Reporter = model count
-	 */
-	private static void run_Weighted_Count(DirectedGraph<PrintConstraint, SymbolicEdge> graph) {
-		Model_Acyclic_Weighted_Manager mFactory = new Model_Acyclic_Weighted_Manager(alpha, initialBound);
-		Solver_Count<Model_Acyclic_Weighted> mSolver = new Solver_Count<Model_Acyclic_Weighted>(mFactory, initialBound);
-		Parser_2<Model_Acyclic_Weighted> mParser = new Parser_2<Model_Acyclic_Weighted>(mSolver, debug);
-		Reporter_Count<Model_Acyclic_Weighted> mReporter = new Reporter_Count<Model_Acyclic_Weighted>(graph, mParser, mSolver, debug);
-		mReporter.run();
-	}
-	
-	/*
-	 * Solver = jsa, Automata = acyclic weighted, Reporter = sat
-	 */
-	private static void run_Weighted_SAT(DirectedGraph<PrintConstraint, SymbolicEdge> graph) {
-		Model_Acyclic_Weighted_Manager mFactory = new Model_Acyclic_Weighted_Manager(alpha, initialBound);
-		Solver_Count<Model_Acyclic_Weighted> mSolver = new Solver_Count<Model_Acyclic_Weighted>(mFactory, initialBound);
-		Parser_2<Model_Acyclic_Weighted> mParser = new Parser_2<Model_Acyclic_Weighted>(mSolver, debug);
-		Reporter_SAT<Model_Acyclic_Weighted> mReporter = new Reporter_SAT<Model_Acyclic_Weighted>(graph, mParser, mSolver, debug);
-		mReporter.run();
-	}
-	
 	
 	/**
 	 * Solver = concrete, Automata = singleton, Reporter = sat

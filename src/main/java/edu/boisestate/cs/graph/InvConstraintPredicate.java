@@ -8,7 +8,6 @@ import java.util.List;
 
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.BasicAutomata;
-import edu.boisestate.cs.automaton.RegExp;
 import edu.boisestate.cs.automatonModel.A_Model;
 import edu.boisestate.cs.automatonModel.A_Model_Inverse;
 //import edu.boisestate.cs.solvers.Solver_Inverse;
