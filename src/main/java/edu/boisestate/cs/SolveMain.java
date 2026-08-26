@@ -12,24 +12,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.boisestate.cs.Settings.ReportType;
 import edu.boisestate.cs.Settings.SolverType;
 import edu.boisestate.cs.automatonModel.AutomatonModelManager;
-import edu.boisestate.cs.automatonModel.Model_Acyclic;
 import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse;
 import edu.boisestate.cs.automatonModel.Model_Acyclic_Inverse_Manager;
-import edu.boisestate.cs.automatonModel.Model_Acyclic_Manager;
-import edu.boisestate.cs.automatonModel.Model_Bounded;
-import edu.boisestate.cs.automatonModel.Model_Bounded_Manager;
-import edu.boisestate.cs.automatonModel.Model_Concrete_Singleton;
-import edu.boisestate.cs.automatonModel.Model_Concrete_Singleton_Manager;
 import edu.boisestate.cs.decider.Decider;
 import edu.boisestate.cs.graph.InvDefaultDirectedGraph;
 import edu.boisestate.cs.graph.PrintConstraint;
 import edu.boisestate.cs.graph.SymbolicEdge;
 import edu.boisestate.cs.reporting.MCReporter;
 import edu.boisestate.cs.reporting.Reporter;
-import edu.boisestate.cs.reporting.Reporter_Count;
 import edu.boisestate.cs.reporting.Reporter_Inverse;
 import edu.boisestate.cs.reporting.Reporter_Inverse_BFS;
-import edu.boisestate.cs.reporting.Reporter_SAT;
 import edu.boisestate.cs.reporting.SATReporter;
 import edu.boisestate.cs.solvers.*;
 import edu.boisestate.cs.util.LambdaVoid1;
@@ -130,77 +122,6 @@ public class SolveMain {
 			run_Acyclic_Inverse_r3(graph);
 
 
-		/*
-		 * If solver is jsa, we need to run the correct method based on the reporter and automata types.
-		 */
-		} else if (settings.getSolverType() == SolverType.JSA) {
-
-			if (settings.getReportType() == ReportType.MODEL_COUNT) {
-
-				if (settings.getAutomatonModelVersion() == 1) {
-					// jsa, bounded, count
-					printHeader(inputFile, initialBound, "JSA", "Model Count", "Bounded");
-
-					DirectedGraph<PrintConstraint, SymbolicEdge> graph = loadGraph(inputFile);
-					run_Bounded_Count(graph);
-
-				}
-
-				if (settings.getAutomatonModelVersion() == 2) {
-					// jsa, acyclic, count
-					printHeader(inputFile, initialBound, "JSA", "Model Count", "Acyclic");
-
-					DirectedGraph<PrintConstraint, SymbolicEdge> graph = loadGraph(inputFile);
-					run_Acyclic_Count(graph);
-
-				}
-
-			}
-
-			if (settings.getReportType() == ReportType.SAT) {
-
-				if (settings.getAutomatonModelVersion() == 1) {
-					// jsa, bounded, sat
-					printHeader(inputFile, initialBound, "JSA", "SAT", "Bounded");
-
-					DirectedGraph<PrintConstraint, SymbolicEdge> graph = loadGraph(inputFile);
-					run_Bounded_SAT(graph);
-
-				}
-
-				if (settings.getAutomatonModelVersion() == 2) {
-					// jsa, acyclic, sat
-					printHeader(inputFile, initialBound, "JSA", "SAT", "Acyclic");
-
-					DirectedGraph<PrintConstraint, SymbolicEdge> graph = loadGraph(inputFile);
-					run_Acyclic_SAT(graph);
-
-				}
-			}
-
-		} else if (settings.getSolverType() == SolverType.CONCRETE) {
-			if (settings.getReportType() == ReportType.SAT) {
-				if(settings.getAutomatonModelVersion() == 1) {
-					//explicitly encodes sets of strings as an acyclic automaton would
-					printHeader(inputFile, initialBound, "Concrete", "SAT", "Acyclic");
-					DirectedGraph<PrintConstraint, SymbolicEdge> graph = loadGraph(inputFile);
-					//run_Concrete_Acyclic_SAT(graph);
-				} else if (settings.getAutomatonModelVersion() == 2) {//eas: only this one is supported for now to do the testing
-					printHeader(inputFile, initialBound, "Concrete", "SAT", "Singleton");
-					DirectedGraph<PrintConstraint, SymbolicEdge> graph = loadGraph(inputFile);
-					run_Concrete_Singleton_SAT(graph);
-				}
-			} else if (settings.getReportType() == ReportType.MODEL_COUNT) {
-				if(settings.getAutomatonModelVersion() == 1) {
-					//explicitly encodes sets of strings as an acyclic automaton would
-					printHeader(inputFile, initialBound, "Concrete", "SAT", "Acyclic");
-					DirectedGraph<PrintConstraint, SymbolicEdge> graph = loadGraph(inputFile);
-					//run_Concrete_Acyclic_MC(graph);
-				} else if (settings.getAutomatonModelVersion() == 2) {
-					printHeader(inputFile, initialBound, "Concrete", "SAT", "Singleton");
-				}
-			}
-			
 			/*
 			 * The remaining types are the concrete and blank solvers, which currently use the non-typed classes.
 			 */
@@ -651,65 +572,6 @@ public class SolveMain {
 		//mDecider.decide();
 	}
 	
-	/*
-	 * Solver = jsa, Automata = bounded, Reporter = model count
-	 */
-	private static void run_Bounded_Count(DirectedGraph<PrintConstraint, SymbolicEdge> graph) {
-		Model_Bounded_Manager mFactory = new Model_Bounded_Manager(alpha, initialBound);
-		Solver_Count<Model_Bounded> mSolver = new Solver_Count<Model_Bounded>(mFactory, initialBound);
-		Parser_2<Model_Bounded> mParser = new Parser_2<Model_Bounded>(mSolver, debug);
-		Reporter_Count<Model_Bounded> mReporter = new Reporter_Count<Model_Bounded>(graph, mParser, mSolver, debug);
-		mReporter.run();
-	}
-
-	/*
-	 * Solver = jsa, Automata = bounded, Reporter = sat
-	 */
-	private static void run_Bounded_SAT(DirectedGraph<PrintConstraint, SymbolicEdge> graph) {
-		Model_Bounded_Manager mFactory = new Model_Bounded_Manager(alpha, initialBound);
-		Solver<Model_Bounded> mSolver = new Solver<Model_Bounded>(mFactory, initialBound);
-		Parser_2<Model_Bounded> mParser = new Parser_2<Model_Bounded>(mSolver, debug);
-		Reporter_SAT<Model_Bounded> mReporter = new Reporter_SAT<Model_Bounded>(graph, mParser, mSolver, debug);
-		mReporter.run();
-	}
-
-	/*
-	 * Solver = jsa, Automata = acyclic, Reporter = model count
-	 */
-	private static void run_Acyclic_Count(DirectedGraph<PrintConstraint, SymbolicEdge> graph) {
-		Model_Acyclic_Manager mFactory = new Model_Acyclic_Manager(alpha, initialBound);
-		Solver_Count<Model_Acyclic> mSolver = new Solver_Count<Model_Acyclic>(mFactory, initialBound);
-		Parser_2<Model_Acyclic> mParser = new Parser_2<Model_Acyclic>(mSolver, debug);
-		Reporter_Count<Model_Acyclic> mReporter = new Reporter_Count<Model_Acyclic>(graph, mParser, mSolver, debug);
-		mReporter.run();
-	}
-	
-	/*
-	 * Solver = jsa, Automata = acyclic, Reporter = sat
-	 */
-	private static void run_Acyclic_SAT(DirectedGraph<PrintConstraint, SymbolicEdge> graph) {
-		Model_Acyclic_Manager mFactory = new Model_Acyclic_Manager(alpha, initialBound);
-		Solver<Model_Acyclic> mSolver = new Solver<Model_Acyclic>(mFactory, initialBound);
-		Parser_2<Model_Acyclic> mParser = new Parser_2<Model_Acyclic>(mSolver, debug);
-		Reporter_SAT<Model_Acyclic> mReporter = new Reporter_SAT<Model_Acyclic>(graph, mParser, mSolver, debug);
-		mReporter.run();
-	}
-	
-	/**
-	 * Solver = concrete, Automata = singleton, Reporter = sat
-	 * @param graph
-	 */
-	private static void run_Concrete_Singleton_SAT(DirectedGraph<PrintConstraint, SymbolicEdge> graph) {
-		//TODO: for eas
-		//the input values will be obtained from the graph itself
-		Model_Concrete_Singleton_Manager mFactory = new Model_Concrete_Singleton_Manager(alpha, initialBound);
-		Solver<Model_Concrete_Singleton> mSolver = new Solver<Model_Concrete_Singleton>(mFactory, initialBound);
-		Parser_2<Model_Concrete_Singleton> mParser = new Parser_2<Model_Concrete_Singleton>(mSolver, debug);
-		Reporter_SAT<Model_Concrete_Singleton> mReporter = new Reporter_SAT<Model_Concrete_Singleton>(graph, mParser, mSolver, debug);
-		mReporter.run();
-		
-	}
-
 	private static String convertSmt2ToJson(String smt2Path) throws IOException, InterruptedException {
 	    // Create temp file for JSON output
 	    File tempJson = File.createTempFile("smt-input-", ".json");
